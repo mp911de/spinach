@@ -1,4 +1,4 @@
-lettuce - A scalable Java Redis client
+spinach - A scalable Java Disque client
 ======================================
 
 
@@ -10,11 +10,8 @@ asynchronous connections. Multiple threads may share one connection. Spinach is 
 Multiple connections are efficiently managed by the excellent netty NIO
 framework.
 
-This version of lettuce has been tested against Disque.
-
 * Works with Java 6, 7 and 8
-* synchronous and [asynchronous connections](https://github.com/mp911de/lettuce/wiki/Asynchronous-Connections)
-* [CDI](https://github.com/mp911de/lettuce/wiki/CDI-Support) and [Spring](https://github.com/mp911de/lettuce/wiki/Spring-Support) support
+* synchronous and asynchronous connections
 * [Codecs](https://github.com/mp911de/lettuce/wiki/Codecs) (for UTF8/bit/JSON etc. representation of your data)
 
 
@@ -38,8 +35,11 @@ Basic Usage
 
 ```java
   DisqueClient client = new DisqueClient("localhost")
-  DisqueConnection<String> connection = client.connect()
-  String value = connection.get("key")
+  DisqueConnection<String, String> connection = client.connect()
+  String jobId = connection.addJob("queue", "body", 1, SECONDS);
+  
+  Job<String, String> job = connection.getJob("queue");
+  connection.ackjob(job.getId());
 ```
 
 Each Disque command is implemented by one or more methods with names identical
@@ -71,22 +71,16 @@ get.get() == "value"
  ```
 
 
-Performance
------------
-
-Spinach is made for performance. The async API can issue about 300Kops/sec whereas the sync API performs about 13Kops/sec (GET's, PING's).
-Sync performance depends on the Redis performance (tested on a Mac, 2,7 GHz Intel Core i7).
-
 Building
 -----------
 
 Spinach is built with Apache Maven. The tests require multiple running Disque instances for different test cases which
 are configured using a ```Makefile```.
 
-* Initial environment setup (clone and build `redis`): ```make prepare```
+* Initial environment setup (clone and build `disque`): ```make prepare```
 * Run the build: ```make test```
-* Start Redis (manually): ```make start```
-* Stop Redis (manually): ```make stop```
+* Start Disque (manually): ```make start```
+* Stop Disque (manually): ```make stop```
 
 License
 -------

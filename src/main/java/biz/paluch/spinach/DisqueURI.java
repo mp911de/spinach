@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.net.HostAndPort;
+import com.lambdaworks.redis.ConnectionPoint;
 
 /**
  * Disque URI. Contains connection details for the Disque connections. You can provide as well the database, password and
@@ -365,7 +366,7 @@ public class DisqueURI implements Serializable {
 
     }
 
-    public static class DisqueHostAndPort implements Serializable {
+    public static class DisqueHostAndPort implements Serializable, ConnectionPoint {
 
         private String host;
         private int port;
@@ -389,6 +390,11 @@ public class DisqueURI implements Serializable {
 
         public int getPort() {
             return port;
+        }
+
+        @Override
+        public String getSocket() {
+            return null;
         }
 
         public void setPort(int port) {
