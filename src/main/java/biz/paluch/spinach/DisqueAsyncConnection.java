@@ -1,6 +1,7 @@
 package biz.paluch.spinach;
 
 import java.io.Closeable;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.lambdaworks.redis.RedisFuture;
@@ -11,13 +12,37 @@ import com.lambdaworks.redis.RedisServerAsyncConnection;
  */
 public interface DisqueAsyncConnection<K, V> extends RedisServerAsyncConnection<K, V>, Closeable {
 
-    RedisFuture<String> addJob(K queue, V job, long duration, TimeUnit timeUnit);
+    RedisFuture<String> addjob(K queue, V job, long timeout, TimeUnit timeUnit);
 
-    RedisFuture<String> addJob(K queue, V job, long duration, TimeUnit timeUnit, AddJobArgs addJobArgs);
+    RedisFuture<String> addjob(K queue, V job, long timeout, TimeUnit timeUnit, AddJobArgs addJobArgs);
 
-    RedisFuture<Job<K, V>> getJob(K queue);
+    RedisFuture<Job<K, V>> getjob(K queue);
 
-    RedisFuture<Job<K, V>> getJob(long duration, TimeUnit timeUnit, K queue);
+    RedisFuture<Job<K, V>> getjob(long timeout, TimeUnit timeUnit, K queue);
+
+    RedisFuture<List<Job<K, V>>> getjob(K... queues);
+
+    RedisFuture<List<Job<K, V>>> getjob(long timeout, TimeUnit timeUnit, long count, K... queues);
+
+    RedisFuture<Long> enqueue(String... jobIds);
+
+    RedisFuture<Long> dequeue(String... jobIds);
+
+    RedisFuture<Long> deljob(String... jobIds);
+
+    RedisFuture<Long> ackjob(String... jobIds);
+
+    RedisFuture<Long> fastack(String... jobIds);
+
+    RedisFuture<List<Object>> show(String jobId);
+
+    RedisFuture<Long> qlen(K queue);
+
+    RedisFuture<List<Job<K, V>>> qpeek(K queue, long count);
+
+    RedisFuture<String> debugFlushall();
+
+    RedisFuture<List<Object>> hello();
 
     /**
      * Set the default timeout for operations.

@@ -9,6 +9,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import biz.paluch.spinach.impl.DisqueAsyncConnectionImpl;
 import com.google.common.base.Supplier;
 import com.lambdaworks.redis.AbstractRedisClient;
 import com.lambdaworks.redis.ConnectionBuilder;

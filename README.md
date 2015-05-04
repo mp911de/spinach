@@ -36,9 +36,9 @@ Basic Usage
 ```java
   DisqueClient client = new DisqueClient("localhost")
   DisqueConnection<String, String> connection = client.connect()
-  String jobId = connection.addJob("queue", "body", 1, SECONDS);
+  String jobId = connection.addjob("queue", "body", 1, SECONDS);
   
-  Job<String, String> job = connection.getJob("queue");
+  Job<String, String> job = connection.getjob("queue");
   connection.ackjob(job.getId());
 ```
 

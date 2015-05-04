@@ -44,6 +44,7 @@ public abstract class AbstractCommandTest {
     @Before
     public void openConnection() throws Exception {
         disque = client.connect();
+        disque.debugFlushall();
     }
 
     @After

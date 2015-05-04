@@ -4,6 +4,7 @@ import static com.lambdaworks.redis.protocol.CommandKeyword.*;
 
 import java.util.concurrent.TimeUnit;
 
+import biz.paluch.spinach.impl.CommandKeyword;
 import com.lambdaworks.redis.protocol.CommandArgs;
 
 /**
@@ -96,8 +97,8 @@ public class AddJobArgs {
             return this;
         }
 
-        public Builder delay(long delay) {
-            this.delay = delay;
+        public Builder delay(long delayMs) {
+            this.delay = delayMs;
             return this;
         }
 
@@ -106,8 +107,8 @@ public class AddJobArgs {
             return this;
         }
 
-        public Builder retry(long retry) {
-            this.retry = retry;
+        public Builder retry(long retrySec) {
+            this.retry = retrySec;
             return this;
         }
 
@@ -116,8 +117,8 @@ public class AddJobArgs {
             return this;
         }
 
-        public Builder ttl(long ttl) {
-            this.ttl = ttl;
+        public Builder ttl(long ttlSec) {
+            this.ttl = ttlSec;
             return this;
         }
 

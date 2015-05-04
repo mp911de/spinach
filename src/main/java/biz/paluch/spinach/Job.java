@@ -2,6 +2,8 @@ package biz.paluch.spinach;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
+ * @param <K> Queue-Id Type.
+ * @param <V> Body-Id Type.
  */
 public class Job<K, V> {
     private K queue;

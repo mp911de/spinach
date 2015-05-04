@@ -1,6 +1,7 @@
 package biz.paluch.spinach;
 
 import java.io.Closeable;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.lambdaworks.redis.RedisServerConnection;
@@ -10,13 +11,37 @@ import com.lambdaworks.redis.RedisServerConnection;
  */
 public interface DisqueConnection<K, V> extends RedisServerConnection<K, V>, Closeable {
 
-    String addJob(K queue, V job, long duration, TimeUnit timeUnit);
+    String addjob(K queue, V job, long timeout, TimeUnit timeUnit);
 
-    String addJob(K queue, V job, long duration, TimeUnit timeUnit, AddJobArgs addJobArgs);
+    String addjob(K queue, V job, long timeout, TimeUnit timeUnit, AddJobArgs addJobArgs);
 
-    Job<K, V> getJob(K queue);
+    Job<K, V> getjob(K queue);
 
-    Job<K, V> getJob(long duration, TimeUnit timeUnit, K queue);
+    Job<K, V> getjob(long timeout, TimeUnit timeUnit, K queue);
+
+    List<Job<K, V>> getjob(K... queues);
+
+    List<Job<K, V>> getjob(long timeout, TimeUnit timeUnit, long count, K... queues);
+
+    long enqueue(String... jobIds);
+
+    long dequeue(String... jobIds);
+
+    long deljob(String... jobIds);
+
+    long ackjob(String... jobIds);
+
+    long fastack(String... jobIds);
+
+    List<Object> show(String jobId);
+
+    long qlen(K queue);
+
+    List<Job<K, V>> qpeek(K queue, long count);
+
+    String debugFlushall();
+
+    List<Object> hello();
 
     /**
      * Set the default timeout for operations.

@@ -41,6 +41,8 @@ public class JobOutput<K, V> extends CommandOutput<K, V, Job<K, V>> {
 
     @Override
     public void complete(int depth) {
-        output = new Job<K, V>(queue, id, body);
+        if (queue != null && id != null && body != null) {
+            output = new Job<K, V>(queue, id, body);
+        }
     }
 }

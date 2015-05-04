@@ -1,4 +1,4 @@
-package biz.paluch.spinach;
+package biz.paluch.spinach.impl;
 
 import com.lambdaworks.redis.ScriptOutputType;
 import com.lambdaworks.redis.codec.RedisCodec;

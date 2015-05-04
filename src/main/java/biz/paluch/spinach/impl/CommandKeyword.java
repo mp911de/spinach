@@ -1,4 +1,4 @@
-package biz.paluch.spinach;
+package biz.paluch.spinach.impl;
 
 import com.lambdaworks.redis.protocol.LettuceCharsets;
 import com.lambdaworks.redis.protocol.ProtocolKeyword;
@@ -6,12 +6,13 @@ import com.lambdaworks.redis.protocol.ProtocolKeyword;
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public enum CommandType implements ProtocolKeyword {
-    ADDJOB, GETJOB;
+public enum CommandKeyword implements ProtocolKeyword {
+
+    REPLICATE, DELAY, RETRY, TTL, MAXLEN, ASYNC, TIMEOUT, COUNT, FROM, FLUSHALL;
 
     public final byte[] bytes;
 
-    private CommandType() {
+    private CommandKeyword() {
         bytes = name().getBytes(LettuceCharsets.ASCII);
     }
 
@@ -19,5 +20,4 @@ public enum CommandType implements ProtocolKeyword {
     public byte[] getBytes() {
         return bytes;
     }
-
 }
