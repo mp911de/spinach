@@ -34,12 +34,12 @@ Basic Usage
 -----------
 
 ```java
-  DisqueClient client = new DisqueClient("localhost")
-  DisqueConnection<String, String> connection = client.connect()
-  String jobId = connection.addjob("queue", "body", 1, SECONDS);
+DisqueClient client = new DisqueClient("localhost")
+DisqueConnection<String, String> connection = client.connect()
+String jobId = connection.addjob("queue", "body", 1, SECONDS);
   
-  Job<String, String> job = connection.getjob("queue");
-  connection.ackjob(job.getId());
+Job<String, String> job = connection.getjob("queue");
+connection.ackjob(job.getId());
 ```
 
 Each Disque command is implemented by one or more methods with names identical
@@ -61,13 +61,13 @@ Asynchronous Connections
 
 ```java
 DisqueConnection<String, String> async = client.connectAsync()
-RedisFuture<String> set = async.set("key", "value")
-RedisFuture<String> get = async.get("key")
+RedisFuture<String> jobId1 = async.addjob("queue", "body1", 1, SECONDS)
+RedisFuture<String> jobId2 = async.addjob("queue", "body2", 1, SECONDS)
 
-async.awaitAll(set, get) == true
+async.awaitAll(jobId1, jobId2) == true
 
-set.get() == "OK"
-get.get() == "value"
+jobId1.get() == "DI...SQ"
+jobId2.get() == "DI...SQ"
  ```
 
 
