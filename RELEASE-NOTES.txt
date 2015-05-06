@@ -12,7 +12,6 @@ Features
 
 spinach requires a minimum of Java 8 to build and Java 6 run. It is tested continuously against Disque.
 
-For complete information on lettuce see the websites:
+For complete information on lettuce see the website:
 
 * http://github.com/mp911de/spinach
-* http://spinach.paluch.biz.
