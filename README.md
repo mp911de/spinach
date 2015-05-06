@@ -18,17 +18,17 @@ framework.
 Maven Artifacts/Download
 ----------------
 
-Releases of spinach are available in the maven central repository.
+Currently there are no releases of spinach are available in the maven central repository. You can obtain
+the library from https://oss.sonatype.org/content/repositories/snapshots/
 
 ```xml
 <dependency>
   <groupId>biz.paluch.redis</groupId>
   <artifactId>spinach</artifactId>
-  <version>0.1</version>
+  <version>0.1-SNAPSHOT</version>
 </dependency>
 ```
 
-or snapshots at https://oss.sonatype.org/content/repositories/snapshots/
 
 Basic Usage
 -----------
