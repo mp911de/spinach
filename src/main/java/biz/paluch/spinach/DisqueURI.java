@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.net.HostAndPort;
 import com.lambdaworks.redis.ConnectionPoint;
+import io.netty.channel.unix.DomainSocketAddress;
 
 /**
  * Disque URI. Contains connection details for the Disque connections. You can provide as well the database, password and
@@ -25,6 +26,7 @@ import com.lambdaworks.redis.ConnectionPoint;
 public class DisqueURI implements Serializable {
 
     public static final String URI_SCHEME_DISQUE = "disque";
+    public static final String URI_SCHEME_DISQUE_SOCKET = "disque-socket";
     public static final String URI_SCHEME_DISQUE_SECURE = "disquess";
 
     /**
@@ -39,7 +41,7 @@ public class DisqueURI implements Serializable {
     private boolean startTls = false;
     private long timeout = 60;
     private TimeUnit unit = TimeUnit.SECONDS;
-    private final List<DisqueHostAndPort> connectionPoints = new ArrayList<DisqueHostAndPort>();
+    private final List<ConnectionPoint> connectionPoints = new ArrayList<ConnectionPoint>();
 
     /**
      * Default empty constructor.
@@ -115,12 +117,14 @@ public class DisqueURI implements Serializable {
             builder.withPassword(password);
         }
 
-        if (isNotEmpty(uri.getPath())) {
-            String pathSuffix = uri.getPath().substring(1);
+        if (!URI_SCHEME_DISQUE_SOCKET.equals(uri.getScheme())) {
+            if (isNotEmpty(uri.getPath())) {
+                String pathSuffix = uri.getPath().substring(1);
 
-            if (isNotEmpty(pathSuffix)) {
+                if (isNotEmpty(pathSuffix)) {
 
-                builder.withDatabase(Integer.parseInt(pathSuffix));
+                    builder.withDatabase(Integer.parseInt(pathSuffix));
+                }
             }
         }
 
@@ -132,10 +136,14 @@ public class DisqueURI implements Serializable {
         DisqueURI.Builder builder = null;
 
         if (isNotEmpty(uri.getHost())) {
-            if (uri.getPort() != -1) {
-                builder = DisqueURI.Builder.disque(uri.getHost(), uri.getPort());
+            if (uri.getScheme().equals(URI_SCHEME_DISQUE_SOCKET)) {
+                builder = DisqueURI.Builder.disqueSocket(uri.getHost());
             } else {
-                builder = DisqueURI.Builder.disque(uri.getHost());
+                if (uri.getPort() != -1) {
+                    builder = DisqueURI.Builder.disque(uri.getHost(), uri.getPort());
+                } else {
+                    builder = DisqueURI.Builder.disque(uri.getHost());
+                }
             }
         }
 
@@ -147,18 +155,26 @@ public class DisqueURI implements Serializable {
 
             String[] hosts = authority.split("\\,");
             for (String host : hosts) {
-                HostAndPort hostAndPort = HostAndPort.fromString(host);
-                if (builder == null) {
-                    if (hostAndPort.hasPort()) {
-                        builder = DisqueURI.Builder.disque(hostAndPort.getHostText(), hostAndPort.getPort());
+                if (uri.getScheme().equals(URI_SCHEME_DISQUE_SOCKET)) {
+                    if (builder == null) {
+                        builder = DisqueURI.Builder.disqueSocket(host);
                     } else {
-                        builder = DisqueURI.Builder.disque(hostAndPort.getHostText());
+                        builder.withSocket(host);
                     }
                 } else {
-                    if (hostAndPort.hasPort()) {
-                        builder.withDisque(hostAndPort.getHostText(), hostAndPort.getPort());
+                    HostAndPort hostAndPort = HostAndPort.fromString(host);
+                    if (builder == null) {
+                        if (hostAndPort.hasPort()) {
+                            builder = DisqueURI.Builder.disque(hostAndPort.getHostText(), hostAndPort.getPort());
+                        } else {
+                            builder = DisqueURI.Builder.disque(hostAndPort.getHostText());
+                        }
                     } else {
-                        builder.withDisque(hostAndPort.getHostText());
+                        if (hostAndPort.hasPort()) {
+                            builder.withDisque(hostAndPort.getHostText(), hostAndPort.getPort());
+                        } else {
+                            builder.withDisque(hostAndPort.getHostText());
+                        }
                     }
                 }
             }
@@ -225,7 +241,7 @@ public class DisqueURI implements Serializable {
         this.startTls = startTls;
     }
 
-    public List<DisqueHostAndPort> getConnectionPoints() {
+    public List<ConnectionPoint> getConnectionPoints() {
         return connectionPoints;
     }
 
@@ -269,6 +285,28 @@ public class DisqueURI implements Serializable {
             builder.withDisque(host, port);
 
             return builder;
+        }
+
+        /**
+         * Set Disque socket. Creates a new builder .
+         * 
+         * @param socket the socket name
+         * @return New builder with Disque socket.
+         */
+        public static Builder disqueSocket(String socket) {
+            checkNotNull(socket, "Socket must not be null");
+            Builder builder = new Builder();
+
+            builder.withSocket(socket);
+
+            return builder;
+        }
+
+        public Builder withSocket(String socket) {
+            checkNotNull(socket, "Socket must not be null");
+
+            this.disqueURI.connectionPoints.add(new DisqueSocket(socket));
+            return this;
         }
 
         public Builder withDisque(String host) {
@@ -362,6 +400,53 @@ public class DisqueURI implements Serializable {
          */
         public DisqueURI build() {
             return disqueURI;
+        }
+
+    }
+
+    public static class DisqueSocket implements Serializable, ConnectionPoint {
+        private String socket;
+        private transient SocketAddress resolvedAddress;
+
+        public DisqueSocket() {
+        }
+
+        public DisqueSocket(String socket) {
+            this.socket = socket;
+        }
+
+        @Override
+        public String getHost() {
+            return null;
+        }
+
+        @Override
+        public int getPort() {
+            return -1;
+        }
+
+        @Override
+        public String getSocket() {
+            return socket;
+        }
+
+        public void setSocket(String socket) {
+            this.socket = socket;
+        }
+
+        public SocketAddress getResolvedAddress() {
+            if (resolvedAddress == null) {
+                resolvedAddress = new DomainSocketAddress(getSocket());
+            }
+            return resolvedAddress;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuffer sb = new StringBuffer();
+            sb.append("[socket=").append(socket);
+            sb.append(']');
+            return sb.toString();
         }
 
     }

@@ -44,6 +44,13 @@ public interface DisqueConnection<K, V> extends RedisServerConnection<K, V>, Clo
     List<Object> hello();
 
     /**
+     * Ping the server.
+     * 
+     * @return simple-string-reply
+     */
+    String ping();
+
+    /**
      * Set the default timeout for operations.
      *
      * @param timeout the timeout value

@@ -10,16 +10,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.impl.DisqueAsyncConnectionImpl;
+
 import com.google.common.base.Supplier;
-import com.lambdaworks.redis.AbstractRedisClient;
-import com.lambdaworks.redis.ConnectionBuilder;
-import com.lambdaworks.redis.ConnectionPoint;
-import com.lambdaworks.redis.RedisConnectionException;
+import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.codec.Utf8StringCodec;
 import com.lambdaworks.redis.protocol.CommandHandler;
 import com.lambdaworks.redis.protocol.RedisCommand;
-import io.netty.channel.ChannelOption;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
@@ -34,6 +31,7 @@ public class DisqueClient extends AbstractRedisClient {
      */
     public DisqueClient() {
         disqueURI = null;
+        setOptions(new ClientOptions.Builder().build());
         setDefaultTimeout(60, TimeUnit.MINUTES);
     }
 
@@ -67,6 +65,7 @@ public class DisqueClient extends AbstractRedisClient {
         super();
         this.disqueURI = disqueURI;
         setDefaultTimeout(disqueURI.getTimeout(), disqueURI.getUnit());
+        setOptions(new ClientOptions.Builder().build());
     }
 
     /**
@@ -161,34 +160,43 @@ public class DisqueClient extends AbstractRedisClient {
     private <K, V> DisqueAsyncConnectionImpl<K, V> connectAsyncImpl(RedisCodec<K, V> codec, DisqueURI disqueURI) {
         BlockingQueue<RedisCommand<K, V, ?>> queue = new LinkedBlockingQueue<RedisCommand<K, V, ?>>();
 
-        final CommandHandler<K, V> commandHandler = new CommandHandler<K, V>(queue);
+        ClientOptions options = getOptions();
+        final CommandHandler<K, V> commandHandler = new CommandHandler<K, V>(options, queue);
         final DisqueAsyncConnectionImpl<K, V> connection = newDisquelAsyncConnectionImpl(commandHandler, codec, timeout, unit);
 
         logger.debug("Trying to get a disque connection for one of: " + disqueURI.getConnectionPoints());
 
-        ConnectionBuilder connectionBuilder = ConnectionBuilder.connectionBuilder();
+        ConnectionBuilder connectionBuilder;
+        RedisURI redisURI = new RedisURI();
+        toRedisURI(disqueURI, null, redisURI);
+        if (disqueURI.isSsl()) {
+            connectionBuilder = SslConnectionBuilder.sslConnectionBuilder().ssl(redisURI);
+        } else {
+            connectionBuilder = ConnectionBuilder.connectionBuilder();
+        }
 
-        connectionBuilder(commandHandler, connection, null, true, connectionBuilder, null);
-        connectionBuilder.bootstrap().option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-                (int) disqueURI.getUnit().toMillis(disqueURI.getTimeout()));
+        connectionBuilder.clientOptions(options);
+        connectionBuilder(commandHandler, connection, null, connectionBuilder, redisURI);
 
         boolean connected = false;
         Exception causingException = null;
         boolean first = true;
-        for (DisqueURI.DisqueHostAndPort uri : disqueURI.getConnectionPoints()) {
 
+        validateUrisAreOfSameConnectionType(disqueURI.getConnectionPoints());
+        for (ConnectionPoint connectionPoint : disqueURI.getConnectionPoints()) {
+            toRedisURI(disqueURI, connectionPoint, redisURI);
             if (first) {
-                channelType(connectionBuilder, uri);
+                channelType(connectionBuilder, connectionPoint);
                 first = false;
             }
-            connectionBuilder.socketAddressSupplier(getSocketAddressSupplier(uri));
-            logger.debug("Connecting to disque, address: " + uri.getResolvedAddress());
+            connectionBuilder.socketAddressSupplier(getSocketAddressSupplier(connectionPoint));
+            logger.debug("Connecting to disque, address: " + getSocketAddress(connectionPoint));
             try {
                 initializeChannel(connectionBuilder);
                 connected = true;
                 break;
             } catch (Exception e) {
-                logger.warn("Cannot connect disque at " + uri.getHost() + ":" + uri.getPort() + ": " + e.toString());
+                logger.warn("Cannot connect disque " + connectionPoint + ": " + e.toString());
                 causingException = e;
                 if (e instanceof ConnectException) {
                     continue;
@@ -220,18 +228,41 @@ public class DisqueClient extends AbstractRedisClient {
 
     }
 
+    private void toRedisURI(DisqueURI disqueURI, ConnectionPoint connectionPoint, RedisURI redisURI) {
+
+        redisURI.setSsl(disqueURI.isSsl());
+        redisURI.setStartTls(disqueURI.isStartTls());
+        redisURI.setVerifyPeer(disqueURI.isVerifyPeer());
+        redisURI.setTimeout(disqueURI.getTimeout());
+        redisURI.setUnit(disqueURI.getUnit());
+
+        if (connectionPoint != null) {
+            redisURI.setPort(connectionPoint.getPort());
+            redisURI.setHost(connectionPoint.getHost());
+        }
+
+    }
+
     protected <K, V> DisqueAsyncConnectionImpl<K, V> newDisquelAsyncConnectionImpl(CommandHandler<K, V> commandHandler,
             RedisCodec<K, V> codec, long timeout, TimeUnit unit) {
         return new DisqueAsyncConnectionImpl<K, V>(commandHandler, codec, timeout, unit);
     }
 
-    private Supplier<SocketAddress> getSocketAddressSupplier(final DisqueURI.DisqueHostAndPort hostAndPort) {
+    private Supplier<SocketAddress> getSocketAddressSupplier(final ConnectionPoint connectionPoint) {
         return new Supplier<SocketAddress>() {
             @Override
             public SocketAddress get() {
-                return hostAndPort.getResolvedAddress();
+
+                return getSocketAddress(connectionPoint);
             }
 
         };
+    }
+
+    private SocketAddress getSocketAddress(ConnectionPoint connectionPoint) {
+        if (connectionPoint instanceof DisqueURI.DisqueSocket) {
+            return ((DisqueURI.DisqueSocket) connectionPoint).getResolvedAddress();
+        }
+        return ((DisqueURI.DisqueHostAndPort) connectionPoint).getResolvedAddress();
     }
 }

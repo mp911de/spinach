@@ -37,6 +37,15 @@ public class TestSettings {
 
     /**
      *
+     * @return unix domain socket name of your redis instance. Defaults to {@literal work/socket-6479}. Can be overriden with
+     *         {@code -Ddomainsocket=YourSocket}
+     */
+    public static String socket() {
+        return System.getProperty("domainsocket", "work/socket-6479");
+    }
+
+    /**
+     *
      * @return password of your redis instance. Defaults to {@literal passwd}. Can be overriden with
      *         {@code -Dpassword=YourPassword}
      */
