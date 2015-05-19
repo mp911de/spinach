@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.lambdaworks.redis.RedisFuture;
 import com.lambdaworks.redis.RedisServerConnection;
 
 /**
@@ -34,6 +35,8 @@ public interface DisqueConnection<K, V> extends RedisServerConnection<K, V>, Clo
     long fastack(String... jobIds);
 
     List<Object> show(String jobId);
+
+    long working(String jobId);
 
     long qlen(K queue);
 

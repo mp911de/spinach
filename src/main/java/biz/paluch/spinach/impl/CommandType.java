@@ -7,7 +7,7 @@ import com.lambdaworks.redis.protocol.ProtocolKeyword;
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public enum CommandType implements ProtocolKeyword {
-    ADDJOB, GETJOB, DEBUG, ACKJOB, FASTACK, QLEN, QPEEK, HELLO, ENQUEUE, DEQUEUE, DELJOB, SHOW;
+    ADDJOB, GETJOB, DEBUG, ACKJOB, FASTACK, QLEN, QPEEK, HELLO, ENQUEUE, DEQUEUE, DELJOB, SHOW, WORKING;
 
     public final byte[] bytes;
 

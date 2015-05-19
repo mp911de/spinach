@@ -95,6 +95,11 @@ public class DisqueAsyncConnectionImpl<K, V> extends RedisAsyncConnectionImpl<K,
     }
 
     @Override
+    public RedisFuture<Long> working(String jobId) {
+        return dispatch(commandBuilder.working(jobId));
+    }
+
+    @Override
     public RedisFuture<Long> qlen(K queue) {
         return dispatch(commandBuilder.qlen(queue));
     }

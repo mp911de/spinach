@@ -36,6 +36,8 @@ public interface DisqueAsyncConnection<K, V> extends RedisServerAsyncConnection<
 
     RedisFuture<List<Object>> show(String jobId);
 
+    RedisFuture<Long> working(String jobId);
+
     RedisFuture<Long> qlen(K queue);
 
     RedisFuture<List<Job<K, V>>> qpeek(K queue, long count);

@@ -121,7 +121,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
     public RedisCommand<K, V, List<Job<K, V>>> qpeek(K queue, long count) {
         CommandArgs<K, V> args = new CommandArgs<K, V>(codec).addKey(queue).add(count);
 
-        return createCommand(QPEEK, new JobListOutput<K, V>(codec, queue), args);
+        return createCommand(QPEEK, new JobListOutput<K, V>(codec), args);
     }
 
     public RedisCommand<K, V, List<Object>> hello() {
@@ -132,5 +132,11 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         CommandArgs<K, V> args = new CommandArgs<K, V>(codec).add(jobId);
 
         return createCommand(SHOW, new NestedMultiOutput<K, V>(codec), args);
+    }
+
+    public RedisCommand<K, V, Long> working(String jobId) {
+        CommandArgs<K, V> args = new CommandArgs<K, V>(codec).add(jobId);
+
+        return createCommand(WORKING, new IntegerOutput<K, V>(codec), args);
     }
 }
