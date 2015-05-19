@@ -7,11 +7,15 @@ import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.AddJobArgs;
 import biz.paluch.spinach.Job;
+import biz.paluch.spinach.ScanArgs;
 import biz.paluch.spinach.output.JobListOutput;
 import biz.paluch.spinach.output.JobOutput;
 
+import com.lambdaworks.redis.KeyScanCursor;
+import com.lambdaworks.redis.ScanCursor;
 import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.output.IntegerOutput;
+import com.lambdaworks.redis.output.KeyScanOutput;
 import com.lambdaworks.redis.output.NestedMultiOutput;
 import com.lambdaworks.redis.output.StatusOutput;
 import com.lambdaworks.redis.protocol.CommandArgs;
@@ -34,6 +38,10 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
             args.add(timeUnit.toMillis(duration));
         } else {
             args.add(0);
+        }
+
+        if (addJobArgs != null) {
+            addJobArgs.build(args);
         }
 
         return createCommand(ADDJOB, new StatusOutput<K, V>(codec), args);
@@ -138,5 +146,18 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         CommandArgs<K, V> args = new CommandArgs<K, V>(codec).add(jobId);
 
         return createCommand(WORKING, new IntegerOutput<K, V>(codec), args);
+    }
+
+    public RedisCommand<K, V, KeyScanCursor<K>> qscan(ScanCursor scanCursor, ScanArgs scanArgs) {
+        CommandArgs<K, V> args = new CommandArgs<K, V>(codec);
+        if (scanArgs != null) {
+            scanArgs.build(args);
+        }
+
+        if (scanCursor != null) {
+            args.add(scanCursor.getCursor());
+        }
+
+        return createCommand(QSCAN, new KeyScanOutput<K, V>(codec), args);
     }
 }

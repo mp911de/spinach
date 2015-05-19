@@ -135,15 +135,15 @@ public class DisqueURI implements Serializable {
     private static DisqueURI.Builder configureDisque(URI uri) {
         DisqueURI.Builder builder = null;
 
+        if (URI_SCHEME_DISQUE_SOCKET.equals(uri.getScheme())) {
+            builder = Builder.disqueSocket(uri.getPath());
+        } else
+
         if (isNotEmpty(uri.getHost())) {
-            if (uri.getScheme().equals(URI_SCHEME_DISQUE_SOCKET)) {
-                builder = DisqueURI.Builder.disqueSocket(uri.getHost());
+            if (uri.getPort() != -1) {
+                builder = DisqueURI.Builder.disque(uri.getHost(), uri.getPort());
             } else {
-                if (uri.getPort() != -1) {
-                    builder = DisqueURI.Builder.disque(uri.getHost(), uri.getPort());
-                } else {
-                    builder = DisqueURI.Builder.disque(uri.getHost());
-                }
+                builder = DisqueURI.Builder.disque(uri.getHost());
             }
         }
 

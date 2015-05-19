@@ -1,16 +1,14 @@
 package biz.paluch.spinach.impl;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.AddJobArgs;
 import biz.paluch.spinach.DisqueAsyncConnection;
 import biz.paluch.spinach.Job;
+import biz.paluch.spinach.ScanArgs;
 
-import com.lambdaworks.redis.RedisAsyncConnectionImpl;
-import com.lambdaworks.redis.RedisChannelWriter;
-import com.lambdaworks.redis.RedisFuture;
+import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.codec.RedisCodec;
 import io.netty.channel.ChannelHandler;
 
@@ -117,5 +115,25 @@ public class DisqueAsyncConnectionImpl<K, V> extends RedisAsyncConnectionImpl<K,
     @Override
     public RedisFuture<String> debugFlushall() {
         return dispatch(commandBuilder.debugFlushall());
+    }
+
+    @Override
+    public RedisFuture<KeyScanCursor<K>> qscan() {
+        return dispatch(commandBuilder.qscan(null, null));
+    }
+
+    @Override
+    public RedisFuture<KeyScanCursor<K>> qscan(ScanArgs scanArgs) {
+        return dispatch(commandBuilder.qscan(null, scanArgs));
+    }
+
+    @Override
+    public RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor, ScanArgs scanArgs) {
+        return dispatch(commandBuilder.qscan(scanCursor, scanArgs));
+    }
+
+    @Override
+    public RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor) {
+        return dispatch(commandBuilder.qscan(scanCursor, null));
     }
 }

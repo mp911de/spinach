@@ -21,29 +21,8 @@ class BaseCommandBuilder<K, V> {
         return createCommand(type, output, (CommandArgs<K, V>) null);
     }
 
-    protected <T> Command<K, V, T> createCommand(ProtocolKeyword type, CommandOutput<K, V, T> output, K key) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec).addKey(key);
-        return createCommand(type, output, args);
-    }
-
-    protected <T> Command<K, V, T> createCommand(ProtocolKeyword type, CommandOutput<K, V, T> output, K key, V value) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec).addKey(key).addValue(value);
-        return createCommand(type, output, args);
-    }
-
-    protected <T> Command<K, V, T> createCommand(ProtocolKeyword type, CommandOutput<K, V, T> output, K key, V[] values) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec).addKey(key).addValues(values);
-        return createCommand(type, output, args);
-    }
-
     protected <T> Command<K, V, T> createCommand(ProtocolKeyword type, CommandOutput<K, V, T> output, CommandArgs<K, V> args) {
         return new Command<K, V, T>(type, output, args);
     }
 
-    protected String string(double n) {
-        if (Double.isInfinite(n)) {
-            return (n > 0) ? "+inf" : "-inf";
-        }
-        return Double.toString(n);
-    }
 }

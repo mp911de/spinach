@@ -151,7 +151,7 @@ public class AddJobArgs {
         }
     }
 
-    <K, V> void build(CommandArgs<K, V> args) {
+    public <K, V> void build(CommandArgs<K, V> args) {
 
         // ADDJOB queue_name job <ms-timeout> [REPLICATE <count>] [DELAY <sec>] [RETRY <sec>] [TTL <sec>] [MAXLEN <count>]
         // [ASYNC]

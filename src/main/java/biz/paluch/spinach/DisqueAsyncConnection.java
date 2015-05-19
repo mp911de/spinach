@@ -4,8 +4,7 @@ import java.io.Closeable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.lambdaworks.redis.RedisFuture;
-import com.lambdaworks.redis.RedisServerAsyncConnection;
+import com.lambdaworks.redis.*;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
@@ -45,6 +44,38 @@ public interface DisqueAsyncConnection<K, V> extends RedisServerAsyncConnection<
     RedisFuture<String> debugFlushall();
 
     RedisFuture<List<Object>> hello();
+
+    /**
+     * Incrementally iterate the keys space.
+     *
+     * @return RedisFuture&lt;KeyScanCursor&lt;K&gt;&gt; scan cursor.
+     */
+    RedisFuture<KeyScanCursor<K>> qscan();
+
+    /**
+     * Incrementally iterate the keys space.
+     *
+     * @param scanArgs scan arguments
+     * @return RedisFuture&lt;KeyScanCursor&lt;K&gt;&gt; scan cursor.
+     */
+    RedisFuture<KeyScanCursor<K>> qscan(ScanArgs scanArgs);
+
+    /**
+     * Incrementally iterate the keys space.
+     *
+     * @param scanCursor cursor to resume from a previous scan
+     * @param scanArgs scan arguments
+     * @return RedisFuture&lt;KeyScanCursor&lt;K&gt;&gt; scan cursor.
+     */
+    RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor, ScanArgs scanArgs);
+
+    /**
+     * Incrementally iterate the keys space.
+     *
+     * @param scanCursor cursor to resume from a previous scan
+     * @return RedisFuture&lt;KeyScanCursor&lt;K&gt;&gt; scan cursor.
+     */
+    RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor);
 
     /**
      * Set the default timeout for operations.

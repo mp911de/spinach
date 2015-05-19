@@ -4,8 +4,9 @@ import java.io.Closeable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.lambdaworks.redis.RedisFuture;
+import com.lambdaworks.redis.KeyScanCursor;
 import com.lambdaworks.redis.RedisServerConnection;
+import com.lambdaworks.redis.ScanCursor;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
@@ -52,6 +53,38 @@ public interface DisqueConnection<K, V> extends RedisServerConnection<K, V>, Clo
      * @return simple-string-reply
      */
     String ping();
+
+    /**
+     * Incrementally iterate the keys space.
+     *
+     * @return KeyScanCursor&lt;K&gt; scan cursor.
+     */
+    KeyScanCursor<K> qscan();
+
+    /**
+     * Incrementally iterate the keys space.
+     *
+     * @param scanArgs scan arguments
+     * @return KeyScanCursor&lt;K&gt; scan cursor.
+     */
+    KeyScanCursor<K> qscan(ScanArgs scanArgs);
+
+    /**
+     * Incrementally iterate the keys space.
+     *
+     * @param scanCursor cursor to resume from a previous scan
+     * @param scanArgs scan arguments
+     * @return KeyScanCursor&lt;K&gt; scan cursor.
+     */
+    KeyScanCursor<K> qscan(ScanCursor scanCursor, ScanArgs scanArgs);
+
+    /**
+     * Incrementally iterate the keys space.
+     *
+     * @param scanCursor cursor to resume from a previous scan
+     * @return KeyScanCursor&lt;K&gt; scan cursor.
+     */
+    KeyScanCursor<K> qscan(ScanCursor scanCursor);
 
     /**
      * Set the default timeout for operations.

@@ -33,10 +33,7 @@ public class JobOutput<K, V> extends CommandOutput<K, V, Job<K, V>> {
             return;
         }
 
-        if (body == null) {
-            body = codec.decodeValue(bytes);
-            return;
-        }
+        body = codec.decodeValue(bytes);
     }
 
     @Override

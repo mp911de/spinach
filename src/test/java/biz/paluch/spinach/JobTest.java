@@ -5,8 +5,10 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+import com.lambdaworks.redis.KeyScanCursor;
 import com.lambdaworks.redis.RedisException;
 
 /**
@@ -24,7 +26,22 @@ public class JobTest extends AbstractCommandTest {
     @Test
     public void addJobWithArgs() throws Exception {
 
-        AddJobArgs args = AddJobArgs.builder().async(true).delay(1).replicate(1).retry(1, TimeUnit.SECONDS)
+        AddJobArgs args = AddJobArgs.builder().async(true).delay(1).replicate(1).retry(1).ttl(10).maxlen(5).build();
+        String result = disque.addjob(queue, value, 5, TimeUnit.SECONDS, args);
+
+        assertThat(result).startsWith("DI").endsWith("SQ");
+
+        assertThat(args.getAsync()).isTrue();
+        assertThat(args.getDelay()).isEqualTo(1);
+        assertThat(args.getRetry()).isEqualTo(1);
+        assertThat(args.getTtl()).isEqualTo(10);
+
+    }
+
+    @Test
+    public void addJobWithTimeUnits() throws Exception {
+
+        AddJobArgs args = AddJobArgs.builder().async(true).delay(1, TimeUnit.SECONDS).replicate(1).retry(1, TimeUnit.SECONDS)
                 .ttl(10, TimeUnit.MINUTES).build();
         String result = disque.addjob(queue, value, 5, TimeUnit.SECONDS, args);
 
@@ -182,4 +199,62 @@ public class JobTest extends AbstractCommandTest {
         assertThat(result).hasSize(1);
     }
 
+    @Test
+    public void qscan() throws Exception {
+
+        addJobs(1, "q", 100, value);
+
+        KeyScanCursor<String> result = disque.qscan();
+        assertThat(result.getKeys()).hasSize(100);
+        assertThat(result.isFinished()).isTrue();
+    }
+
+    @Test
+    public void qscanWithArgs() throws Exception {
+
+        addJobs(1, "q", 100, value);
+
+        KeyScanCursor<String> result = disque.qscan(ScanArgs.builder().count(5).importrate(0).maxlen(1).maxlen(10).build());
+        assertThat(result.getKeys()).hasSize(5);
+        assertThat(result.isFinished()).isFalse();
+    }
+
+    @Test
+    @Ignore("QSCAN gets confused in the background when scanning multiple times")
+    public void qscanWithContinue() throws Exception {
+
+        addJobs(1, "q", 100, value);
+
+        ScanArgs scanArgs = ScanArgs.builder().count(5).importrate(0).minlen(1).busyloop(true).maxlen(10).build();
+        KeyScanCursor<String> result = disque.qscan(scanArgs);
+        assertThat(result.getKeys()).hasSize(5);
+        result = disque.qscan(result);
+
+        assertThat(result.getKeys()).hasSize(5);
+        assertThat(result.isFinished()).isFalse();
+
+        result = disque.qscan(scanArgs);
+        result = disque.qscan(result, scanArgs);
+        assertThat(result.getKeys()).hasSize(95);
+        assertThat(result.isFinished()).isFalse();
+    }
+
+    private void addJobs(int jobsPerQueue, String queue, int queues, String body) {
+
+        for (int i = 0; i < queues; i++) {
+            String queueName = getQueueName(queue, i, queues);
+            for (int j = 0; j < jobsPerQueue; j++) {
+                disque.addjob(queueName, body, 5, TimeUnit.MINUTES);
+            }
+        }
+
+    }
+
+    private String getQueueName(String prefix, int i, int queues) {
+
+        if (queues != 1) {
+            return prefix + i;
+        }
+        return prefix;
+    }
 }

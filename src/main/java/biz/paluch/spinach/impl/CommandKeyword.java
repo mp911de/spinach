@@ -8,7 +8,7 @@ import com.lambdaworks.redis.protocol.ProtocolKeyword;
  */
 public enum CommandKeyword implements ProtocolKeyword {
 
-    REPLICATE, DELAY, RETRY, TTL, MAXLEN, ASYNC, TIMEOUT, COUNT, FROM, FLUSHALL;
+    REPLICATE, DELAY, RETRY, TTL, MAXLEN, ASYNC, TIMEOUT, COUNT, FROM, FLUSHALL, BUSYLOOP, MINLEN, IMPORTRATE;
 
     public final byte[] bytes;
 
