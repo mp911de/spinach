@@ -214,29 +214,32 @@ public class JobTest extends AbstractCommandTest {
 
         addJobs(1, "q", 100, value);
 
-        KeyScanCursor<String> result = disque.qscan(ScanArgs.builder().count(5).importrate(0).maxlen(1).maxlen(10).build());
+        KeyScanCursor<String> result = disque.qscan(ScanArgs.builder().count(5).build());
         assertThat(result.getKeys()).hasSize(5);
         assertThat(result.isFinished()).isFalse();
+
+        result = disque.qscan(ScanArgs.builder().importrate(0).maxlen(1).maxlen(10).build());
+        assertThat(result.getKeys()).hasSize(100);
+        assertThat(result.isFinished()).isTrue();
     }
 
     @Test
-    @Ignore("QSCAN gets confused in the background when scanning multiple times")
     public void qscanWithContinue() throws Exception {
 
         addJobs(1, "q", 100, value);
 
-        ScanArgs scanArgs = ScanArgs.builder().count(5).importrate(0).minlen(1).busyloop(true).maxlen(10).build();
+        ScanArgs scanArgs = ScanArgs.builder().count(5).build();
         KeyScanCursor<String> result = disque.qscan(scanArgs);
         assertThat(result.getKeys()).hasSize(5);
-        result = disque.qscan(result);
+        result = disque.qscan(result, scanArgs);
 
         assertThat(result.getKeys()).hasSize(5);
         assertThat(result.isFinished()).isFalse();
 
         result = disque.qscan(scanArgs);
-        result = disque.qscan(result, scanArgs);
+        result = disque.qscan(result);
         assertThat(result.getKeys()).hasSize(95);
-        assertThat(result.isFinished()).isFalse();
+        assertThat(result.isFinished()).isTrue();
     }
 
     private void addJobs(int jobsPerQueue, String queue, int queues, String body) {
