@@ -37,11 +37,11 @@ public class TestSettings {
 
     /**
      *
-     * @return unix domain socket name of your redis instance. Defaults to {@literal work/socket-6479}. Can be overriden with
+     * @return unix domain socket name of your redis instance. Defaults to {@literal work/socket-7711}. Can be overriden with
      *         {@code -Ddomainsocket=YourSocket}
      */
     public static String socket() {
-        return System.getProperty("domainsocket", "work/socket-6479");
+        return System.getProperty("domainsocket", "work/disque-7711/socket");
     }
 
     /**
@@ -55,7 +55,7 @@ public class TestSettings {
 
     /**
      *
-     * @return port of your redis instance. Defaults to {@literal 6479}. Can be overriden with {@code -Dport=1234}
+     * @return port of your redis instance. Defaults to {@literal 7711}. Can be overriden with {@code -Dport=1234}
      */
     public static int port() {
         return Integer.valueOf(System.getProperty("port", "7711"));
@@ -63,7 +63,7 @@ public class TestSettings {
 
     /**
      *
-     * @return sslport of your redis instance. Defaults to {@literal 6443}. Can be overriden with {@code -Dsslport=1234}
+     * @return sslport of your redis instance. Defaults to {@literal 7443}. Can be overriden with {@code -Dsslport=1234}
      */
     public static int sslPort() {
         return Integer.valueOf(System.getProperty("sslport", "7443"));

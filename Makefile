@@ -1,5 +1,5 @@
 PATH := ./work/disque-git/src:${PATH}
-ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+ROOT_DIR := $(shell pwd)
 STUNNEL_BIN := $(shell which stunnel)
 BREW_BIN := $(shell which brew)
 YUM_BIN := $(shell which yum)
