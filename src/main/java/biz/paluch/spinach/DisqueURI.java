@@ -249,8 +249,7 @@ public class DisqueURI implements Serializable {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName());
-        sb.append(" [").append(connectionPoints);
-        sb.append(']');
+        sb.append(" ").append(connectionPoints);
         return sb.toString();
     }
 
