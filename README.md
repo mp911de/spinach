@@ -2,7 +2,7 @@ spinach - A scalable Java Disque client
 ======================================
 
 
-[![Build Status](https://travis-ci.org/mp911de/spinach.svg)](https://travis-ci.org/mp911de/spinach) [![Coverage Status](https://img.shields.io/coveralls/mp911de/spinach.svg)](https://coveralls.io/r/mp911de/spinach) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/biz.paluch.redis/spinach/badge.svg)](https://maven-badges.herokuapp.com/maven-central/biz.paluch.redis/spinach)
+[![Build Status](https://travis-ci.org/mp911de/spinach.svg)](https://travis-ci.org/mp911de/spinach) [![Coverage Status](https://coveralls.io/repos/mp911de/spinach/badge.svg?branch=master)](https://coveralls.io/r/mp911de/spinach?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/biz.paluch.redis/spinach/badge.svg)](https://maven-badges.herokuapp.com/maven-central/biz.paluch.redis/spinach)
 
 Spinach is a scalable thread-safe Disque client providing both synchronous and
 asynchronous connections. Multiple threads may share one connection. Spinach is based on
