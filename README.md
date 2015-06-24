@@ -5,7 +5,7 @@ spinach - A scalable Java Disque client
 [![Build Status](https://travis-ci.org/mp911de/spinach.svg)](https://travis-ci.org/mp911de/spinach) [![Coverage Status](https://coveralls.io/repos/mp911de/spinach/badge.svg?branch=master)](https://coveralls.io/r/mp911de/spinach?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/biz.paluch.redis/spinach/badge.svg)](https://maven-badges.herokuapp.com/maven-central/biz.paluch.redis/spinach)
 
 Spinach is a scalable thread-safe Disque client providing both synchronous and
-asynchronous connections. Multiple threads may share one connection. Spinach is based on
+asynchronous APIs. Multiple threads may share one connection. Spinach is based on
 [lettuce](https://github.com/mp911de/lettuce).
 Multiple connections are efficiently managed by the excellent netty NIO
 framework.
@@ -36,9 +36,10 @@ Basic Usage
 ```java
 DisqueClient client = new DisqueClient("localhost")
 DisqueConnection<String, String> connection = client.connect()
-String jobId = connection.addjob("queue", "body", 1, SECONDS);
+DisqueCommands<String, String> sync = connection.sync();
+String jobId = sync.addjob("queue", "body", 1, SECONDS);
   
-Job<String, String> job = connection.getjob("queue");
+Job<String, String> job = sync.getjob("queue");
 connection.ackjob(job.getId());
 ```
 
@@ -56,11 +57,12 @@ and will throw a DisqueException when non-blocking commands fail to return a
 result before the timeout expires. The timeout defaults to 60 seconds and
 may be changed in the DisqueClient or for each individual connection.
 
-Asynchronous Connections
+Asynchronous API
 ------------------------
 
 ```java
-DisqueConnection<String, String> async = client.connectAsync()
+DisqueConnection<String, String> connection = client.connect()
+DisqueAsyncCommands<String, String> sync = connection.sync();
 RedisFuture<String> jobId1 = async.addjob("queue", "body1", 1, SECONDS)
 RedisFuture<String> jobId2 = async.addjob("queue", "body2", 1, SECONDS)
 
@@ -70,14 +72,13 @@ jobId1.get() == "DI...SQ"
 jobId2.get() == "DI...SQ"
  ```
 
-
 Building
 -----------
 
 Spinach is built with Apache Maven. The tests require multiple running Disque instances for different test cases which
 are configured using a ```Makefile```.
 
-* Initial environment setup (clone and build `disque`): ```make prepare```
+* Initial environment setup (clone and build `disque`, setup SSL keys for SSL tests): ```make prepare ssl-keys```
 * Run the build: ```make test```
 * Start Disque (manually): ```make start```
 * Stop Disque (manually): ```make stop```
