@@ -9,6 +9,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import biz.paluch.spinach.api.DisqueConnection;
 import biz.paluch.spinach.impl.DisqueAsyncConnectionImpl;
 
 import com.google.common.base.Supplier;
@@ -19,10 +20,11 @@ import com.lambdaworks.redis.protocol.CommandHandler;
 import com.lambdaworks.redis.protocol.RedisCommand;
 
 /**
+ * A scalable thread-safe Disquelient. Multiple threads may share one connection if they avoid blocking operations.
+ * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public class DisqueClient extends AbstractRedisClient {
-    private final RedisCodec<String, String> codec = new Utf8StringCodec();
     private final DisqueURI disqueURI;
 
     /**
@@ -69,13 +71,12 @@ public class DisqueClient extends AbstractRedisClient {
     }
 
     /**
-     * Open a new synchronous connection to the disque server that treats keys and values as UTF-8 strings.
+     * Connect to a Disque server that treats keys and values as UTF-8 strings.
      *
      * @return A new connection.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public DisqueConnection<String, String> connect() {
-        return (DisqueConnection<String, String>) connect((RedisCodec) codec);
+        return connect(new Utf8StringCodec());
     }
 
     /**
@@ -87,7 +88,6 @@ public class DisqueClient extends AbstractRedisClient {
      * @param <V> Value type.
      * @return A new connection.
      */
-    @SuppressWarnings("unchecked")
     public <K, V> DisqueConnection<K, V> connect(RedisCodec<K, V> codec) {
         checkForDisqueURI();
         checkArgument(codec != null, "RedisCodec must not be null");
@@ -95,69 +95,17 @@ public class DisqueClient extends AbstractRedisClient {
     }
 
     /**
-     * Open a new synchronous connection to the supplied {@link DisqueURI} that treats keys and values as UTF-8 strings.
+     * Connect to a Disque server with the supplied {@link DisqueURI} that treats keys and values as UTF-8 strings.
      *
      * @param disqueURI the disque server to connect to, must not be {@literal null}
      * @return A new connection.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public DisqueConnection<String, String> connect(DisqueURI disqueURI) {
         checkValidDisqueURI(disqueURI);
-        return (DisqueConnection<String, String>) connect((RedisCodec) codec, disqueURI);
+        return connect(new Utf8StringCodec(), disqueURI);
     }
 
-    private void checkValidDisqueURI(DisqueURI disqueURI) {
-        checkArgument(disqueURI != null && !disqueURI.getConnectionPoints().isEmpty(),
-                "A valid DisqueURI with a host is needed");
-    }
-
-    private void checkForDisqueURI() {
-        checkState(
-                this.disqueURI != null,
-                "DisqueURI is not available. Use DisqueClient(Host), DisqueClient(Host, Port) or DisqueClient(DisqueURI) to construct your client.");
-    }
-
-    @SuppressWarnings({ "rawtypes" })
-    private <K, V> DisqueConnection connect(RedisCodec<K, V> codec, DisqueURI disqueURI) {
-        return (DisqueConnection) syncHandler(connectAsyncImpl(codec, disqueURI), DisqueConnection.class);
-    }
-
-    /**
-     * Open a new asynchronous connection to the disque server that treats keys and values as UTF-8 strings.
-     *
-     * @return A new connection.
-     */
-    public DisqueAsyncConnection<String, String> connectAsync() {
-        return connectAsync(codec);
-    }
-
-    /**
-     * Open a new asynchronous connection to the disque server. Use the supplied {@link RedisCodec codec} to encode/decode keys
-     * and values.
-     *
-     * @param codec Use this codec to encode/decode keys and values, must not be {@literal null}
-     * @param <K> Key type.
-     * @param <V> Value type.
-     * @return A new connection.
-     */
-    public <K, V> DisqueAsyncConnection<K, V> connectAsync(RedisCodec<K, V> codec) {
-        checkForDisqueURI();
-        checkArgument(codec != null, "RedisCodec must not be null");
-        return connectAsyncImpl(codec, disqueURI);
-    }
-
-    /**
-     * Open a new asynchronous connection to the supplied {@link DisqueURI} that treats keys and values as UTF-8 strings.
-     *
-     * @param disqueURI the disque server to connect to, must not be {@literal null}
-     * @return A new connection.
-     */
-    public DisqueAsyncConnection<String, String> connectAsync(DisqueURI disqueURI) {
-        checkValidDisqueURI(disqueURI);
-        return connectAsyncImpl(codec, disqueURI);
-    }
-
-    private <K, V> DisqueAsyncConnectionImpl<K, V> connectAsyncImpl(RedisCodec<K, V> codec, DisqueURI disqueURI) {
+    private <K, V> DisqueAsyncConnectionImpl<K, V> connect(RedisCodec<K, V> codec, DisqueURI disqueURI) {
         BlockingQueue<RedisCommand<K, V, ?>> queue = new LinkedBlockingQueue<RedisCommand<K, V, ?>>();
 
         ClientOptions options = getOptions();
@@ -265,4 +213,16 @@ public class DisqueClient extends AbstractRedisClient {
         }
         return ((DisqueURI.DisqueHostAndPort) connectionPoint).getResolvedAddress();
     }
+
+    private void checkValidDisqueURI(DisqueURI disqueURI) {
+        checkArgument(disqueURI != null && !disqueURI.getConnectionPoints().isEmpty(),
+                "A valid DisqueURI with a host is needed");
+    }
+
+    private void checkForDisqueURI() {
+        checkState(
+                this.disqueURI != null,
+                "DisqueURI is not available. Use DisqueClient(Host), DisqueClient(Host, Port) or DisqueClient(DisqueURI) to construct your client.");
+    }
+
 }

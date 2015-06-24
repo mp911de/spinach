@@ -6,6 +6,7 @@ import static org.junit.Assume.*;
 
 import java.io.File;
 
+import biz.paluch.spinach.api.sync.DisqueCommands;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class SslTest {
     public void regularSsl() throws Exception {
         DisqueURI disqueUri = DisqueURI.Builder.disque(host(), sslPort()).withSsl(true).withVerifyPeer(false).build();
 
-        DisqueConnection<String, String> connection = disqueClient.connect(disqueUri);
+        DisqueCommands<String, String> connection = disqueClient.connect(disqueUri).sync();
 
         assertThat(connection.ping()).isEqualTo("PONG");
 
@@ -49,7 +50,7 @@ public class SslTest {
         DisqueURI disqueUri = DisqueURI.Builder.disque(host(), sslPort()).withSsl(true).withVerifyPeer(false).build();
         disqueClient.setOptions(new ClientOptions.Builder().pingBeforeActivateConnection(true).build());
 
-        DisqueConnection<String, String> connection = disqueClient.connect(disqueUri);
+        DisqueCommands<String, String> connection = disqueClient.connect(disqueUri).sync();
 
         assertThat(connection.ping()).isEqualTo("PONG");
 
@@ -60,7 +61,7 @@ public class SslTest {
     public void regularSslWithReconnect() throws Exception {
         DisqueURI disqueUri = DisqueURI.Builder.disque(host(), sslPort()).withSsl(true).withVerifyPeer(false).build();
 
-        DisqueConnection<String, String> connection = disqueClient.connect(disqueUri);
+        DisqueCommands<String, String> connection = disqueClient.connect(disqueUri).sync();
         assertThat(connection.ping()).isEqualTo("PONG");
         connection.quit();
         assertThat(connection.ping()).isEqualTo("PONG");

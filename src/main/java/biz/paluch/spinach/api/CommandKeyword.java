@@ -1,4 +1,4 @@
-package biz.paluch.spinach.impl;
+package biz.paluch.spinach.api;
 
 import com.lambdaworks.redis.protocol.LettuceCharsets;
 import com.lambdaworks.redis.protocol.ProtocolKeyword;
@@ -8,7 +8,7 @@ import com.lambdaworks.redis.protocol.ProtocolKeyword;
  */
 public enum CommandKeyword implements ProtocolKeyword {
 
-    REPLICATE, DELAY, RETRY, TTL, MAXLEN, ASYNC, TIMEOUT, COUNT, FROM, FLUSHALL, BUSYLOOP, MINLEN, IMPORTRATE;
+    REPLICATE, DELAY, RETRY, TTL, MAXLEN, ASYNC, TIMEOUT, COUNT, FROM, FLUSHALL, BUSYLOOP, MINLEN, IMPORTRATE, GET, SET, RESETSTAT, REWRITE;
 
     public final byte[] bytes;
 

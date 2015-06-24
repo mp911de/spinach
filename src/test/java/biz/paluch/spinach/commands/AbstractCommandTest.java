@@ -1,4 +1,4 @@
-package biz.paluch.spinach;
+package biz.paluch.spinach.commands;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import biz.paluch.spinach.DisqueClient;
+import biz.paluch.spinach.TestSettings;
+import biz.paluch.spinach.api.sync.DisqueCommands;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -22,7 +25,7 @@ public abstract class AbstractCommandTest {
 
     protected static DisqueClient client;
     protected Logger log = Logger.getLogger(getClass());
-    protected DisqueConnection<String, String> disque;
+    protected DisqueCommands<String, String> disque;
     protected String key = "key";
     protected String queue = "queue";
     protected String value = "value";
@@ -43,7 +46,7 @@ public abstract class AbstractCommandTest {
 
     @Before
     public void openConnection() throws Exception {
-        disque = client.connect();
+        disque = client.connect().sync();
         disque.debugFlushall();
     }
 

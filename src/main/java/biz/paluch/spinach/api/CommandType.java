@@ -1,4 +1,4 @@
-package biz.paluch.spinach.impl;
+package biz.paluch.spinach.api;
 
 import com.lambdaworks.redis.protocol.LettuceCharsets;
 import com.lambdaworks.redis.protocol.ProtocolKeyword;
@@ -7,11 +7,21 @@ import com.lambdaworks.redis.protocol.ProtocolKeyword;
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public enum CommandType implements ProtocolKeyword {
-    ADDJOB, GETJOB, DEBUG, ACKJOB, FASTACK, QLEN, QPEEK, HELLO, ENQUEUE, DEQUEUE, DELJOB, SHOW, WORKING, QSCAN;
+    // Jobs
+    ADDJOB, GETJOB, ACKJOB, FASTACK, DELJOB, SHOW,
+
+    // Queues
+    QLEN, QPEEK, ENQUEUE, DEQUEUE, QSCAN, WORKING,
+
+    // AOF
+    BGREWRITEAOF,
+
+    // Server commands
+    AUTH, PING, INFO, SHUTDOWN, DEBUG, CONFIG, /* CLUSTER, */CLIENT, SLOWLOG, TIME, COMMAND, /* LATENCY, */HELLO, QUIT;
 
     public final byte[] bytes;
 
-    private CommandType() {
+    CommandType() {
         bytes = name().getBytes(LettuceCharsets.ASCII);
     }
 

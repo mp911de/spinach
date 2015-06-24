@@ -10,6 +10,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import biz.paluch.spinach.api.async.DisqueAsyncCommands;
+import biz.paluch.spinach.api.sync.DisqueCommands;
+
 import com.lambdaworks.redis.RedisFuture;
 
 /**
@@ -21,14 +24,19 @@ public class SyncAsyncApiConvergenceTest {
     private Method method;
 
     @SuppressWarnings("rawtypes")
-    private Class<DisqueAsyncConnection> asyncClass = DisqueAsyncConnection.class;
+    private Class<DisqueAsyncCommands> asyncClass = DisqueAsyncCommands.class;
 
     @Parameterized.Parameters(name = "Method {0}/{1}")
     public static List<Object[]> parameters() {
 
         List<Object[]> result = new ArrayList<Object[]>();
-        Method[] methods = DisqueConnection.class.getMethods();
+        Method[] methods = DisqueCommands.class.getMethods();
         for (Method method : methods) {
+
+            if (method.getName().equals("setTimeout")) {
+                continue;
+            }
+
             result.add(new Object[] { method.getName(), method });
         }
 

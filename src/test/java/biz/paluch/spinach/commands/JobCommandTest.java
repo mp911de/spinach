@@ -1,6 +1,6 @@
-package biz.paluch.spinach;
+package biz.paluch.spinach.commands;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -8,13 +8,17 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import biz.paluch.spinach.api.AddJobArgs;
+import biz.paluch.spinach.api.Job;
+import biz.paluch.spinach.api.ScanArgs;
+
 import com.lambdaworks.redis.KeyScanCursor;
 import com.lambdaworks.redis.RedisException;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public class JobTest extends AbstractCommandTest {
+public class JobCommandTest extends AbstractCommandTest {
 
     @Test
     public void addJob() throws Exception {
@@ -67,6 +71,14 @@ public class JobTest extends AbstractCommandTest {
         assertThat(job.getQueue()).isEqualTo(queue);
         assertThat(job.getId()).startsWith("DI").endsWith("SQ").isEqualTo(result);
         assertThat(job.getBody()).isEqualTo(value);
+    }
+
+    @Test
+    public void getJobs() throws Exception {
+        addJob();
+        List<Job<String, String>> result = disque.getjobs(queue);
+
+        assertThat(result).hasSize(1);
     }
 
     @Test

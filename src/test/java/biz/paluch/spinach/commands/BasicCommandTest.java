@@ -1,17 +1,15 @@
-package biz.paluch.spinach;
+package biz.paluch.spinach.commands;
 
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public class BasicCommandsTest extends AbstractCommandTest {
+public class BasicCommandTest extends AbstractCommandTest {
 
     @Test
     public void hello() throws Exception {
@@ -24,7 +22,7 @@ public class BasicCommandsTest extends AbstractCommandTest {
     @Test
     public void info() throws Exception {
 
-        String result = disque.info();
+        String result = disque.ping();
         assertThat(result).isNotEmpty();
     }
 }

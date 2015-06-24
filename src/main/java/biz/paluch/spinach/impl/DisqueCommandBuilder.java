@@ -1,24 +1,24 @@
 package biz.paluch.spinach.impl;
 
-import static biz.paluch.spinach.impl.CommandType.*;
+import static biz.paluch.spinach.api.CommandType.*;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import biz.paluch.spinach.AddJobArgs;
-import biz.paluch.spinach.Job;
-import biz.paluch.spinach.ScanArgs;
+import biz.paluch.spinach.api.AddJobArgs;
+import biz.paluch.spinach.api.CommandKeyword;
+import biz.paluch.spinach.api.Job;
+import biz.paluch.spinach.api.ScanArgs;
 import biz.paluch.spinach.output.JobListOutput;
 import biz.paluch.spinach.output.JobOutput;
 
 import com.lambdaworks.redis.KeyScanCursor;
+import com.lambdaworks.redis.KillArgs;
 import com.lambdaworks.redis.ScanCursor;
 import com.lambdaworks.redis.codec.RedisCodec;
-import com.lambdaworks.redis.output.IntegerOutput;
-import com.lambdaworks.redis.output.KeyScanOutput;
-import com.lambdaworks.redis.output.NestedMultiOutput;
-import com.lambdaworks.redis.output.StatusOutput;
-import com.lambdaworks.redis.protocol.CommandArgs;
+import com.lambdaworks.redis.output.*;
+import com.lambdaworks.redis.protocol.Command;
+import com.lambdaworks.redis.protocol.CommandType;
 import com.lambdaworks.redis.protocol.RedisCommand;
 
 /**
@@ -33,7 +33,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
     }
 
     public RedisCommand<K, V, String> addjob(K queue, V job, long duration, TimeUnit timeUnit, AddJobArgs addJobArgs) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec).addKey(queue).addValue(job);
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).addKey(queue).addValue(job);
         if (timeUnit != null) {
             args.add(timeUnit.toMillis(duration));
         } else {
@@ -48,7 +48,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
     }
 
     public RedisCommand<K, V, Job<K, V>> getjob(long duration, TimeUnit timeUnit, K... queues) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec);
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
         if (timeUnit != null) {
             args.add(CommandKeyword.TIMEOUT).add(timeUnit.toMillis(duration));
         }
@@ -59,7 +59,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
     }
 
     public RedisCommand<K, V, List<Job<K, V>>> getjobs(long count, long duration, TimeUnit timeUnit, K... queues) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec);
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
         if (timeUnit != null && duration > 0) {
             args.add(CommandKeyword.TIMEOUT).add(timeUnit.toMillis(duration));
         }
@@ -74,7 +74,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
     }
 
     public RedisCommand<K, V, String> debugFlushall() {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec);
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
 
         args.add(CommandKeyword.FLUSHALL);
 
@@ -82,31 +82,31 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
     }
 
     public RedisCommand<K, V, Long> ackjob(String[] jobIds) {
-        CommandArgs<K, V> args = withJobIds(jobIds);
+        DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(ACKJOB, new IntegerOutput<K, V>(codec), args);
     }
 
     public RedisCommand<K, V, Long> enqueue(String[] jobIds) {
-        CommandArgs<K, V> args = withJobIds(jobIds);
+        DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(ENQUEUE, new IntegerOutput<K, V>(codec), args);
     }
 
     public RedisCommand<K, V, Long> dequeue(String[] jobIds) {
-        CommandArgs<K, V> args = withJobIds(jobIds);
+        DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(DEQUEUE, new IntegerOutput<K, V>(codec), args);
     }
 
     public RedisCommand<K, V, Long> deljob(String[] jobIds) {
-        CommandArgs<K, V> args = withJobIds(jobIds);
+        DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(DELJOB, new IntegerOutput<K, V>(codec), args);
     }
 
-    private CommandArgs<K, V> withJobIds(String[] jobIds) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec);
+    private DisqueCommandArgs<K, V> withJobIds(String[] jobIds) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
 
         for (String jobId : jobIds) {
             args.add(jobId);
@@ -115,19 +115,19 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
     }
 
     public RedisCommand<K, V, Long> fastack(String[] jobIds) {
-        CommandArgs<K, V> args = withJobIds(jobIds);
+        DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(FASTACK, new IntegerOutput<K, V>(codec), args);
     }
 
     public RedisCommand<K, V, Long> qlen(K queue) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec).addKey(queue);
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).addKey(queue);
 
         return createCommand(QLEN, new IntegerOutput<K, V>(codec), args);
     }
 
     public RedisCommand<K, V, List<Job<K, V>>> qpeek(K queue, long count) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec).addKey(queue).add(count);
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).addKey(queue).add(count);
 
         return createCommand(QPEEK, new JobListOutput<K, V>(codec), args);
     }
@@ -137,19 +137,19 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
     }
 
     public RedisCommand<K, V, List<Object>> show(String jobId) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec).add(jobId);
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(jobId);
 
         return createCommand(SHOW, new NestedMultiOutput<K, V>(codec), args);
     }
 
     public RedisCommand<K, V, Long> working(String jobId) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec).add(jobId);
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(jobId);
 
         return createCommand(WORKING, new IntegerOutput<K, V>(codec), args);
     }
 
     public RedisCommand<K, V, KeyScanCursor<K>> qscan(ScanCursor scanCursor, ScanArgs scanArgs) {
-        CommandArgs<K, V> args = new CommandArgs<K, V>(codec);
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
         if (scanArgs != null) {
             scanArgs.build(args);
         }
@@ -159,5 +159,149 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         }
 
         return createCommand(QSCAN, new KeyScanOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> auth(String password) {
+
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(password);
+        return createCommand(AUTH, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, K> clientGetname() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec)
+                .add(com.lambdaworks.redis.protocol.CommandKeyword.GETNAME);
+        return createCommand(CLIENT, new KeyOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clientSetname(K name) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(
+                com.lambdaworks.redis.protocol.CommandKeyword.SETNAME).addKey(name);
+        return createCommand(CLIENT, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clientKill(String addr) {
+
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(
+                com.lambdaworks.redis.protocol.CommandKeyword.KILL).add(addr);
+        return createCommand(CLIENT, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, Long> clientKill(KillArgs killArgs) {
+
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec)
+                .add(com.lambdaworks.redis.protocol.CommandKeyword.KILL);
+        // killArgs.build(args);
+        return createCommand(CLIENT, new IntegerOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clientPause(long timeout) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(
+                com.lambdaworks.redis.protocol.CommandKeyword.PAUSE).add(timeout);
+        return createCommand(CLIENT, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clientList() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec)
+                .add(com.lambdaworks.redis.protocol.CommandKeyword.LIST);
+        return createCommand(CLIENT, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, List<Object>> command() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
+        return createCommand(COMMAND, new ArrayOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, List<Object>> commandInfo(String... commands) {
+
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
+        args.add(INFO);
+
+        for (String command : commands) {
+            args.add(command);
+        }
+
+        return createCommand(COMMAND, new ArrayOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, Long> commandCount() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec)
+                .add(com.lambdaworks.redis.protocol.CommandKeyword.COUNT);
+        return createCommand(COMMAND, new IntegerOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> configRewrite() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec)
+                .add(com.lambdaworks.redis.protocol.CommandKeyword.REWRITE);
+        return createCommand(CONFIG, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, List<String>> configGet(String parameter) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(CommandType.GET).add(parameter);
+        return createCommand(CONFIG, new StringListOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> configResetstat() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec)
+                .add(com.lambdaworks.redis.protocol.CommandKeyword.RESETSTAT);
+        return createCommand(CONFIG, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> configSet(String parameter, String value) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(CommandType.SET).add(parameter).add(value);
+        return createCommand(CONFIG, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> info() {
+        return createCommand(INFO, new StatusOutput<K, V>(codec));
+    }
+
+    public Command<K, V, String> info(String section) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(section);
+        return createCommand(INFO, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, List<Object>> slowlogGet() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(CommandType.GET);
+        return createCommand(SLOWLOG, new NestedMultiOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, List<Object>> slowlogGet(int count) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(CommandType.GET).add(count);
+        return createCommand(SLOWLOG, new NestedMultiOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, Long> slowlogLen() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec)
+                .add(com.lambdaworks.redis.protocol.CommandKeyword.LEN);
+        return createCommand(SLOWLOG, new IntegerOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> slowlogReset() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec)
+                .add(com.lambdaworks.redis.protocol.CommandKeyword.RESET);
+        return createCommand(SLOWLOG, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, List<V>> time() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
+        return createCommand(TIME, new ValueListOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> shutdown(boolean save) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
+        return createCommand(SHUTDOWN, new StatusOutput<K, V>(codec),
+                save ? args.add(CommandType.SAVE) : args.add(com.lambdaworks.redis.protocol.CommandKeyword.NOSAVE));
+    }
+
+    public Command<K, V, String> bgrewriteaof() {
+        return createCommand(BGREWRITEAOF, new StatusOutput<K, V>(codec));
+    }
+
+    public Command<K, V, String> ping() {
+        return createCommand(PING, new StatusOutput<K, V>(codec));
+    }
+
+    public Command<K, V, String> quit() {
+        return createCommand(QUIT, new StatusOutput<K, V>(codec));
     }
 }

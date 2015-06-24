@@ -2,12 +2,13 @@ package biz.paluch.spinach.output;
 
 import java.nio.ByteBuffer;
 
-import biz.paluch.spinach.Job;
+import biz.paluch.spinach.api.Job;
 
 import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.protocol.CommandOutput;
 
 /**
+ *
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public class JobOutput<K, V> extends CommandOutput<K, V, Job<K, V>> {

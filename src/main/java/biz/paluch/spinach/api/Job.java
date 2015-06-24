@@ -1,4 +1,4 @@
-package biz.paluch.spinach;
+package biz.paluch.spinach.api;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>

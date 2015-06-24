@@ -1,17 +1,25 @@
-package biz.paluch.spinach;
+package biz.paluch.spinach.api.sync;
 
-import java.io.Closeable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import biz.paluch.spinach.api.AddJobArgs;
+import biz.paluch.spinach.api.DisqueConnection;
+import biz.paluch.spinach.api.Job;
+import biz.paluch.spinach.api.ScanArgs;
+
 import com.lambdaworks.redis.KeyScanCursor;
-import com.lambdaworks.redis.RedisServerConnection;
 import com.lambdaworks.redis.ScanCursor;
 
 /**
+ *
+ * Synchronous executed commands for Disque. This API is thread-safe.
+ * 
+ * @param <K> Key type.
+ * @param <V> Value type.
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public interface DisqueConnection<K, V> extends RedisServerConnection<K, V>, Closeable {
+public interface DisqueCommands<K, V> extends DisqueServerCommands<K, V> {
 
     String addjob(K queue, V job, long timeout, TimeUnit timeUnit);
 
@@ -21,9 +29,9 @@ public interface DisqueConnection<K, V> extends RedisServerConnection<K, V>, Clo
 
     Job<K, V> getjob(long timeout, TimeUnit timeUnit, K queue);
 
-    List<Job<K, V>> getjob(K... queues);
+    List<Job<K, V>> getjobs(K... queues);
 
-    List<Job<K, V>> getjob(long timeout, TimeUnit timeUnit, long count, K... queues);
+    List<Job<K, V>> getjobs(long timeout, TimeUnit timeUnit, long count, K... queues);
 
     long enqueue(String... jobIds);
 
@@ -43,16 +51,6 @@ public interface DisqueConnection<K, V> extends RedisServerConnection<K, V>, Clo
 
     List<Job<K, V>> qpeek(K queue, long count);
 
-    String debugFlushall();
-
-    List<Object> hello();
-
-    /**
-     * Ping the server.
-     * 
-     * @return simple-string-reply
-     */
-    String ping();
 
     /**
      * Incrementally iterate the keys space.
@@ -103,6 +101,13 @@ public interface DisqueConnection<K, V> extends RedisServerConnection<K, V>, Clo
     String auth(String password);
 
     /**
+     * Ping the server.
+     *
+     * @return simple-string-reply
+     */
+    String ping();
+
+    /**
      * Close the connection.
      * 
      * @return String simple-string-reply always OK.
@@ -112,7 +117,14 @@ public interface DisqueConnection<K, V> extends RedisServerConnection<K, V>, Clo
     /**
      * Close the connection. The connection will become not usable anymore as soon as this method was called.
      */
-    @Override
     void close();
+
+    /**
+     *
+     * @return true if the connection is open (connected and not closed).
+     */
+    boolean isOpen();
+
+    DisqueConnection<K, V> getConnection();
 
 }

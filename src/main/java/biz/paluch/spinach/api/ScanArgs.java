@@ -1,8 +1,7 @@
-package biz.paluch.spinach;
+package biz.paluch.spinach.api;
 
 import static com.lambdaworks.redis.protocol.CommandKeyword.*;
 
-import biz.paluch.spinach.impl.CommandKeyword;
 import com.lambdaworks.redis.protocol.CommandArgs;
 
 /**

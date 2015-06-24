@@ -1,19 +1,23 @@
 package biz.paluch.spinach.impl;
 
-import java.util.List;
+import java.lang.reflect.Proxy;
 import java.util.concurrent.TimeUnit;
 
-import biz.paluch.spinach.AddJobArgs;
-import biz.paluch.spinach.DisqueAsyncConnection;
-import biz.paluch.spinach.Job;
-import biz.paluch.spinach.ScanArgs;
+import biz.paluch.spinach.api.CommandType;
+import biz.paluch.spinach.api.DisqueConnection;
+import biz.paluch.spinach.api.async.DisqueAsyncCommands;
+import biz.paluch.spinach.api.sync.DisqueCommands;
 
-import com.lambdaworks.redis.*;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.lambdaworks.redis.AbstractRedisClient;
+import com.lambdaworks.redis.RedisChannelHandler;
+import com.lambdaworks.redis.RedisChannelWriter;
 import com.lambdaworks.redis.codec.RedisCodec;
+import com.lambdaworks.redis.protocol.RedisCommand;
 import io.netty.channel.ChannelHandler;
 
 /**
- * An asynchronous thread-safe connection to a disque server. Multiple threads may share one {@link DisqueAsyncConnectionImpl} A
+ * An thread-safe connection to a disque server. Multiple threads may share one {@link DisqueAsyncConnectionImpl}. A
  * {@link com.lambdaworks.redis.protocol.ConnectionWatchdog} monitors each connection and reconnects automatically until
  * {@link #close} is called. All pending commands will be (re)sent after successful reconnection.
  *
@@ -23,117 +27,100 @@ import io.netty.channel.ChannelHandler;
  */
 
 @ChannelHandler.Sharable
-public class DisqueAsyncConnectionImpl<K, V> extends RedisAsyncConnectionImpl<K, V> implements DisqueAsyncConnection<K, V> {
+public class DisqueAsyncConnectionImpl<K, V> extends RedisChannelHandler<K, V> implements DisqueConnection<K, V> {
 
-    protected DisqueCommandBuilder<K, V> commandBuilder;
+    protected RedisCodec<K, V> codec;
+    protected DisqueCommands<K, V> sync;
+    protected DisqueAsyncCommandsImpl<K, V> async;
 
+    private char[] password;
+
+    /**
+     * Initialize a new connection.
+     *
+     * @param writer the channel writer
+     * @param codec Codec used to encode/decode keys and values.
+     * @param timeout Maximum time to wait for a response.
+     * @param unit Unit of time for the timeout.
+     */
     public DisqueAsyncConnectionImpl(RedisChannelWriter<K, V> writer, RedisCodec<K, V> codec, long timeout, TimeUnit unit) {
-        super(writer, codec, timeout, unit);
-        commandBuilder = new DisqueCommandBuilder<K, V>(codec);
+        super(writer, timeout, unit);
+        this.codec = codec;
+    }
+
+    public DisqueAsyncCommands<K, V> async() {
+        return getAsyncCommands();
+    }
+
+    protected DisqueAsyncCommandsImpl<K, V> getAsyncCommands() {
+        if (async == null) {
+            async = newDisqueAsyncCommandsImpl();
+        }
+
+        return async;
+    }
+
+    /**
+     * Create a new instance of {@link DisqueAsyncCommandsImpl}. Can be overriden to extend.
+     *
+     * @return a new instance
+     */
+    protected DisqueAsyncCommandsImpl<K, V> newDisqueAsyncCommandsImpl() {
+        return new DisqueAsyncCommandsImpl<K, V>(this, codec);
+    }
+
+    public DisqueCommands<K, V> sync() {
+        if (sync == null) {
+            sync = syncHandler(async(), DisqueCommands.class);
+        }
+        return sync;
     }
 
     @Override
-    public RedisFuture<String> addjob(K queue, V job, long duration, TimeUnit timeUnit) {
-        return dispatch(commandBuilder.addjob(queue, job, duration, timeUnit, null));
+    public TimeUnit getTimeoutUnit() {
+        return unit;
     }
 
     @Override
-    public RedisFuture<String> addjob(K queue, V job, long duration, TimeUnit timeUnit, AddJobArgs addJobArgs) {
-        return dispatch(commandBuilder.addjob(queue, job, duration, timeUnit, addJobArgs));
+    public long getTimeout() {
+        return timeout;
     }
 
     @Override
-    public RedisFuture<Job<K, V>> getjob(K queue) {
-        return dispatch(commandBuilder.getjob(0, null, queue));
+    public <T> RedisCommand<K, V, T> dispatch(RedisCommand<K, V, T> cmd) {
+
+        if (cmd instanceof DisqueCommand) {
+            final DisqueCommand<K, V, T> local = (DisqueCommand<K, V, T>) cmd;
+
+            if (local.getType() == CommandType.AUTH) {
+
+                local.addListener(new Runnable() {
+                    @Override
+                    public void run() {
+                        if ("OK".equals(local.getOutput().get())) {
+                            DisqueAsyncConnectionImpl.this.password = local.getArgs().getStrings().get(0).toCharArray();
+                        }
+                    }
+                }, MoreExecutors.sameThreadExecutor());
+            }
+        }
+
+        return super.dispatch(cmd);
+    }
+
+    protected <T> T syncHandler(Object asyncApi, Class<?>... interfaces) {
+        FutureSyncInvocationHandler<K, V> h = new FutureSyncInvocationHandler<K, V>(this, asyncApi);
+        return (T) Proxy.newProxyInstance(AbstractRedisClient.class.getClassLoader(), interfaces, h);
     }
 
     @Override
-    public RedisFuture<Job<K, V>> getjob(long duration, TimeUnit timeUnit, K queue) {
-        return dispatch(commandBuilder.getjob(duration, timeUnit, queue));
-    }
+    public void activated() {
 
-    @Override
-    public RedisFuture<List<Job<K, V>>> getjob(K... queues) {
-        return dispatch(commandBuilder.getjobs(0, 0, null, queues));
-    }
+        super.activated();
+        // do not block in here, since the channel flow will be interrupted.
+        if (password != null) {
+            getAsyncCommands().auth(new String(password));
+        }
 
-    @Override
-    public RedisFuture<List<Job<K, V>>> getjob(long duration, TimeUnit timeUnit, long count, K... queues) {
-        return dispatch(commandBuilder.getjobs(count, duration, timeUnit, queues));
-    }
-
-    @Override
-    public RedisFuture<List<Object>> show(String jobId) {
-        return dispatch(commandBuilder.show(jobId));
-    }
-
-    @Override
-    public RedisFuture<Long> enqueue(String... jobIds) {
-        return dispatch(commandBuilder.enqueue(jobIds));
-    }
-
-    @Override
-    public RedisFuture<Long> dequeue(String... jobIds) {
-        return dispatch(commandBuilder.dequeue(jobIds));
-    }
-
-    @Override
-    public RedisFuture<Long> deljob(String... jobIds) {
-        return dispatch(commandBuilder.deljob(jobIds));
-    }
-
-    @Override
-    public RedisFuture<Long> ackjob(String... jobIds) {
-        return dispatch(commandBuilder.ackjob(jobIds));
-    }
-
-    @Override
-    public RedisFuture<Long> fastack(String... jobIds) {
-        return dispatch(commandBuilder.fastack(jobIds));
-    }
-
-    @Override
-    public RedisFuture<Long> working(String jobId) {
-        return dispatch(commandBuilder.working(jobId));
-    }
-
-    @Override
-    public RedisFuture<Long> qlen(K queue) {
-        return dispatch(commandBuilder.qlen(queue));
-    }
-
-    @Override
-    public RedisFuture<List<Job<K, V>>> qpeek(K queue, long count) {
-        return dispatch(commandBuilder.qpeek(queue, count));
-    }
-
-    @Override
-    public RedisFuture<List<Object>> hello() {
-        return dispatch(commandBuilder.hello());
-    }
-
-    @Override
-    public RedisFuture<String> debugFlushall() {
-        return dispatch(commandBuilder.debugFlushall());
-    }
-
-    @Override
-    public RedisFuture<KeyScanCursor<K>> qscan() {
-        return dispatch(commandBuilder.qscan(null, null));
-    }
-
-    @Override
-    public RedisFuture<KeyScanCursor<K>> qscan(ScanArgs scanArgs) {
-        return dispatch(commandBuilder.qscan(null, scanArgs));
-    }
-
-    @Override
-    public RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor, ScanArgs scanArgs) {
-        return dispatch(commandBuilder.qscan(scanCursor, scanArgs));
-    }
-
-    @Override
-    public RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor) {
-        return dispatch(commandBuilder.qscan(scanCursor, null));
     }
 }

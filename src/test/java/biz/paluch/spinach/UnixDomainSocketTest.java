@@ -6,6 +6,7 @@ import static org.junit.Assume.*;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import biz.paluch.spinach.api.sync.DisqueCommands;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -18,7 +19,7 @@ public class UnixDomainSocketTest {
 
     protected Logger log = Logger.getLogger(getClass());
 
-    private DisqueConnection<String, String> connection;
+    private DisqueCommands<String, String> connection;
 
     @Test
     public void linux_x86_64_socket() throws Exception {
@@ -27,10 +28,10 @@ public class UnixDomainSocketTest {
 
         DisqueClient disqueClient = new DisqueClient(DisqueURI.Builder.disqueSocket(TestSettings.socket()).build());
 
-        DisqueConnection<String, String> connection = disqueClient.connect();
+        DisqueCommands<String, String> connection = disqueClient.connect().sync();
 
         connection.debugFlushall();
-        connection.info();
+        connection.ping();
 
         disqueClient.shutdown(0, 0, TimeUnit.SECONDS);
     }
