@@ -1,6 +1,7 @@
 package biz.paluch.spinach;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.net.ConnectException;
 import java.net.SocketAddress;
@@ -13,7 +14,14 @@ import biz.paluch.spinach.api.DisqueConnection;
 import biz.paluch.spinach.impl.DisqueAsyncConnectionImpl;
 
 import com.google.common.base.Supplier;
-import com.lambdaworks.redis.*;
+import com.lambdaworks.redis.AbstractRedisClient;
+import com.lambdaworks.redis.ClientOptions;
+import com.lambdaworks.redis.ConnectionBuilder;
+import com.lambdaworks.redis.ConnectionPoint;
+import com.lambdaworks.redis.RedisConnectionException;
+import com.lambdaworks.redis.RedisException;
+import com.lambdaworks.redis.RedisURI;
+import com.lambdaworks.redis.SslConnectionBuilder;
 import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.codec.Utf8StringCodec;
 import com.lambdaworks.redis.protocol.CommandHandler;
@@ -40,10 +48,11 @@ public class DisqueClient extends AbstractRedisClient {
     /**
      * Create a new client that connects to the supplied host on the default port.
      * 
-     * @param host Server hostname.
+     * @param uri a Disque URI.
+     *
      */
-    public DisqueClient(String host) {
-        this(host, DisqueURI.DEFAULT_DISQUE_PORT);
+    public DisqueClient(String uri) {
+        this(uri != null && uri.startsWith("disque") ? DisqueURI.create(uri) : new DisqueURI.Builder().disque(uri).build());
     }
 
     /**
@@ -151,6 +160,16 @@ public class DisqueClient extends AbstractRedisClient {
                 }
             }
         }
+
+        try {
+            if (disqueURI.getPassword() != null) {
+                connection.sync().auth(new String(disqueURI.getPassword()));
+            }
+        } catch (RedisException e) {
+            connection.close();
+            throw e;
+        }
+
         if (!connected) {
             throw new RedisConnectionException("Cannot connect to disque: " + disqueURI, causingException);
         }
