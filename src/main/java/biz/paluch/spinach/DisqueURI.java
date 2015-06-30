@@ -1,7 +1,9 @@
 package biz.paluch.spinach;
 
-import static com.google.common.base.Preconditions.*;
-import static com.lambdaworks.redis.LettuceStrings.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.lambdaworks.redis.LettuceStrings.isEmpty;
+import static com.lambdaworks.redis.LettuceStrings.isNotEmpty;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;
@@ -27,7 +29,7 @@ public class DisqueURI implements Serializable {
 
     public static final String URI_SCHEME_DISQUE = "disque";
     public static final String URI_SCHEME_DISQUE_SOCKET = "disque-socket";
-    public static final String URI_SCHEME_DISQUE_SECURE = "disquess";
+    public static final String URI_SCHEME_DISQUE_SECURE = "disques";
 
     /**
      * The default disque port.
@@ -71,7 +73,9 @@ public class DisqueURI implements Serializable {
     /**
      * Create a Disque URI from an URI string. Supported formats are:
      * <ul>
-     * <li>disque://[password@]host[:port][/databaseNumber]</li>
+     * <li>disque://[password@]host[:port][,host2[:port2]][,hostN[:port2N]]</li>
+     * <li>disques://[password@]host[:port][,host2[:port2]][,hostN[:port2N]]</li>
+     * <li>disque-socket://socket-path</li>
      * </ul>
      *
      * The uri must follow conventions of {@link java.net.URI}
@@ -86,7 +90,9 @@ public class DisqueURI implements Serializable {
     /**
      * Create a Disque URI from an URI string. Supported formats are:
      * <ul>
-     * <li>disque://[password@]host[:port][/databaseNumber]</li>
+     * <li>disque://[password@]host[:port][,host2[:port2]][,hostN[:port2N]]</li>
+     * <li>disques://[password@]host[:port][,host2[:port2]][,hostN[:port2N]]</li>
+     * <li>disque-socket://socket-path</li>
      * </ul>
      *
      * The uri must follow conventions of {@link java.net.URI}

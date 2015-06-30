@@ -1,0 +1,59 @@
+Download spinach
+======================
+
+ spinach is distributed under the
+ [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
+
+  The link in the Mirrors column should display a list of available mirrors with a
+  default selection based on your inferred location. If you do not see that page,
+  try a different browser.  The checksum and signature are links to
+  the originals on the main distribution server.
+
+|                   | Download     | Checksum     | Signature    |
+| ----------------- |:-------------|:-------------|:-------------|
+| spinach (jar) | [spinach-${spinach-release-version}.jar](http://search.maven.org/remotecontent?filepath=biz/paluch/redis/spinach/${spinach-release-version}/spinach-${spinach-release-version}.jar)|[spinach-${spinach-release-version}.jar.md5](http://search.maven.org/remotecontent?filepath=biz/paluch/redis/spinach/${spinach-release-version}/spinach-${spinach-release-version}.jar.md5)|[spinach-${spinach-release-version}.jar.asc](http://search.maven.org/remotecontent?filepath=biz/paluch/redis/spinach/${spinach-release-version}/spinach-${spinach-release-version}.jar.asc)|
+| spinach binary (zip) | [spinach-${spinach-release-version}-bin.zip](https://github.com/mp911de/spinach/releases/download/${spinach-release-version}/spinach-${spinach-release-version}-bin.zip)|[spinach-${spinach-release-version}-bin.zip.md5](https://github.com/mp911de/spinach/releases/download/${spinach-release-version}/spinach-${spinach-release-version}-bin.zip.md5)|[spinach-${spinach-release-version}-bin.zip.asc](https://github.com/mp911de/spinach/releases/download/${spinach-release-version}/spinach-${spinach-release-version}-bin.zip.asc)|
+| spinach binary (tar.gz) | [spinach-${spinach-release-version}-bin.tar.gz](https://github.com/mp911de/spinach/releases/download/${spinach-release-version}/spinach-${spinach-release-version}-bin.tar.gz)|[spinach-${spinach-release-version}-bin.tar.gz.md5](https://github.com/mp911de/spinach/releases/download/${spinach-release-version}/spinach-${spinach-release-version}-bin.tar.gz.md5)|[spinach-${spinach-release-version}-bin.tar.gz.asc](https://github.com/mp911de/spinach/releases/download/${spinach-release-version}/spinach-${spinach-release-version}-bin.tar.gz.asc)|
+
+
+It is essential that you verify the integrity of the downloaded files using the PGP or MD5 signatures.
+
+The PGP signatures can be verified using PGP or GPG. First download the
+[KEYS](http://spinach.paluch.biz/KEYS) as well as the asc signature file for the relevant distribution.
+Make sure you get these files from Maven Central rather
+than from a mirror. Then verify the signatures using
+
+
+    % gpg --import KEYS
+    % gpg --verify spinach-${spinach-release-version}.jar.asc
+
+
+Alternatively, you can verify the MD5 signature on the files. A unix program called md5 or md5sum is included
+in many unix distributions.
+
+
+Previous Releases
+-----------------
+
+  All previous releases of spinach can be found in 
+  [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22biz.paluch.redis%22%20AND%20a%3A%22spinach%22).
+
+
+Using spinach on your classpath
+-----------------
+
+  To use spinach in your application make sure that the jars are in the application's classpath. Add
+  the dependencies listed below to your classpath.
+
+    spinach-${spinach-release-version}.jar
+    lettuce-${lettuce-version}.jar
+    netty-buffer-${netty-version}.jar
+    netty-codec-${netty-version}.Final.jar
+    netty-common-${netty-version}.Final.jar
+    netty-transport-${netty-version}.jar
+    netty-transport-native-epoll-${netty-version}.jar
+    netty-handler-${netty-version}.jar
+    guava-17.0.jar
+    commons-pool2-2.2.jar
+
+You can do this from the command line or a manifest file.

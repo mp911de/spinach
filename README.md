@@ -4,40 +4,64 @@ spinach - A scalable Java Disque client
 
 [![Build Status](https://travis-ci.org/mp911de/spinach.svg)](https://travis-ci.org/mp911de/spinach) [![Coverage Status](https://coveralls.io/repos/mp911de/spinach/badge.svg?branch=master)](https://coveralls.io/r/mp911de/spinach?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/biz.paluch.redis/spinach/badge.svg)](https://maven-badges.herokuapp.com/maven-central/biz.paluch.redis/spinach)
 
+spinach - A scalable Java Disque client
+=============
+
 Spinach is a scalable thread-safe Disque client providing both synchronous and
-asynchronous APIs. Multiple threads may share one connection. Spinach is based on
+asynchronous APIs. Multiple threads may share one connection if they do not use blocking commands. Spinach is based on
 [lettuce](https://github.com/mp911de/lettuce).
 Multiple connections are efficiently managed by the excellent netty NIO
 framework.
 
 * Works with Java 6, 7 and 8
-* synchronous and asynchronous connections
+* [synchronous](https://github.com/mp911de/spinach/wiki/Basic-usage) and [asynchronous](https://github.com/mp911de/spinach/wiki/Asynchronous-Connections) APIs
+* [SSL](https://github.com/mp911de/spinach/wiki/SSL-Connections) and [Unix Domain Socket](https://github.com/mp911de/spinach/wiki/Unix-Domain-Sockets) connections
 * [Codecs](https://github.com/mp911de/lettuce/wiki/Codecs) (for UTF8/bit/JSON etc. representation of your data)
 
+See the [Wiki](https://github.com/mp911de/spinach/wiki) for more docs.
 
-Maven Artifacts/Download
+Communication
+---------------
+
+* [Github Issues](https://github.com/mp911de/spinach/issues)
+
+
+Documentation
+---------------
+
+* [Wiki](https://github.com/mp911de/spinach/wiki)
+* [Javadoc](http://spinach.paluch.biz/docs/api/releases/latest/)
+
+Binaries/Download
 ----------------
 
-Currently there are no releases of spinach are available in the maven central repository. You can obtain
-the library from https://oss.sonatype.org/content/repositories/snapshots/
+Binaries and dependency information for Maven, Ivy, Gradle and others can be found at http://search.maven.org.
+
+Releases of spinach are available in the maven central repository. Take also a look at the [Download](https://github.com/mp911de/spinach/wiki/Download) page in the [Wiki](https://github.com/mp911de/lettuce/wiki).
+
+Example for Maven:
 
 ```xml
 <dependency>
   <groupId>biz.paluch.redis</groupId>
   <artifactId>spinach</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>x.y.z</version>
 </dependency>
 ```
+
+All versions: [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22biz.paluch.redis%22%20AND%20a%3A%spinach%22)
+
+Snapshots: [Sonatype OSS Repository](https://oss.sonatype.org/#nexus-search;gav~biz.paluch.redis~spinach~~~) 
 
 
 Basic Usage
 -----------
 
 ```java
-DisqueClient client = new DisqueClient("localhost")
-DisqueConnection<String, String> connection = client.connect()
+DisqueClient client = new DisqueClient("host");
+DisqueConnection<String, String> connection = client.connect().sync();
 DisqueCommands<String, String> sync = connection.sync();
-String jobId = sync.addjob("queue", "body", 1, SECONDS);
+String jobId = sync.addjob("queue", "body", 1, TimeUnit.MINUTES);
   
 Job<String, String> job = sync.getjob("queue");
 connection.ackjob(job.getId());
@@ -61,10 +85,10 @@ Asynchronous API
 ------------------------
 
 ```java
-DisqueConnection<String, String> connection = client.connect()
-DisqueAsyncCommands<String, String> sync = connection.sync();
-RedisFuture<String> jobId1 = async.addjob("queue", "body1", 1, SECONDS)
-RedisFuture<String> jobId2 = async.addjob("queue", "body2", 1, SECONDS)
+DisqueConnection<String, String> connection = client.connect();
+DisqueAsyncCommands<String, String>  async = connection.async();
+RedisFuture<String> jobId1 = async.addjob("queue", "body1", 1, SECONDS);
+RedisFuture<String> jobId2 = async.addjob("queue", "body2", 1, SECONDS);
 
 async.awaitAll(jobId1, jobId2) == true
 

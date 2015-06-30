@@ -1,17 +1,18 @@
               spinach 0.1 RELEASE NOTES
 
-This is the initial spinach release with very basic support.
-
-spinach is also on Gitter. If you need any support, meet lettuce at https://gitter.im/mp911de/spinach
+This is the initial spinach release with basic support.
 
 Features
 ------------
 * Sync and Async API
 * SSL Support (over stunnel)
-* Cluster-Support
+* Unix domain sockets (linux-x86_64 only)
+* Cluster-Support (connect to one node with the ability to provide a list of nodes)
 
 spinach requires a minimum of Java 8 to build and Java 6 run. It is tested continuously against Disque.
 
-For complete information on lettuce see the website:
+For complete information on spinach see the website:
 
 * http://github.com/mp911de/spinach
+* http://github.com/mp911de/spinach/wiki
+* http://spinach.paluch.biz/
