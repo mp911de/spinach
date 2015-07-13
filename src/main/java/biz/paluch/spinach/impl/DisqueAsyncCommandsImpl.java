@@ -130,18 +130,38 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     }
 
     @Override
-    public RedisFuture<KeyScanCursor<K>> qscan(ScanArgs scanArgs) {
+    public RedisFuture<KeyScanCursor<K>> qscan(QScanArgs scanArgs) {
         return dispatch(commandBuilder.qscan(null, scanArgs));
     }
 
     @Override
-    public RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor, ScanArgs scanArgs) {
+    public RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor, QScanArgs scanArgs) {
         return dispatch(commandBuilder.qscan(scanCursor, scanArgs));
     }
 
     @Override
     public RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor) {
         return dispatch(commandBuilder.qscan(scanCursor, null));
+    }
+
+    @Override
+    public RedisFuture<KeyScanCursor<String>> jscan() {
+        return dispatch(commandBuilder.jscan(null, null));
+    }
+
+    @Override
+    public RedisFuture<KeyScanCursor<String>> jscan(JScanArgs<K> scanArgs) {
+        return dispatch(commandBuilder.jscan(null, scanArgs));
+    }
+
+    @Override
+    public RedisFuture<KeyScanCursor<String>> jscan(ScanCursor scanCursor, JScanArgs<K> scanArgs) {
+        return dispatch(commandBuilder.jscan(scanCursor, scanArgs));
+    }
+
+    @Override
+    public RedisFuture<KeyScanCursor<String>> jscan(ScanCursor scanCursor) {
+        return dispatch(commandBuilder.jscan(scanCursor, null));
     }
 
     public <T> RedisCommand<K, V, T> dispatch(RedisCommand<K, V, T> cmd) {

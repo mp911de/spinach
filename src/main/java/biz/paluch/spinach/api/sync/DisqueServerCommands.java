@@ -7,7 +7,7 @@ import biz.paluch.spinach.api.CommandType;
 import com.lambdaworks.redis.KillArgs;
 
 /**
- * Synchronous executed commands for Server Control.
+ * Synchronous executed commands related with Disque Server Control.
  * 
  * @param <K> Key type.
  * @param <V> Value type.

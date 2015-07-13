@@ -9,7 +9,7 @@ import com.lambdaworks.redis.protocol.CommandArgs;
  * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public class ScanArgs {
+public class QScanArgs {
 
     private Long count;
     private Integer minlen;
@@ -79,6 +79,12 @@ public class ScanArgs {
 
         }
 
+        /**
+         * Limit result to {@code count} items.
+         *
+         * @param count number of items
+         * @return the current builder
+         */
         public Builder count(long count) {
             this.count = count;
             return this;
@@ -99,14 +105,35 @@ public class ScanArgs {
             return this;
         }
 
+        /**
+         * Enable blocking loop mode.
+         *
+         * @return the current builder
+         */
+        public Builder busyloop() {
+            return busyloop(true);
+        }
+
+        /**
+         * Enable/disable blocking loop mode
+         *
+         * @param busyloop {@literal true} or {@literal false}
+         * @return the current builder
+         */
         public Builder busyloop(boolean busyloop) {
             this.busyloop = busyloop;
             return this;
         }
 
-        public ScanArgs build() {
 
-            ScanArgs result = new ScanArgs();
+        /**
+         * Build an instance of {@link QScanArgs}
+         *
+         * @return a new instance of {@link QScanArgs}
+         */
+        public QScanArgs build() {
+
+            QScanArgs result = new QScanArgs();
             result.setBusyloop(busyloop);
             result.setMinlen(minlen);
             result.setMaxlen(maxlen);

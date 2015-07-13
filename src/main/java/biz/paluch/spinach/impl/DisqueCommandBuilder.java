@@ -5,12 +5,10 @@ import static biz.paluch.spinach.api.CommandType.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import biz.paluch.spinach.api.AddJobArgs;
-import biz.paluch.spinach.api.CommandKeyword;
-import biz.paluch.spinach.api.Job;
-import biz.paluch.spinach.api.ScanArgs;
+import biz.paluch.spinach.api.*;
 import biz.paluch.spinach.output.JobListOutput;
 import biz.paluch.spinach.output.JobOutput;
+import biz.paluch.spinach.output.StringScanOutput;
 
 import com.lambdaworks.redis.KeyScanCursor;
 import com.lambdaworks.redis.KillArgs;
@@ -148,7 +146,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(WORKING, new IntegerOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, KeyScanCursor<K>> qscan(ScanCursor scanCursor, ScanArgs scanArgs) {
+    public RedisCommand<K, V, KeyScanCursor<K>> qscan(ScanCursor scanCursor, QScanArgs scanArgs) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
         if (scanArgs != null) {
             scanArgs.build(args);
@@ -159,6 +157,22 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         }
 
         return createCommand(QSCAN, new KeyScanOutput<K, V>(codec), args);
+    }
+
+    public RedisCommand<K, V, KeyScanCursor<String>> jscan(ScanCursor scanCursor, JScanArgs<K> scanArgs) {
+
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
+        if (scanArgs != null) {
+            scanArgs.build(args);
+        }
+
+        if (scanCursor != null) {
+            args.add(scanCursor.getCursor());
+        }
+
+        args.add(CommandKeyword.REPLY).add("id");
+
+        return createCommand(JSCAN, new StringScanOutput<K, V>(codec), args);
     }
 
     public Command<K, V, String> auth(String password) {
@@ -304,4 +318,5 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
     public Command<K, V, String> quit() {
         return createCommand(QUIT, new StatusOutput<K, V>(codec));
     }
+
 }

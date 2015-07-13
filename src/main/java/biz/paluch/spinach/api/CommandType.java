@@ -8,7 +8,7 @@ import com.lambdaworks.redis.protocol.ProtocolKeyword;
  */
 public enum CommandType implements ProtocolKeyword {
     // Jobs
-    ADDJOB, GETJOB, ACKJOB, FASTACK, DELJOB, SHOW,
+    ADDJOB, GETJOB, ACKJOB, FASTACK, DELJOB, SHOW, JSCAN,
 
     // Queues
     QLEN, QPEEK, ENQUEUE, DEQUEUE, QSCAN, WORKING,

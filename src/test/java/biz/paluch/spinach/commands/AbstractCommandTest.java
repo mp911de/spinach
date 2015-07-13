@@ -6,14 +6,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import biz.paluch.spinach.DisqueClient;
-import biz.paluch.spinach.TestSettings;
-import biz.paluch.spinach.api.sync.DisqueCommands;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+
+import biz.paluch.spinach.DisqueClient;
+import biz.paluch.spinach.TestSettings;
+import biz.paluch.spinach.api.sync.DisqueCommands;
 
 import com.lambdaworks.redis.KeyValue;
 import com.lambdaworks.redis.ScoredValue;
@@ -73,6 +74,25 @@ public abstract class AbstractCommandTest {
 
     protected Set<String> set(String... args) {
         return new HashSet<String>(Arrays.asList(args));
+    }
+
+    protected void addJobs(int jobsPerQueue, String queue, int queues, String body) {
+
+        for (int i = 0; i < queues; i++) {
+            String queueName = getQueueName(queue, i, queues);
+            for (int j = 0; j < jobsPerQueue; j++) {
+                disque.addjob(queueName, body, 5, TimeUnit.MINUTES);
+            }
+        }
+
+    }
+
+    protected String getQueueName(String prefix, int i, int queues) {
+
+        if (queues != 1) {
+            return prefix + i;
+        }
+        return prefix;
     }
 
 }

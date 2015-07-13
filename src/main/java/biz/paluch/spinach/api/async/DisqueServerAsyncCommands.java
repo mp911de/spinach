@@ -8,7 +8,7 @@ import com.lambdaworks.redis.KillArgs;
 import com.lambdaworks.redis.RedisFuture;
 
 /**
- * Synchronous executed commands for Server Control.
+ * Asynchronous executed commands related with Disque Server Control.
  * 
  * @param <K> Key type.
  * @param <V> Value type.
