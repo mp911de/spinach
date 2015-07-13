@@ -74,7 +74,6 @@ public class QueueCommandTest extends AbstractCommandTest {
 
         KeyScanCursor<String> result = disque.qscan();
         assertThat(result.getKeys()).hasSize(100);
-        assertThat(result.isFinished()).isFalse();
     }
 
     @Test
