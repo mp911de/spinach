@@ -26,11 +26,6 @@ class DisqueCommand<K, V, T> extends Command<K, V, T> {
         this.type = type;
     }
 
-    public DisqueCommand(ProtocolKeyword type, CommandOutput<K, V, T> output, DisqueCommandArgs<K, V> args, boolean multi) {
-        super(type, output, args, multi);
-        this.type = type;
-    }
-
     public T get() throws ExecutionException {
         try {
             this.latch.await();

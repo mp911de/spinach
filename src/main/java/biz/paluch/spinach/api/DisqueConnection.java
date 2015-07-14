@@ -3,6 +3,7 @@ package biz.paluch.spinach.api;
 import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.api.async.DisqueAsyncCommands;
+import biz.paluch.spinach.api.rx.DisqueReactiveCommands;
 import biz.paluch.spinach.api.sync.DisqueCommands;
 
 import com.lambdaworks.redis.ClientOptions;
@@ -34,6 +35,13 @@ public interface DisqueConnection<K, V> {
      * @return the asynchronous API for the underlying connection.
      */
     DisqueAsyncCommands<K, V> async();
+
+    /**
+     * Returns the {@link DisqueReactiveCommands} API for the current connection. Does not create a new connection.
+     *
+     * @return the reactive API for the underlying connection.
+     */
+    DisqueReactiveCommands<K, V> reactive();
 
     /**
      * Set the default command timeout for this connection.

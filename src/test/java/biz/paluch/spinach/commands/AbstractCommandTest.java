@@ -6,18 +6,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import biz.paluch.spinach.DisqueClient;
+import biz.paluch.spinach.TestSettings;
+import biz.paluch.spinach.api.sync.DisqueCommands;
+import com.lambdaworks.redis.KeyValue;
+import com.lambdaworks.redis.ScoredValue;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-
-import biz.paluch.spinach.DisqueClient;
-import biz.paluch.spinach.TestSettings;
-import biz.paluch.spinach.api.sync.DisqueCommands;
-
-import com.lambdaworks.redis.KeyValue;
-import com.lambdaworks.redis.ScoredValue;
 
 public abstract class AbstractCommandTest {
     public static final String host = TestSettings.host();
@@ -93,6 +91,27 @@ public abstract class AbstractCommandTest {
             return prefix + i;
         }
         return prefix;
+    }
+
+    public abstract class WithPasswordRequired {
+        protected abstract void run(DisqueClient client) throws Exception;
+
+        public WithPasswordRequired() throws Exception {
+            try {
+                disque.configSet("requirepass", passwd);
+                disque.auth(passwd);
+
+                DisqueClient client = getDisqueClient();
+                try {
+                    run(client);
+                } finally {
+                    client.shutdown(100, 100, TimeUnit.MILLISECONDS);
+                }
+            } finally {
+
+                disque.configSet("requirepass", "");
+            }
+        }
     }
 
 }

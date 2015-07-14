@@ -9,7 +9,6 @@ import biz.paluch.spinach.api.*;
 import biz.paluch.spinach.output.JobListOutput;
 import biz.paluch.spinach.output.JobOutput;
 import biz.paluch.spinach.output.StringScanOutput;
-
 import com.lambdaworks.redis.KeyScanCursor;
 import com.lambdaworks.redis.KillArgs;
 import com.lambdaworks.redis.ScanCursor;
@@ -17,7 +16,6 @@ import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.output.*;
 import com.lambdaworks.redis.protocol.Command;
 import com.lambdaworks.redis.protocol.CommandType;
-import com.lambdaworks.redis.protocol.RedisCommand;
 
 /**
  * @param <K>
@@ -30,7 +28,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         super(codec);
     }
 
-    public RedisCommand<K, V, String> addjob(K queue, V job, long duration, TimeUnit timeUnit, AddJobArgs addJobArgs) {
+    public Command<K, V, String> addjob(K queue, V job, long duration, TimeUnit timeUnit, AddJobArgs addJobArgs) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).addKey(queue).addValue(job);
         if (timeUnit != null) {
             args.add(timeUnit.toMillis(duration));
@@ -45,7 +43,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(ADDJOB, new StatusOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, Job<K, V>> getjob(long duration, TimeUnit timeUnit, K... queues) {
+    public Command<K, V, Job<K, V>> getjob(long duration, TimeUnit timeUnit, K... queues) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
         if (timeUnit != null) {
             args.add(CommandKeyword.TIMEOUT).add(timeUnit.toMillis(duration));
@@ -56,7 +54,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(GETJOB, new JobOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, List<Job<K, V>>> getjobs(long count, long duration, TimeUnit timeUnit, K... queues) {
+    public Command<K, V, List<Job<K, V>>> getjobs(long count, long duration, TimeUnit timeUnit, K... queues) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
         if (timeUnit != null && duration > 0) {
             args.add(CommandKeyword.TIMEOUT).add(timeUnit.toMillis(duration));
@@ -71,7 +69,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(GETJOB, new JobListOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, String> debugFlushall() {
+    public Command<K, V, String> debugFlushall() {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
 
         args.add(CommandKeyword.FLUSHALL);
@@ -79,25 +77,25 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(DEBUG, new StatusOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, Long> ackjob(String[] jobIds) {
+    public Command<K, V, Long> ackjob(String[] jobIds) {
         DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(ACKJOB, new IntegerOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, Long> enqueue(String[] jobIds) {
+    public Command<K, V, Long> enqueue(String[] jobIds) {
         DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(ENQUEUE, new IntegerOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, Long> dequeue(String[] jobIds) {
+    public Command<K, V, Long> dequeue(String[] jobIds) {
         DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(DEQUEUE, new IntegerOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, Long> deljob(String[] jobIds) {
+    public Command<K, V, Long> deljob(String[] jobIds) {
         DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(DELJOB, new IntegerOutput<K, V>(codec), args);
@@ -112,41 +110,41 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return args;
     }
 
-    public RedisCommand<K, V, Long> fastack(String[] jobIds) {
+    public Command<K, V, Long> fastack(String[] jobIds) {
         DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(FASTACK, new IntegerOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, Long> qlen(K queue) {
+    public Command<K, V, Long> qlen(K queue) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).addKey(queue);
 
         return createCommand(QLEN, new IntegerOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, List<Job<K, V>>> qpeek(K queue, long count) {
+    public Command<K, V, List<Job<K, V>>> qpeek(K queue, long count) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).addKey(queue).add(count);
 
         return createCommand(QPEEK, new JobListOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, List<Object>> hello() {
+    public Command<K, V, List<Object>> hello() {
         return createCommand(HELLO, new NestedMultiOutput<K, V>(codec));
     }
 
-    public RedisCommand<K, V, List<Object>> show(String jobId) {
+    public Command<K, V, List<Object>> show(String jobId) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(jobId);
 
         return createCommand(SHOW, new NestedMultiOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, Long> working(String jobId) {
+    public Command<K, V, Long> working(String jobId) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(jobId);
 
         return createCommand(WORKING, new IntegerOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, KeyScanCursor<K>> qscan(ScanCursor scanCursor, QScanArgs scanArgs) {
+    public Command<K, V, KeyScanCursor<K>> qscan(ScanCursor scanCursor, QScanArgs scanArgs) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
         if (scanArgs != null) {
             scanArgs.build(args);
@@ -159,7 +157,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(QSCAN, new KeyScanOutput<K, V>(codec), args);
     }
 
-    public RedisCommand<K, V, KeyScanCursor<String>> jscan(ScanCursor scanCursor, JScanArgs<K> scanArgs) {
+    public Command<K, V, KeyScanCursor<String>> jscan(ScanCursor scanCursor, JScanArgs<K> scanArgs) {
 
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
         if (scanArgs != null) {

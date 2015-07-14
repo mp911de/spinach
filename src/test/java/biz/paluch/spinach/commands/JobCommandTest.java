@@ -180,7 +180,8 @@ public class JobCommandTest extends AbstractCommandTest {
 
         addJobs(1, "q", 120, value);
 
-        KeyScanCursor<String> result = disque.jscan(JScanArgs.builder().queue("q13").build());
+        KeyScanCursor<String> result = disque.jscan(JScanArgs.builder().queue("q13").busyloop()
+                .jobstates(JScanArgs.JobState.QUEUED).build());
         assertThat(result.getKeys()).hasSize(1);
         assertThat(result.isFinished()).isTrue();
 

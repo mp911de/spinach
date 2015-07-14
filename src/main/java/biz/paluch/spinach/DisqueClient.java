@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.api.DisqueConnection;
-import biz.paluch.spinach.impl.DisqueAsyncConnectionImpl;
+import biz.paluch.spinach.impl.DisqueConnectionImpl;
 
 import com.google.common.base.Supplier;
 import com.lambdaworks.redis.AbstractRedisClient;
@@ -114,12 +114,12 @@ public class DisqueClient extends AbstractRedisClient {
         return connect(new Utf8StringCodec(), disqueURI);
     }
 
-    private <K, V> DisqueAsyncConnectionImpl<K, V> connect(RedisCodec<K, V> codec, DisqueURI disqueURI) {
+    private <K, V> DisqueConnectionImpl<K, V> connect(RedisCodec<K, V> codec, DisqueURI disqueURI) {
         BlockingQueue<RedisCommand<K, V, ?>> queue = new LinkedBlockingQueue<RedisCommand<K, V, ?>>();
 
         ClientOptions options = getOptions();
         final CommandHandler<K, V> commandHandler = new CommandHandler<K, V>(options, queue);
-        final DisqueAsyncConnectionImpl<K, V> connection = newDisquelAsyncConnectionImpl(commandHandler, codec, timeout, unit);
+        final DisqueConnectionImpl<K, V> connection = newDisquelAsyncConnectionImpl(commandHandler, codec, timeout, unit);
 
         logger.debug("Trying to get a disque connection for one of: " + disqueURI.getConnectionPoints());
 
@@ -210,9 +210,9 @@ public class DisqueClient extends AbstractRedisClient {
 
     }
 
-    protected <K, V> DisqueAsyncConnectionImpl<K, V> newDisquelAsyncConnectionImpl(CommandHandler<K, V> commandHandler,
+    protected <K, V> DisqueConnectionImpl<K, V> newDisquelAsyncConnectionImpl(CommandHandler<K, V> commandHandler,
             RedisCodec<K, V> codec, long timeout, TimeUnit unit) {
-        return new DisqueAsyncConnectionImpl<K, V>(commandHandler, codec, timeout, unit);
+        return new DisqueConnectionImpl<K, V>(commandHandler, codec, timeout, unit);
     }
 
     private Supplier<SocketAddress> getSocketAddressSupplier(final ConnectionPoint connectionPoint) {

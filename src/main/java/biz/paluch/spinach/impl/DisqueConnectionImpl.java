@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import biz.paluch.spinach.api.CommandType;
 import biz.paluch.spinach.api.DisqueConnection;
 import biz.paluch.spinach.api.async.DisqueAsyncCommands;
+import biz.paluch.spinach.api.rx.DisqueReactiveCommands;
 import biz.paluch.spinach.api.sync.DisqueCommands;
 
 import com.google.common.util.concurrent.MoreExecutors;
@@ -17,7 +18,7 @@ import com.lambdaworks.redis.protocol.RedisCommand;
 import io.netty.channel.ChannelHandler;
 
 /**
- * An thread-safe connection to a disque server. Multiple threads may share one {@link DisqueAsyncConnectionImpl}. A
+ * An thread-safe connection to a disque server. Multiple threads may share one {@link DisqueConnectionImpl}. A
  * {@link com.lambdaworks.redis.protocol.ConnectionWatchdog} monitors each connection and reconnects automatically until
  * {@link #close} is called. All pending commands will be (re)sent after successful reconnection.
  *
@@ -27,11 +28,12 @@ import io.netty.channel.ChannelHandler;
  */
 
 @ChannelHandler.Sharable
-public class DisqueAsyncConnectionImpl<K, V> extends RedisChannelHandler<K, V> implements DisqueConnection<K, V> {
+public class DisqueConnectionImpl<K, V> extends RedisChannelHandler<K, V> implements DisqueConnection<K, V> {
 
     protected RedisCodec<K, V> codec;
     protected DisqueCommands<K, V> sync;
     protected DisqueAsyncCommandsImpl<K, V> async;
+    protected DisqueReactiveCommandsImpl<K, V> reactive;
 
     private char[] password;
 
@@ -43,7 +45,7 @@ public class DisqueAsyncConnectionImpl<K, V> extends RedisChannelHandler<K, V> i
      * @param timeout Maximum time to wait for a response.
      * @param unit Unit of time for the timeout.
      */
-    public DisqueAsyncConnectionImpl(RedisChannelWriter<K, V> writer, RedisCodec<K, V> codec, long timeout, TimeUnit unit) {
+    public DisqueConnectionImpl(RedisChannelWriter<K, V> writer, RedisCodec<K, V> codec, long timeout, TimeUnit unit) {
         super(writer, timeout, unit);
         this.codec = codec;
     }
@@ -61,12 +63,30 @@ public class DisqueAsyncConnectionImpl<K, V> extends RedisChannelHandler<K, V> i
     }
 
     /**
-     * Create a new instance of {@link DisqueAsyncCommandsImpl}. Can be overriden to extend.
+     * Create a new instance of {@link DisqueAsyncCommandsImpl}. Can be overridden to extend.
      *
      * @return a new instance
      */
     protected DisqueAsyncCommandsImpl<K, V> newDisqueAsyncCommandsImpl() {
         return new DisqueAsyncCommandsImpl<K, V>(this, codec);
+    }
+
+    @Override
+    public DisqueReactiveCommands<K, V> reactive() {
+        if (reactive == null) {
+            reactive = newDisqueReactiveCommandsImpl();
+        }
+
+        return reactive;
+    }
+
+    /**
+     * Create a new instance of {@link DisqueReactiveCommandsImpl}. Can be overridden to extend.
+     *
+     * @return a new instance
+     */
+    protected DisqueReactiveCommandsImpl<K, V> newDisqueReactiveCommandsImpl() {
+        return new DisqueReactiveCommandsImpl<K, V>(this, codec);
     }
 
     public DisqueCommands<K, V> sync() {
@@ -93,12 +113,11 @@ public class DisqueAsyncConnectionImpl<K, V> extends RedisChannelHandler<K, V> i
             final DisqueCommand<K, V, T> local = (DisqueCommand<K, V, T>) cmd;
 
             if (local.getType() == CommandType.AUTH) {
-
                 local.addListener(new Runnable() {
                     @Override
                     public void run() {
                         if ("OK".equals(local.getOutput().get())) {
-                            DisqueAsyncConnectionImpl.this.password = local.getArgs().getStrings().get(0).toCharArray();
+                            DisqueConnectionImpl.this.password = local.getArgs().getStrings().get(0).toCharArray();
                         }
                     }
                 }, MoreExecutors.sameThreadExecutor());

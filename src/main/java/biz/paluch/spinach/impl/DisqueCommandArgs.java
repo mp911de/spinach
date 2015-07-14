@@ -1,7 +1,6 @@
 package biz.paluch.spinach.impl;
 
 import java.util.List;
-import java.util.Map;
 
 import com.google.common.collect.Lists;
 import com.lambdaworks.redis.codec.RedisCodec;
@@ -48,22 +47,7 @@ class DisqueCommandArgs<K, V> extends CommandArgs<K, V> {
     }
 
     @Override
-    public DisqueCommandArgs<K, V> addValues(V... values) {
-        return (DisqueCommandArgs<K, V>) super.addValues(values);
-    }
-
-    @Override
-    public DisqueCommandArgs<K, V> add(Map<K, V> map) {
-        return (DisqueCommandArgs<K, V>) super.add(map);
-    }
-
-    @Override
     public DisqueCommandArgs<K, V> add(long n) {
-        return (DisqueCommandArgs<K, V>) super.add(n);
-    }
-
-    @Override
-    public DisqueCommandArgs<K, V> add(double n) {
         return (DisqueCommandArgs<K, V>) super.add(n);
     }
 

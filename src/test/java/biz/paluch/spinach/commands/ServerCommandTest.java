@@ -19,6 +19,7 @@ import com.lambdaworks.redis.models.command.CommandDetailParser;
 
 public class ServerCommandTest extends AbstractCommandTest {
 
+
     @Test
     public void bgrewriteaof() throws Exception {
         String msg = "Background append only file rewriting";
