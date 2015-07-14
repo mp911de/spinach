@@ -1,6 +1,6 @@
 package biz.paluch.spinach.commands.rx;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.TimeUnit;
 
@@ -42,6 +42,7 @@ public class RxJobCommandTest extends JobCommandTest {
 
         assertThat(qlen).isEqualTo(1);
 
+        final DisqueReactiveCommands<String, String> rx = client.connect().reactive();
         rx.getjob(queue).flatMap(new Func1<Job<String, String>, Observable<Long>>() {
             @Override
             public Observable<Long> call(Job<String, String> job) {

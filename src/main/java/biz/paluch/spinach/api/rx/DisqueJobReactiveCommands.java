@@ -3,12 +3,13 @@ package biz.paluch.spinach.api.rx;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import rx.Observable;
 import biz.paluch.spinach.api.AddJobArgs;
 import biz.paluch.spinach.api.JScanArgs;
 import biz.paluch.spinach.api.Job;
+
 import com.lambdaworks.redis.KeyScanCursor;
 import com.lambdaworks.redis.ScanCursor;
-import rx.Observable;
 
 /**
  * Reactive commands related with Disque Jobs.
@@ -125,7 +126,7 @@ public interface DisqueJobReactiveCommands<K, V> {
     Observable<List<Object>> show(String jobId);
 
     /**
-     * /** Incrementally iterate all the existing queues in the local node returning the job id's.
+     * Incrementally iterate all the existing queues in the local node returning the job id's.
      *
      * @return KeyScanCursor&lt;K&gt; scan cursor.
      */

@@ -1,18 +1,31 @@
 spinach - A scalable Java Disque client
 =============
 
-Spinach is a scalable thread-safe Disque client providing both synchronous and
-asynchronous APIs. Multiple threads may share one connection if they do not use blocking commands. Spinach is based on
+Spinach is a scalable thread-safe Disque client providing synchronous asynchronous and reactive APIs. 
+Multiple threads may share one connection if they do not use blocking commands. Spinach is based on
 [lettuce](https://github.com/mp911de/lettuce).
-Multiple connections are efficiently managed by the excellent netty NIO
+Connections are efficiently managed by the excellent netty NIO
 framework.
 
 * Works with Java 6, 7 and 8
-* [synchronous](https://github.com/mp911de/spinach/wiki/Basic-usage) and [asynchronous](https://github.com/mp911de/spinach/wiki/Asynchronous-Connections) APIs
+* [synchronous](https://github.com/mp911de/spinach/wiki/Basic-usage), [asynchronous](https://github.com/mp911de/spinach/wiki/Asynchronous-API) and [reactive](https://github.com/mp911de/spinach/wiki/Reactive-API) APIs
 * [SSL](https://github.com/mp911de/spinach/wiki/SSL-Connections) and [Unix Domain Socket](https://github.com/mp911de/spinach/wiki/Unix-Domain-Sockets) connections
 * [Codecs](https://github.com/mp911de/lettuce/wiki/Codecs) (for UTF8/bit/JSON etc. representation of your data)
 
 See the [Wiki](https://github.com/mp911de/spinach/wiki) for more docs.
+
+
+Communication
+---------------
+
+* [Github Issues](https://github.com/mp911de/spinach/issues)
+
+
+Documentation
+---------------
+
+* [Wiki](https://github.com/mp911de/spinach/wiki)
+* [Javadoc](http://spinach.paluch.biz/apidocs/)
 
 Binaries/Download
 ----------------

@@ -14,7 +14,7 @@ Multiple connections are efficiently managed by the excellent netty NIO
 framework.
 
 * Works with Java 6, 7 and 8
-* [synchronous](https://github.com/mp911de/spinach/wiki/Basic-usage) and [asynchronous](https://github.com/mp911de/spinach/wiki/Asynchronous-Connections) APIs
+* [synchronous](https://github.com/mp911de/spinach/wiki/Basic-usage), [asynchronous](https://github.com/mp911de/spinach/wiki/Asynchronous-API) and [reactive](https://github.com/mp911de/spinach/wiki/Reactive-API) APIs
 * [SSL](https://github.com/mp911de/spinach/wiki/SSL-Connections) and [Unix Domain Socket](https://github.com/mp911de/spinach/wiki/Unix-Domain-Sockets) connections
 * [Codecs](https://github.com/mp911de/lettuce/wiki/Codecs) (for UTF8/bit/JSON etc. representation of your data)
 
@@ -116,4 +116,4 @@ Contributing
 -------
 
 Github is for social coding: if you want to write code, I encourage contributions through pull requests from forks of this repository. 
-Create Github tickets for bugs and new features and comment on the ones that you are interested in.
+Create Github tickets for bugs and new features and comment on the ones that you are interested in and take a look into [CONTRIBUTING.md](https://github.com/mp911de/spinach/tree/master/CONTRIBUTING.md)
