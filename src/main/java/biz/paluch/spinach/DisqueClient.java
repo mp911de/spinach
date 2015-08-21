@@ -2,9 +2,11 @@ package biz.paluch.spinach;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.copyOf;
 
 import java.net.ConnectException;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -114,17 +116,19 @@ public class DisqueClient extends AbstractRedisClient {
         return connect(new Utf8StringCodec(), disqueURI);
     }
 
-    private <K, V> DisqueConnectionImpl<K, V> connect(RedisCodec<K, V> codec, DisqueURI disqueURI) {
+    private <K, V> DisqueConnectionImpl<K, V> connect(RedisCodec<K, V> codec, final DisqueURI disqueURI) {
         BlockingQueue<RedisCommand<K, V, ?>> queue = new LinkedBlockingQueue<RedisCommand<K, V, ?>>();
+
+        checkArgument(!disqueURI.getConnectionPoints().isEmpty(), "No connection points specified");
 
         ClientOptions options = getOptions();
         final CommandHandler<K, V> commandHandler = new CommandHandler<K, V>(options, queue);
         final DisqueConnectionImpl<K, V> connection = newDisquelAsyncConnectionImpl(commandHandler, codec, timeout, unit);
 
-        logger.debug("Trying to get a disque connection for one of: " + disqueURI.getConnectionPoints());
+        logger.debug("Trying to get a Disque connection for one of: " + disqueURI.getConnectionPoints());
 
         ConnectionBuilder connectionBuilder;
-        RedisURI redisURI = new RedisURI();
+        final RedisURI redisURI = new RedisURI();
         toRedisURI(disqueURI, null, redisURI);
         if (disqueURI.isSsl()) {
             connectionBuilder = SslConnectionBuilder.sslConnectionBuilder().ssl(redisURI);
@@ -137,23 +141,31 @@ public class DisqueClient extends AbstractRedisClient {
 
         boolean connected = false;
         Exception causingException = null;
-        boolean first = true;
 
         validateUrisAreOfSameConnectionType(disqueURI.getConnectionPoints());
-        for (ConnectionPoint connectionPoint : disqueURI.getConnectionPoints()) {
-            toRedisURI(disqueURI, connectionPoint, redisURI);
-            if (first) {
-                channelType(connectionBuilder, connectionPoint);
-                first = false;
+
+        int connectionAttempts = disqueURI.getConnectionPoints().size();
+        final Supplier<ConnectionPoint> connectionPointSupplier = new RoundRobinConnectionPointSupplier(
+                copyOf(disqueURI.getConnectionPoints()));
+
+        channelType(connectionBuilder, disqueURI.getConnectionPoints().get(0));
+        connectionBuilder.socketAddressSupplier(new Supplier<SocketAddress>() {
+            @Override
+            public SocketAddress get() {
+
+                ConnectionPoint connectionPoint = connectionPointSupplier.get();
+                toRedisURI(disqueURI, connectionPoint, redisURI);
+                return getSocketAddress(connectionPoint);
             }
-            connectionBuilder.socketAddressSupplier(getSocketAddressSupplier(connectionPoint));
-            logger.debug("Connecting to disque, address: " + getSocketAddress(connectionPoint));
+        });
+
+        for (int i = 0; i < connectionAttempts; i++) {
             try {
                 initializeChannel(connectionBuilder);
                 connected = true;
                 break;
             } catch (Exception e) {
-                logger.warn("Cannot connect disque " + connectionPoint + ": " + e.toString());
+                logger.warn(e.getMessage());
                 causingException = e;
                 if (e instanceof ConnectException) {
                     continue;
@@ -171,7 +183,7 @@ public class DisqueClient extends AbstractRedisClient {
         }
 
         if (!connected) {
-            throw new RedisConnectionException("Cannot connect to disque: " + disqueURI, causingException);
+            throw new RedisConnectionException("Cannot connect to Disque: " + disqueURI, causingException);
         }
 
         return connection;
@@ -215,18 +227,7 @@ public class DisqueClient extends AbstractRedisClient {
         return new DisqueConnectionImpl<K, V>(commandHandler, codec, timeout, unit);
     }
 
-    private Supplier<SocketAddress> getSocketAddressSupplier(final ConnectionPoint connectionPoint) {
-        return new Supplier<SocketAddress>() {
-            @Override
-            public SocketAddress get() {
-
-                return getSocketAddress(connectionPoint);
-            }
-
-        };
-    }
-
-    private SocketAddress getSocketAddress(ConnectionPoint connectionPoint) {
+    private static SocketAddress getSocketAddress(ConnectionPoint connectionPoint) {
         if (connectionPoint instanceof DisqueURI.DisqueSocket) {
             return ((DisqueURI.DisqueSocket) connectionPoint).getResolvedAddress();
         }
@@ -244,4 +245,41 @@ public class DisqueClient extends AbstractRedisClient {
                 "DisqueURI is not available. Use DisqueClient(Host), DisqueClient(Host, Port) or DisqueClient(DisqueURI) to construct your client.");
     }
 
+    /**
+     * Round-Robin socket address supplier. Connection points are iterated circular without an end.
+     */
+    static class RoundRobinConnectionPointSupplier implements Supplier<ConnectionPoint> {
+
+        private final Collection<? extends ConnectionPoint> connectionPoint;
+        private ConnectionPoint offset;
+
+        public RoundRobinConnectionPointSupplier(Collection<? extends ConnectionPoint> connectionPoints) {
+            this(connectionPoints, null);
+        }
+
+        public RoundRobinConnectionPointSupplier(Collection<? extends ConnectionPoint> connectionPoints, ConnectionPoint offset) {
+            this.connectionPoint = connectionPoints;
+            this.offset = offset;
+        }
+
+        @Override
+        public ConnectionPoint get() {
+
+            if (offset != null) {
+                boolean accept = false;
+                for (ConnectionPoint point : connectionPoint) {
+                    if (point == offset) {
+                        accept = true;
+                        continue;
+                    }
+
+                    if (accept) {
+                        return offset = point;
+                    }
+                }
+            }
+
+            return offset = connectionPoint.iterator().next();
+        }
+    }
 }

@@ -4,6 +4,10 @@ import static com.google.code.tempusfugit.temporal.Duration.*;
 import static com.google.code.tempusfugit.temporal.WaitFor.*;
 import static org.assertj.core.api.Assertions.*;
 
+import java.net.ConnectException;
+import java.nio.channels.UnresolvedAddressException;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -147,9 +151,25 @@ public class ClientTest extends AbstractCommandTest {
     @Test
     public void connectFailure() throws Exception {
         DisqueClient client = new DisqueClient("invalid");
-        exception.expect(RedisException.class);
-        exception.expectMessage("Cannot connect to disque");
-        client.connect();
+        try {
+            client.connect();
+        } catch (Exception e) {
+            assertThat(e).hasRootCauseExactlyInstanceOf(UnresolvedAddressException.class);
+        }
+
+        client.shutdown(1, 1, TimeUnit.MILLISECONDS);
+    }
+
+    @Test
+    public void connectConnectionRefused() throws Exception {
+        DisqueClient client = new DisqueClient(TestSettings.host(), TestSettings.port(999));
+        try {
+            client.connect();
+        } catch (Exception e) {
+            assertThat(e).hasRootCauseExactlyInstanceOf(ConnectException.class);
+            assertThat(e.getCause().getCause()).hasMessageContaining("Connection refused");
+        }
+        client.shutdown(1, 1, TimeUnit.MILLISECONDS);
     }
 
     private class TestConnectionListener implements RedisConnectionStateListener {
