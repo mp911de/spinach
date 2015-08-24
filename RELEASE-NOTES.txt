@@ -1,13 +1,15 @@
-              spinach 0.1 RELEASE NOTES
+              spinach 0.1.1 RELEASE NOTES
 
-This is the initial spinach release with basic support.
+This release fixes a reconnection bug. spinach allows to specify multiple connection
+points. The first working connection point will allow a connection but if the connection
+is down, only the connection point of the broken connection will be used for reconnecting.
+So the reconnect sticks to the broken host/connection point without trying the other
+specified connection points. The current release addresses this issue by using round-robin
+and utilizes all provided connection points for a reconnect.
 
 Features
 ------------
-* Sync and Async API
-* SSL Support (over stunnel)
-* Unix domain sockets (linux-x86_64 only)
-* Cluster-Support (connect to one node with the ability to provide a list of nodes)
+* Reconnect sticks to the last known connection point and does not use additional connection points #7
 
 spinach requires a minimum of Java 8 to build and Java 6 run. It is tested continuously against Disque.
 
