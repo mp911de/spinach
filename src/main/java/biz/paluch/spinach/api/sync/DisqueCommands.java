@@ -12,7 +12,8 @@ import biz.paluch.spinach.api.DisqueConnection;
  * @param <V> Value type.
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public interface DisqueCommands<K, V> extends DisqueJobCommands<K, V>, DisqueQueueCommands<K, V>, DisqueServerCommands<K, V> {
+public interface DisqueCommands<K, V> extends DisqueJobCommands<K, V>, DisqueQueueCommands<K, V>, DisqueServerCommands<K, V>,
+        DisqueClusterCommands<K, V> {
 
     /**
      * Authenticate to the server.

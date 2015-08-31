@@ -301,6 +301,41 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
         return createObservable(commandBuilder.bgrewriteaof());
     }
 
+    @Override
+    public Observable<String> clusterMeet(String ip, int port) {
+        return createObservable(commandBuilder.clusterMeet(ip, port));
+    }
+
+    @Override
+    public Observable<String> clusterForget(String nodeId) {
+        return createObservable(commandBuilder.clusterForget(nodeId));
+    }
+
+    @Override
+    public Observable<String> clusterInfo() {
+        return createObservable(commandBuilder.clusterInfo());
+    }
+
+    @Override
+    public Observable<String> clusterMyId() {
+        return createObservable(commandBuilder.clusterMyId());
+    }
+
+    @Override
+    public Observable<String> clusterNodes() {
+        return createObservable(commandBuilder.clusterNodes());
+    }
+
+    @Override
+    public Observable<String> clusterReset(boolean hard) {
+        return createObservable(commandBuilder.clusterReset(hard));
+    }
+
+    @Override
+    public Observable<String> clusterSaveconfig() {
+        return createObservable(commandBuilder.clusterSaveconfig());
+    }
+
     protected <T> Observable<T> createObservable(final CommandType type, final CommandOutput<K, V, T> output,
             final CommandArgs<K, V> args) {
         return createObservable(new Supplier<Command<K, V, T>>() {

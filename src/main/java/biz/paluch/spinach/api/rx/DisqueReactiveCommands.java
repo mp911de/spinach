@@ -1,7 +1,7 @@
 package biz.paluch.spinach.api.rx;
 
-import biz.paluch.spinach.api.DisqueConnection;
 import rx.Observable;
+import biz.paluch.spinach.api.DisqueConnection;
 
 /**
  * Reactive commands for Disque. This API is thread-safe.
@@ -11,7 +11,7 @@ import rx.Observable;
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public interface DisqueReactiveCommands<K, V> extends DisqueJobReactiveCommands<K, V>, DisqueQueueReactiveCommands<K, V>,
-        DisqueServerReactiveCommands<K, V> {
+        DisqueServerReactiveCommands<K, V>, DisqueClusterReactiveCommands<K, V> {
 
     /**
      * Authenticate to the server.

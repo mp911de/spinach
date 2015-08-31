@@ -17,7 +17,7 @@ public enum CommandType implements ProtocolKeyword {
     BGREWRITEAOF,
 
     // Server commands
-    AUTH, PING, INFO, SHUTDOWN, DEBUG, CONFIG, /* CLUSTER, */CLIENT, SLOWLOG, TIME, COMMAND, /* LATENCY, */HELLO, QUIT;
+    AUTH, PING, INFO, SHUTDOWN, DEBUG, CONFIG, CLUSTER, CLIENT, SLOWLOG, TIME, COMMAND, /* LATENCY, */HELLO, QUIT;
 
     public final byte[] bytes;
 

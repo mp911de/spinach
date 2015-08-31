@@ -11,7 +11,7 @@ import com.lambdaworks.redis.RedisFuture;
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public interface DisqueAsyncCommands<K, V> extends DisqueJobAsyncCommands<K, V>, DisqueQueueAsyncCommands<K, V>,
-        DisqueServerAsyncCommands<K, V> {
+        DisqueServerAsyncCommands<K, V>, DisqueClusterAsyncCommands<K, V> {
 
     /**
      * Authenticate to the server.
