@@ -11,7 +11,7 @@ public enum CommandType implements ProtocolKeyword {
     ADDJOB, GETJOB, ACKJOB, FASTACK, DELJOB, SHOW, JSCAN,
 
     // Queues
-    QLEN, QPEEK, ENQUEUE, DEQUEUE, QSCAN, WORKING,
+    QLEN, QPEEK, ENQUEUE, NACK, DEQUEUE, QSCAN, WORKING,
 
     // AOF
     BGREWRITEAOF,

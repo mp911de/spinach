@@ -85,6 +85,11 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     }
 
     @Override
+    public RedisFuture<Long> nack(String... jobIds) {
+        return dispatch(commandBuilder.nack(jobIds));
+    }
+
+    @Override
     public RedisFuture<Long> deljob(String... jobIds) {
         return dispatch(commandBuilder.deljob(jobIds));
     }

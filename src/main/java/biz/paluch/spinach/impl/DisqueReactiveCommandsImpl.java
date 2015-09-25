@@ -82,6 +82,11 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
+    public Observable<Long> nack(String... jobIds) {
+        return createObservable(commandBuilder.nack(jobIds));
+    }
+
+    @Override
     public Observable<Long> dequeue(String... jobIds) {
         return createObservable(commandBuilder.dequeue(jobIds));
     }

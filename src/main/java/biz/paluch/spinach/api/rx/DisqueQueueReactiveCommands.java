@@ -1,10 +1,11 @@
 package biz.paluch.spinach.api.rx;
 
+import rx.Observable;
 import biz.paluch.spinach.api.Job;
 import biz.paluch.spinach.api.QScanArgs;
+
 import com.lambdaworks.redis.KeyScanCursor;
 import com.lambdaworks.redis.ScanCursor;
-import rx.Observable;
 
 /**
  * Reactive commands related with Disque Queues.
@@ -16,16 +17,26 @@ import rx.Observable;
 public interface DisqueQueueReactiveCommands<K, V> {
 
     /**
-     *
-     * @param jobIds
-     * @return Return the number of jobs actually move from active to queued state
+     * Queue jobs if not already queued.
+     * 
+     * @param jobIds the job Id's
+     * @return the number of jobs actually move from active to queued state
      */
     Observable<Long> enqueue(String... jobIds);
 
     /**
+     * Queue jobs if not already queued and increment the nack counter.
      *
      * @param jobIds the job Id's
-     * @return Return the number of jobs actually moved from queue to active state
+     * @return the number of jobs actually move from active to queued state
+     */
+    Observable<Long> nack(String... jobIds);
+
+    /**
+     * Remove the job from the queue.
+     * 
+     * @param jobIds the job Id's
+     * @return the number of jobs actually moved from queue to active state
      */
     Observable<Long> dequeue(String... jobIds);
 

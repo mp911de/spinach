@@ -96,6 +96,12 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(DEQUEUE, new IntegerOutput<K, V>(codec), args);
     }
 
+    public Command<K, V, Long> nack(String[] jobIds) {
+        DisqueCommandArgs<K, V> args = withJobIds(jobIds);
+
+        return createCommand(NACK, new IntegerOutput<K, V>(codec), args);
+    }
+
     public Command<K, V, Long> deljob(String[] jobIds) {
         DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
