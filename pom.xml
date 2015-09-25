@@ -9,7 +9,7 @@
 
     <groupId>biz.paluch.redis</groupId>
     <artifactId>spinach</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
     <packaging>jar</packaging>
 
     <name>spinach</name>
@@ -53,7 +53,7 @@
         <connection>scm:git:https://github.com/mp911de/spinach.git</connection>
         <developerConnection>scm:git:https://github.com/mp911de/spinach.git</developerConnection>
         <url>http://github.com/mp911de/spinach</url>
-        <tag>HEAD</tag>
+        <tag>0.2</tag>
     </scm>
 
     <prerequisites>
