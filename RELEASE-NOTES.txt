@@ -1,17 +1,22 @@
-              spinach 0.1.1 RELEASE NOTES
+              spinach 0.2 RELEASE NOTES
 
-This release fixes a reconnection bug. spinach allows to specify multiple connection
-points. The first working connection point will allow a connection but if the connection
-is down, only the connection point of the broken connection will be used for reconnecting.
-So the reconnect sticks to the broken host/connection point without trying the other
-specified connection points. The current release addresses this issue by using round-robin
-and utilizes all provided connection points for a reconnect.
+This release addresses minor issues and allows to use lettuce 3.3.Final. It adds support for more Disque commands
+and eases creation of a DisqueURI.
 
-Features
+Enhancements
 ------------
-* Reconnect sticks to the last known connection point and does not use additional connection points #7
+* Provide a Reactive API #4 (shipped with 0.1.1)
+* Implement CLUSTER commands #5 (shipped with 0.1.1)
+* Implement JSCAN command #6 (shipped with 0.1.1)
+* Implement NACK command #11
+* Upgraded lettuce from 3.2.Final to 3.3.Final #13 (Thanks to @pulse00)
 
-spinach requires a minimum of Java 8 to build and Java 6 run. It is tested continuously against Disque.
+Other Changes
+-------------
+* Bump rxjava to 1.0.14
+* Polishing and sugar for DisqueURI
+
+spinach requires a minimum of Java 8 to build and Java 6 run. It is tested continuously against Disque unstable.
 
 For complete information on spinach see the website:
 

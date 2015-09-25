@@ -58,7 +58,7 @@ Basic Usage
 -----------
 
 ```java
-DisqueClient client = new DisqueClient("host");
+DisqueClient client = new DisqueClient(DisqueURI.create("host", 7711));
 DisqueConnection<String, String> connection = client.connect().sync();
 DisqueCommands<String, String> sync = connection.sync();
 String jobId = sync.addjob("queue", "body", 1, TimeUnit.MINUTES);
