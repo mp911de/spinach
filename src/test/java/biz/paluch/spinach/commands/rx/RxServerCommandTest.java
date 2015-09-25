@@ -6,7 +6,6 @@ import org.junit.Test;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 14.07.15 08:28
  */
 public class RxServerCommandTest extends ServerCommandTest {
 

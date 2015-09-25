@@ -7,8 +7,11 @@ import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.output.ScanOutput;
 
 /**
+ * Output handler for string-based {@code SCAN} commands.
+ * 
+ * @param <K> Key type.
+ * @param <V> Value type.
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 13.07.15 12:47
  */
 public class StringScanOutput<K, V> extends ScanOutput<K, V, KeyScanCursor<String>> {
 

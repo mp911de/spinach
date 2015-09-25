@@ -23,7 +23,6 @@ import io.netty.channel.unix.DomainSocketAddress;
  * timeouts within the DisqueURI. Either build your self the object
  * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 3.0
  */
 @SuppressWarnings("serial")
 public class DisqueURI implements Serializable {

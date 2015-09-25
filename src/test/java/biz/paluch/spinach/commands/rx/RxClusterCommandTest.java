@@ -7,7 +7,6 @@ import biz.paluch.spinach.commands.QueueCommandTest;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 14.07.15 08:28
  */
 public class RxClusterCommandTest extends ClusterCommandTest {
 

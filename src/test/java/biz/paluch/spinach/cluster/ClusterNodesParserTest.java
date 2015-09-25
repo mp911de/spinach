@@ -12,7 +12,6 @@ import com.google.common.collect.Sets;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 31.08.15 15:03
  */
 public class ClusterNodesParserTest {
 

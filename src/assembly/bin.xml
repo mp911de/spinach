@@ -30,6 +30,7 @@
         <dependencySet>
             <includes>
                 <include>io.netty:*</include>
+                <include>io.reactivex:*</include>
                 <include>com.google.guava:*</include>
                 <include>org.apache.commons:*</include>
                 <include>biz.paluch.redis:lettuce:*</include>
@@ -39,7 +40,7 @@
         </dependencySet>
         <dependencySet>
             <includes>
-                <include>biz.paluch.redis:lettuce:*:javadoc</include>
+                <include>biz.paluch.redis:spinach:*:javadoc</include>
             </includes>
             <outputDirectory>apidocs</outputDirectory>
             <unpack>true</unpack>

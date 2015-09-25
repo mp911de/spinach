@@ -8,7 +8,8 @@ import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.protocol.CommandOutput;
 
 /**
- *
+ * Output handler for commands returning {@link Job} data structres.
+ * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public class JobOutput<K, V> extends CommandOutput<K, V, Job<K, V>> {

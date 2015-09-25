@@ -30,7 +30,7 @@ Documentation
 ---------------
 
 * [Wiki](https://github.com/mp911de/spinach/wiki)
-* [Javadoc](http://spinach.paluch.biz/docs/api/releases/latest/)
+* [Javadoc](http://spinach.paluch.biz/apidocs/)
 
 Binaries/Download
 ----------------

@@ -1,10 +1,10 @@
 spinach - A scalable Java Disque client
 =============
 
-Spinach is a scalable thread-safe Disque client providing synchronous asynchronous and reactive APIs. 
-Multiple threads may share one connection if they do not use blocking commands. Spinach is based on
+Spinach is a scalable thread-safe Disque client providing both synchronous and
+asynchronous APIs. Multiple threads may share one connection if they do not use blocking commands. Spinach is based on
 [lettuce](https://github.com/mp911de/lettuce).
-Connections are efficiently managed by the excellent netty NIO
+Multiple connections are efficiently managed by the excellent netty NIO
 framework.
 
 * Works with Java 6, 7 and 8

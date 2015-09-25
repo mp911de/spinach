@@ -11,6 +11,8 @@ import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.protocol.CommandOutput;
 
 /**
+ * Output handler for commands returning a {@link List} of {@link Job Jobs} data structres.
+ * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public class JobListOutput<K, V> extends CommandOutput<K, V, List<Job<K, V>>> implements SupportsObservables {

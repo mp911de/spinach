@@ -5,7 +5,6 @@ import org.junit.Before;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 14.07.15 08:28
  */
 public class RxQueueCommandTest extends QueueCommandTest {
 
