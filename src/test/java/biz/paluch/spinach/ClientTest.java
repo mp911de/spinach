@@ -254,6 +254,28 @@ public class ClientTest extends AbstractCommandTest {
     }
 
     @Test
+    public void connectWithHelloClusterConnectionStrategy() throws Exception {
+
+        DisqueURI disqueURI = DisqueURI.Builder.disque(host, port).build();
+
+        DisqueConnection<String, String> connect = client.connect(new Utf8StringCodec(), disqueURI,
+                SocketAddressSupplierFactory.Factories.HELLO_CLUSTER);
+
+        // initial address
+        assertThat(connect.sync().info("server")).contains("tcp_port:" + port);
+        connect.sync().quit();
+
+        // obtained from cluster, may be the same
+        assertThat(connect.sync().info("server")).contains("tcp_port:" + port);
+        connect.sync().quit();
+
+        // obtained from cluster, second cluster node
+        assertThat(connect.sync().info("server")).contains("tcp_port:" + TestSettings.port(1));
+
+        connect.close();
+    }
+
+    @Test
     public void clusterConnectionTest() throws Exception {
 
         int port0 = TestSettings.port(0);

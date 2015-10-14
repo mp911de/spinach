@@ -8,14 +8,14 @@ import biz.paluch.spinach.DisqueURI;
 import com.lambdaworks.redis.ConnectionPoint;
 
 /**
- * Round-Robin socket address supplier. Connection points are iterated circular without an end.
+ * Round-Robin socket address supplier. Connection points are iterated circular/infinitely.
  * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public class RoundRobinSocketAddressSupplier implements SocketAddressSupplier {
 
     protected final Collection<? extends ConnectionPoint> connectionPoint;
-    protected ConnectionPoint offset;
+    protected RoundRobin<? extends ConnectionPoint> roundRobin;
 
     public RoundRobinSocketAddressSupplier(Collection<? extends ConnectionPoint> connectionPoints) {
         this(connectionPoints, null);
@@ -23,31 +23,13 @@ public class RoundRobinSocketAddressSupplier implements SocketAddressSupplier {
 
     public RoundRobinSocketAddressSupplier(Collection<? extends ConnectionPoint> connectionPoints, ConnectionPoint offset) {
         this.connectionPoint = connectionPoints;
-        this.offset = offset;
+        this.roundRobin = new RoundRobin<ConnectionPoint>(connectionPoints, offset);
     }
 
     @Override
     public SocketAddress get() {
-        ConnectionPoint connectionPoint = getConnectionPoint();
+        ConnectionPoint connectionPoint = roundRobin.next();
         return getSocketAddress(connectionPoint);
-    }
-
-    private ConnectionPoint getConnectionPoint() {
-        if (offset != null) {
-            boolean accept = false;
-            for (ConnectionPoint point : connectionPoint) {
-                if (point == offset) {
-                    accept = true;
-                    continue;
-                }
-
-                if (accept) {
-                    return offset = point;
-                }
-            }
-        }
-
-        return offset = connectionPoint.iterator().next();
     }
 
     protected static SocketAddress getSocketAddress(ConnectionPoint connectionPoint) {

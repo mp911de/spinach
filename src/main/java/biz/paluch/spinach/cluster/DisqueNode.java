@@ -13,7 +13,7 @@ import com.lambdaworks.redis.RedisURI;
  * Representation of a redis cluster node.
  * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 3.0
+ * @since 0.2
  */
 @SuppressWarnings("serial")
 public class DisqueNode implements Serializable {

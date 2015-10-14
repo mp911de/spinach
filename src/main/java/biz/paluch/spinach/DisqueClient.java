@@ -12,9 +12,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.api.DisqueConnection;
-import biz.paluch.spinach.impl.DisqueConnectionImpl;
-import biz.paluch.spinach.impl.SocketAddressSupplier;
-import biz.paluch.spinach.impl.SocketAddressSupplierFactory;
+import biz.paluch.spinach.impl.*;
 
 import com.google.common.base.Supplier;
 import com.lambdaworks.redis.*;
@@ -147,17 +145,10 @@ public class DisqueClient extends AbstractRedisClient {
 
         logger.debug("Trying to get a Disque connection for one of: " + disqueURI.getConnectionPoints());
 
-        ConnectionBuilder connectionBuilder;
+
         final RedisURI redisURI = new RedisURI();
         toRedisURI(disqueURI, null, redisURI);
-        if (disqueURI.isSsl()) {
-            connectionBuilder = SslConnectionBuilder.sslConnectionBuilder().ssl(redisURI);
-        } else {
-            connectionBuilder = ConnectionBuilder.connectionBuilder();
-        }
-
-        connectionBuilder.clientOptions(options);
-        connectionBuilder(commandHandler, connection, null, connectionBuilder, redisURI);
+        ConnectionBuilder connectionBuilder = connectionBuilder(disqueURI, options, commandHandler, connection, redisURI);
 
         boolean connected = false;
         Exception causingException = null;
@@ -209,7 +200,29 @@ public class DisqueClient extends AbstractRedisClient {
             throw new RedisConnectionException("Cannot connect to Disque: " + disqueURI, causingException);
         }
 
+        if (socketAddressSupplier instanceof ConnectionAware) {
+            ((ConnectionAware) socketAddressSupplier).setConnection(connection);
+        }
+
+        if (socketAddressSupplier instanceof EventExecutorAware) {
+            ((EventExecutorAware) socketAddressSupplier).setEventExecutor(genericWorkerPool);
+        }
+
         return connection;
+    }
+
+    private <K, V> ConnectionBuilder connectionBuilder(DisqueURI disqueURI, ClientOptions options,
+            CommandHandler<K, V> commandHandler, DisqueConnectionImpl<K, V> connection, RedisURI redisURI) {
+        ConnectionBuilder connectionBuilder;
+        if (disqueURI.isSsl()) {
+            connectionBuilder = SslConnectionBuilder.sslConnectionBuilder().ssl(redisURI);
+        } else {
+            connectionBuilder = ConnectionBuilder.connectionBuilder();
+        }
+
+        connectionBuilder.clientOptions(options);
+        connectionBuilder(commandHandler, connection, null, connectionBuilder, redisURI);
+        return connectionBuilder;
     }
 
     private void validateUrisAreOfSameConnectionType(List<? extends ConnectionPoint> connectionPoints) {
