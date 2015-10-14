@@ -78,6 +78,13 @@ public class JobCommandTest extends AbstractCommandTest {
     }
 
     @Test
+    public void getJobsWithTimeout() throws Exception {
+        List<Job<String, String>> result = disque.getjobs(1, TimeUnit.SECONDS, 1, queue);
+
+        assertThat(result).hasSize(0);
+    }
+
+    @Test
     public void getJobWithoutJob() throws Exception {
 
         assertThat(disque.qlen(queue)).isEqualTo(0);
@@ -110,34 +117,6 @@ public class JobCommandTest extends AbstractCommandTest {
         assertThat(result).isEqualTo(1);
 
         assertThat(disque.qlen(queue)).isEqualTo(0);
-
-    }
-
-
-    @Test
-    public void enqueue() throws Exception {
-
-        String jobid = disque.addjob(queue, value, 2, TimeUnit.SECONDS);
-
-        disque.getjob(queue);
-
-        assertThat(disque.qlen(queue)).isEqualTo(0);
-
-        long result = disque.enqueue(jobid);
-        assertThat(result).isEqualTo(1);
-
-        assertThat(disque.qlen(queue)).isEqualTo(1);
-    }
-
-    @Test
-    public void dequeue() throws Exception {
-
-        String jobid = disque.addjob(queue, value, 2, TimeUnit.SECONDS);
-        long result = disque.dequeue(jobid);
-        assertThat(result).isEqualTo(1);
-
-        assertThat(disque.qlen(queue)).isEqualTo(0);
-
     }
 
     @Test
@@ -148,7 +127,6 @@ public class JobCommandTest extends AbstractCommandTest {
         assertThat(result).isEqualTo(1);
 
         assertThat(disque.qlen(queue)).isEqualTo(0);
-
     }
 
     @Test

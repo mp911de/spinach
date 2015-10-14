@@ -9,7 +9,7 @@
 
     <groupId>biz.paluch.redis</groupId>
     <artifactId>spinach</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>spinach</name>
@@ -43,9 +43,10 @@
         <!-- You need a running redis+sentinel for all tests, therefore disabled by default -->
         <skipTests>true</skipTests>
         <github.site.upload.skip>true</github.site.upload.skip>
-        <spinach-release-version>0.1.1</spinach-release-version>
-        <lettuce-version>3.2.Final</lettuce-version>
+        <spinach-release-version>0.2</spinach-release-version>
+        <lettuce-version>3.3.Final</lettuce-version>
         <netty-version>4.0.28.Final</netty-version>
+        <rxjava-version>1.0.14</rxjava-version>
     </properties>
 
     <scm>
@@ -99,7 +100,7 @@
         <dependency>
             <groupId>io.reactivex</groupId>
             <artifactId>rxjava</artifactId>
-            <version>1.0.12</version>
+            <version>${rxjava-version}</version>
         </dependency>
 
         <dependency>
@@ -348,6 +349,7 @@
                         <link>http://netty.io/4.0/api/</link>
                         <link>http://commons.apache.org/proper/commons-pool/api-2.2/</link>
                         <link>http://docs.guava-libraries.googlecode.com/git/javadoc/</link>
+                        <link>http://reactivex.io/RxJava/javadoc/</link>
                     </links>
                     <additionalparam>-Xdoclint:all -Xdoclint:-html</additionalparam>
                 </configuration>
@@ -476,6 +478,7 @@
                         <link>http://netty.io/4.0/api/</link>
                         <link>http://commons.apache.org/proper/commons-pool/api-2.2/</link>
                         <link>http://docs.guava-libraries.googlecode.com/git/javadoc/</link>
+                        <link>http://reactivex.io/RxJava/javadoc/</link>
                     </links>
                 </configuration>
             </plugin>

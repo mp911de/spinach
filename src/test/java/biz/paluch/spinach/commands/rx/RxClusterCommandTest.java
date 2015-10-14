@@ -1,12 +1,14 @@
 package biz.paluch.spinach.commands.rx;
 
-import biz.paluch.spinach.commands.QueueCommandTest;
+import biz.paluch.spinach.commands.ClusterCommandTest;
 import org.junit.Before;
+
+import biz.paluch.spinach.commands.QueueCommandTest;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public class RxQueueCommandTest extends QueueCommandTest {
+public class RxClusterCommandTest extends ClusterCommandTest {
 
     @Before
     public void openConnection() throws Exception {

@@ -1,5 +1,6 @@
 package biz.paluch.spinach.impl;
 
+import static biz.paluch.spinach.api.CommandKeyword.*;
 import static biz.paluch.spinach.api.CommandType.*;
 
 import java.util.List;
@@ -93,6 +94,12 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(DEQUEUE, new IntegerOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, Long> nack(String[] jobIds) {
+        DisqueCommandArgs<K, V> args = withJobIds(jobIds);
+
+        return createCommand(NACK, new IntegerOutput<K, V>(codec), args);
     }
 
     public Command<K, V, Long> deljob(String[] jobIds) {
@@ -307,6 +314,51 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
 
     public Command<K, V, String> bgrewriteaof() {
         return createCommand(BGREWRITEAOF, new StatusOutput<K, V>(codec));
+    }
+
+    public Command<K, V, String> clusterMeet(String ip, int port) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(MEET).add(ip).add(port);
+        return createCommand(CLUSTER, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clusterForget(String nodeId) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(FORGET).add(nodeId);
+        return createCommand(CLUSTER, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clusterInfo() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(INFO);
+
+        return createCommand(CLUSTER, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clusterMyId() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(CommandType.MYID);
+
+        return createCommand(CLUSTER, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clusterNodes() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(NODES);
+
+        return createCommand(CLUSTER, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clusterReset(boolean hard) {
+
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(RESET);
+        if (hard) {
+            args.add(HARD);
+        } else {
+            args.add(SOFT);
+        }
+        return createCommand(CLUSTER, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clusterSaveconfig() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(SAVECONFIG);
+
+        return createCommand(CLUSTER, new StatusOutput<K, V>(codec), args);
     }
 
     public Command<K, V, String> ping() {

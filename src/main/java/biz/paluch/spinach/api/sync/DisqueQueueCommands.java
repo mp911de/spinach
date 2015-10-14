@@ -4,6 +4,7 @@ import java.util.List;
 
 import biz.paluch.spinach.api.Job;
 import biz.paluch.spinach.api.QScanArgs;
+
 import com.lambdaworks.redis.KeyScanCursor;
 import com.lambdaworks.redis.ScanCursor;
 
@@ -18,16 +19,26 @@ import com.lambdaworks.redis.ScanCursor;
 public interface DisqueQueueCommands<K, V> {
 
     /**
-     *
+     * Queue jobs if not already queued.
+     * 
      * @param jobIds the job Id's
-     * @return Return the number of jobs actually move from active to queued state
+     * @return the number of jobs actually move from active to queued state
      */
     long enqueue(String... jobIds);
 
     /**
-     *
+     * Queue jobs if not already queued and increment the nack counter.
+     * 
      * @param jobIds the job Id's
-     * @return Return the number of jobs actually moved from queue to active state
+     * @return the number of jobs actually move from active to queued state
+     */
+    long nack(String... jobIds);
+
+    /**
+     * Remove the job from the queue.
+     * 
+     * @param jobIds the job Id's
+     * @return the number of jobs actually moved from queue to active state
      */
     long dequeue(String... jobIds);
 

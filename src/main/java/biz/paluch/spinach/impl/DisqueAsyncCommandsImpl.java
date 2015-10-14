@@ -85,6 +85,11 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     }
 
     @Override
+    public RedisFuture<Long> nack(String... jobIds) {
+        return dispatch(commandBuilder.nack(jobIds));
+    }
+
+    @Override
     public RedisFuture<Long> deljob(String... jobIds) {
         return dispatch(commandBuilder.deljob(jobIds));
     }
@@ -301,6 +306,41 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     @Override
     public RedisFuture<String> bgrewriteaof() {
         return dispatch(commandBuilder.bgrewriteaof());
+    }
+
+    @Override
+    public RedisFuture<String> clusterMeet(String ip, int port) {
+        return dispatch(commandBuilder.clusterMeet(ip, port));
+    }
+
+    @Override
+    public RedisFuture<String> clusterForget(String nodeId) {
+        return dispatch(commandBuilder.clusterForget(nodeId));
+    }
+
+    @Override
+    public RedisFuture<String> clusterInfo() {
+        return dispatch(commandBuilder.clusterInfo());
+    }
+
+    @Override
+    public RedisFuture<String> clusterMyId() {
+        return dispatch(commandBuilder.clusterMyId());
+    }
+
+    @Override
+    public RedisFuture<String> clusterNodes() {
+        return dispatch(commandBuilder.clusterNodes());
+    }
+
+    @Override
+    public RedisFuture<String> clusterReset(boolean hard) {
+        return dispatch(commandBuilder.clusterReset(hard));
+    }
+
+    @Override
+    public RedisFuture<String> clusterSaveconfig() {
+        return dispatch(commandBuilder.clusterSaveconfig());
     }
 
     @Override

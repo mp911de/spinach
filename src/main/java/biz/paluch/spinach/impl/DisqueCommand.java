@@ -15,7 +15,6 @@ import com.lambdaworks.redis.protocol.ProtocolKeyword;
  * reports an error while command execution.
  * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 24.06.15 08:06
  */
 class DisqueCommand<K, V, T> extends Command<K, V, T> {
 

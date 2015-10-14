@@ -96,31 +96,31 @@ public interface DisqueJobCommands<K, V> {
      * Evict (and possibly remove from queue) all the jobs in memeory matching the specified job IDs. Jobs are evicted whatever
      * their state is, since this command is mostly used inside the AOF or for debugging purposes.
      *
-     * @param jobIds
-     * @return The return value is the number of jobs evicted
+     * @param jobIds the job Id's
+     * @return the number of jobs evicted
      */
     long deljob(String... jobIds);
 
     /**
      * Set job state as acknowledged, if the job does not exist creates a fake job just to hold the acknowledge.
      *
-     * @param jobIds
-     * @return The command returns the number of jobs already known and that were already not in the ACKED state.
+     * @param jobIds the job Id's
+     * @return the number of jobs already known and that were already not in the ACKED state.
      */
     long ackjob(String... jobIds);
 
     /**
      * Performs a fast acknowledge of the specified jobs.
      *
-     * @param jobIds
-     * @return The command returns the number of jobs that are deleted from the local node as a result of receiving the command
+     * @param jobIds the job Id's
+     * @return the number of jobs that are deleted from the local node as a result of receiving the command
      */
     long fastack(String... jobIds);
 
     /**
      * Describes a job without changing its state.
      *
-     * @param jobId
+     * @param jobId the job Id's
      * @return bulk-reply
      */
     List<Object> show(String jobId);

@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.net.HostAndPort;
 import com.lambdaworks.redis.ConnectionPoint;
+import com.lambdaworks.redis.LettuceStrings;
 import io.netty.channel.unix.DomainSocketAddress;
 
 /**
@@ -22,7 +23,6 @@ import io.netty.channel.unix.DomainSocketAddress;
  * timeouts within the DisqueURI. Either build your self the object
  * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 3.0
  */
 @SuppressWarnings("serial")
 public class DisqueURI implements Serializable {
@@ -32,7 +32,7 @@ public class DisqueURI implements Serializable {
     public static final String URI_SCHEME_DISQUE_SECURE = "disques";
 
     /**
-     * The default disque port.
+     * The default Disque port.
      */
     public static final int DEFAULT_DISQUE_PORT = 7711;
 
@@ -54,8 +54,8 @@ public class DisqueURI implements Serializable {
     /**
      * Constructor with host/port and timeout.
      * 
-     * @param host the host
-     * @param port the port
+     * @param host the host string, must not be empty
+     * @param port the port, must be in the range between {@literal 1} to {@literal 65535}
      * @param timeout timeout value
      * @param unit unit of the timeout value
      */
@@ -71,6 +71,17 @@ public class DisqueURI implements Serializable {
     }
 
     /**
+     * Create a Disque URI from {@code host} and {@code port}.
+     *
+     * @param host the host string, must not be empty
+     * @param port the port, must be in the range between {@literal 1} to {@literal 65535}
+     * @return An instance of {@link DisqueURI} containing details from the URI.
+     */
+    public static DisqueURI create(String host, int port) {
+        return new Builder().withDisque(host, port).build();
+    }
+
+    /**
      * Create a Disque URI from an URI string. Supported formats are:
      * <ul>
      * <li>disque://[password@]host[:port][,host2[:port2]][,hostN[:port2N]]</li>
@@ -78,10 +89,10 @@ public class DisqueURI implements Serializable {
      * <li>disque-socket://socket-path</li>
      * </ul>
      *
-     * The uri must follow conventions of {@link java.net.URI}
+     * The {@code uri} must follow conventions of {@link java.net.URI}
      * 
-     * @param uri The URI string.
-     * @return An instance of {@link DisqueURI} containing details from the URI.
+     * @param uri the URI string
+     * @return An instance of {@link DisqueURI} containing details from the URI
      */
     public static DisqueURI create(String uri) {
         return create(URI.create(uri));
@@ -95,10 +106,10 @@ public class DisqueURI implements Serializable {
      * <li>disque-socket://socket-path</li>
      * </ul>
      *
-     * The uri must follow conventions of {@link java.net.URI}
+     * The {@code uri} must follow conventions of {@link java.net.URI}
      *
-     * @param uri The URI.
-     * @return An instance of {@link DisqueURI} containing details from the URI.
+     * @param uri the URI
+     * @return An instance of {@link DisqueURI} containing details from the URI
      */
     public static DisqueURI create(URI uri) {
 
@@ -123,19 +134,7 @@ public class DisqueURI implements Serializable {
             builder.withPassword(password);
         }
 
-        if (!URI_SCHEME_DISQUE_SOCKET.equals(uri.getScheme())) {
-            if (isNotEmpty(uri.getPath())) {
-                String pathSuffix = uri.getPath().substring(1);
-
-                if (isNotEmpty(pathSuffix)) {
-
-                    builder.withDatabase(Integer.parseInt(pathSuffix));
-                }
-            }
-        }
-
         return builder.build();
-
     }
 
     private static DisqueURI.Builder configureDisque(URI uri) {
@@ -215,14 +214,6 @@ public class DisqueURI implements Serializable {
         this.unit = unit;
     }
 
-    public int getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(int database) {
-        this.database = database;
-    }
-
     public boolean isSsl() {
         return ssl;
     }
@@ -269,60 +260,68 @@ public class DisqueURI implements Serializable {
         /**
          * Set Disque host. Creates a new builder.
          * 
-         * @param host the host name
-         * @return New builder with Disque host/port.
+         * @param host the host string, must not be empty
+         * @return New builder with Disque host and the default Disque port
          */
         public static Builder disque(String host) {
             return disque(host, DEFAULT_DISQUE_PORT);
         }
 
         /**
-         * Set Disque host and port. Creates a new builder
+         * Set Disque host and port. Creates a new builder.
          * 
-         * @param host the host name
-         * @param port the port
-         * @return New builder with Disque host/port.
+         * @param host the host string, must not be empty
+         * @param port the port, must be in the range between {@literal 1} to {@literal 65535}
+         * @return New builder with Disque host/port
          */
         public static Builder disque(String host, int port) {
-            checkNotNull(host, "Host must not be null");
             Builder builder = new Builder();
-
             builder.withDisque(host, port);
 
             return builder;
         }
 
         /**
-         * Set Disque socket. Creates a new builder .
+         * Set Disque socket. Creates a new builder.
          * 
-         * @param socket the socket name
-         * @return New builder with Disque socket.
+         * @param socket the socket name, must not be empty
+         * @return New builder with Disque socket
          */
         public static Builder disqueSocket(String socket) {
-            checkNotNull(socket, "Socket must not be null");
             Builder builder = new Builder();
-
             builder.withSocket(socket);
-
             return builder;
         }
 
+        /**
+         * Set Disque socket.
+         * 
+         * @param socket the socket name, must not be empty
+         * @return the builder
+         */
         public Builder withSocket(String socket) {
-            checkNotNull(socket, "Socket must not be null");
-
             this.disqueURI.connectionPoints.add(new DisqueSocket(socket));
             return this;
         }
 
+        /**
+         * Set Disque host
+         * 
+         * @param host the host string, must not be empty
+         * @return the builder
+         */
         public Builder withDisque(String host) {
-            checkNotNull(host, "Host must not be null");
-
             return withDisque(host, DEFAULT_DISQUE_PORT);
         }
 
+        /**
+         * Set Disque host and port.
+         * 
+         * @param host the host string, must not be empty
+         * @param port the port, must be in the range between {@literal 1} to {@literal 65535}
+         * @return the builder
+         */
         public Builder withDisque(String host, int port) {
-            checkNotNull(host, "Host must not be null");
-
             DisqueHostAndPort hap = new DisqueHostAndPort(host, port);
             this.disqueURI.connectionPoints.add(hap);
             return this;
@@ -358,17 +357,6 @@ public class DisqueURI implements Serializable {
          */
         public Builder withVerifyPeer(boolean verifyPeer) {
             disqueURI.setVerifyPeer(verifyPeer);
-            return this;
-        }
-
-        /**
-         * Adds database selection.
-         * 
-         * @param database the database number
-         * @return the builder
-         */
-        public Builder withDatabase(int database) {
-            disqueURI.setDatabase(database);
             return this;
         }
 
@@ -409,6 +397,9 @@ public class DisqueURI implements Serializable {
 
     }
 
+    /**
+     * A Unix Domain Socket connection-point.
+     */
     public static class DisqueSocket implements Serializable, ConnectionPoint {
         private String socket;
         private transient SocketAddress resolvedAddress;
@@ -417,6 +408,7 @@ public class DisqueURI implements Serializable {
         }
 
         public DisqueSocket(String socket) {
+            checkArgument(LettuceStrings.isNotEmpty(socket), "Socket must not be empty");
             this.socket = socket;
         }
 
@@ -436,6 +428,7 @@ public class DisqueURI implements Serializable {
         }
 
         public void setSocket(String socket) {
+            checkArgument(LettuceStrings.isNotEmpty(socket), "Socket must not be empty");
             this.socket = socket;
         }
 
@@ -449,13 +442,16 @@ public class DisqueURI implements Serializable {
         @Override
         public String toString() {
             final StringBuffer sb = new StringBuffer();
-            sb.append("[socket=").append(socket);
+            sb.append("[").append(socket);
             sb.append(']');
             return sb.toString();
         }
 
     }
 
+    /**
+     * A Network connection-point.
+     */
     public static class DisqueHostAndPort implements Serializable, ConnectionPoint {
 
         private String host;
@@ -466,6 +462,8 @@ public class DisqueURI implements Serializable {
         }
 
         public DisqueHostAndPort(String host, int port) {
+            checkArgument(LettuceStrings.isNotEmpty(host), "Host must not be empty");
+            checkArgument(isValidPort(port), "Port is out of range");
             this.host = host;
             this.port = port;
         }
@@ -475,6 +473,7 @@ public class DisqueURI implements Serializable {
         }
 
         public void setHost(String host) {
+            checkArgument(LettuceStrings.isNotEmpty(host), "Host must not be empty");
             this.host = host;
         }
 
@@ -488,6 +487,7 @@ public class DisqueURI implements Serializable {
         }
 
         public void setPort(int port) {
+            checkArgument(isValidPort(port), "Port is out of range");
             this.port = port;
         }
 
@@ -501,10 +501,19 @@ public class DisqueURI implements Serializable {
         @Override
         public String toString() {
             final StringBuffer sb = new StringBuffer();
-            sb.append("[port=").append(port);
-            sb.append(", host='").append(host).append('\'');
+            sb.append("[").append(host);
+            sb.append(":").append(port);
             sb.append(']');
             return sb.toString();
+        }
+
+        /**
+         *
+         * @param port the port number
+         * @return {@literal true} for valid port numbers
+         */
+        static boolean isValidPort(int port) {
+            return port >= 1 && port <= 65535;
         }
     }
 

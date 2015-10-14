@@ -53,6 +53,7 @@ Using spinach on your classpath
     netty-transport-${netty-version}.jar
     netty-transport-native-epoll-${netty-version}.jar
     netty-handler-${netty-version}.jar
+    rxjava-${rxjava-version}.jar
     guava-17.0.jar
     commons-pool2-2.2.jar
 

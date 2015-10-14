@@ -1,13 +1,65 @@
 package biz.paluch.spinach;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.TimeUnit;
 
-import com.lambdaworks.redis.ConnectionPoint;
 import org.junit.Test;
 
+import com.lambdaworks.redis.ConnectionPoint;
+
 public class DisqueURIBuilderTest {
+
+    @Test
+    public void newUri() throws Exception {
+        DisqueURI result = new DisqueURI("a", 1, 2, TimeUnit.DAYS);
+        assertThat(result.getConnectionPoints()).hasSize(1);
+
+        assertThat(result.getUnit()).isEqualTo(TimeUnit.DAYS);
+        assertThat(result.getTimeout()).isEqualTo(2);
+        assertThat(result.isSsl()).isFalse();
+
+        assertThat(result.isSsl()).isFalse();
+        assertThat(result.isStartTls()).isFalse();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidPort0() throws Exception {
+        DisqueURI.create("host", 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidPort65536() throws Exception {
+        DisqueURI.create("host", 65536);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void emptyHost() throws Exception {
+        DisqueURI.create("", 44);
+    }
+
+    @Test
+    public void programmatic() throws Exception {
+        DisqueURI uri = new DisqueURI();
+        uri.setSsl(true);
+        uri.setStartTls(true);
+
+        DisqueURI.DisqueHostAndPort hap = new DisqueURI.DisqueHostAndPort();
+        hap.setHost("host");
+        hap.setPort(42);
+
+        assertThat(hap.toString()).contains("host:42");
+
+        DisqueURI.DisqueSocket socket = new DisqueURI.DisqueSocket();
+        socket.setSocket("/path");
+
+        assertThat(socket.toString()).contains("[/path]");
+
+        uri.getConnectionPoints().add(hap);
+        uri.getConnectionPoints().add(socket);
+
+        assertThat(uri.getConnectionPoints()).hasSize(2);
+    }
 
     @Test
     public void disque() throws Exception {
@@ -65,6 +117,15 @@ public class DisqueURIBuilderTest {
     }
 
     @Test
+    public void disqueSslFromBuilder() throws Exception {
+        DisqueURI result = DisqueURI.Builder.disque("host").withSsl(true).withStartTls(false).withVerifyPeer(true).build();
+
+        assertThat(result.isSsl()).isTrue();
+        assertThat(result.isStartTls()).isFalse();
+        assertThat(result.isVerifyPeer()).isTrue();
+    }
+
+    @Test
     public void multipleDisqueFromUrl() throws Exception {
         DisqueURI result = DisqueURI.create(DisqueURI.URI_SCHEME_DISQUE + "://password@localhost/1");
 
@@ -92,7 +153,5 @@ public class DisqueURIBuilderTest {
         ConnectionPoint cp3 = result.getConnectionPoints().get(2);
         assertThat(cp3.getPort()).isEqualTo(DisqueURI.DEFAULT_DISQUE_PORT);
         assertThat(cp3.getHost()).isEqualTo("host3");
-
     }
-
 }

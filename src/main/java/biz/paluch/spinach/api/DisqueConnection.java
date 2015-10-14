@@ -18,7 +18,6 @@ import com.lambdaworks.redis.protocol.RedisCommand;
  * @param <K> Key type.
  * @param <V> Value type.
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 24.06.15 07:29
  */
 public interface DisqueConnection<K, V> {
 
