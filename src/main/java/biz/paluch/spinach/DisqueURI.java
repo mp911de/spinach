@@ -36,7 +36,6 @@ public class DisqueURI implements Serializable {
      */
     public static final int DEFAULT_DISQUE_PORT = 7711;
 
-    private int database;
     private char[] password;
     private boolean ssl = false;
     private boolean verifyPeer = true;

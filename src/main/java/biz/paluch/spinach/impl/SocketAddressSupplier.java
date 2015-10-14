@@ -1,0 +1,18 @@
+package biz.paluch.spinach.impl;
+
+import java.net.SocketAddress;
+
+import com.google.common.base.Supplier;
+
+/**
+ * Supplier API for {@link SocketAddress}. A {@code SocketAddressSupplier} is typically used to provide a {@link SocketAddress}
+ * for connecting to Disque. The client requests a socket address from the supplier to establish initially a connection or to
+ * reconnect. The supplier is required to supply an infinite number of elements. The sequence and ordering of elements is detail
+ * of the particular implementation.
+ *
+ * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
+ * @since 0.3
+ */
+public interface SocketAddressSupplier extends Supplier<SocketAddress> {
+
+}

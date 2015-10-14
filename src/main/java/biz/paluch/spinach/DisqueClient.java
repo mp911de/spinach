@@ -2,11 +2,10 @@ package biz.paluch.spinach;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableList.copyOf;
 
 import java.net.ConnectException;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,33 +13,30 @@ import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.api.DisqueConnection;
 import biz.paluch.spinach.impl.DisqueConnectionImpl;
+import biz.paluch.spinach.impl.SocketAddressSupplier;
+import biz.paluch.spinach.impl.SocketAddressSupplierFactory;
 
 import com.google.common.base.Supplier;
-import com.lambdaworks.redis.AbstractRedisClient;
-import com.lambdaworks.redis.ClientOptions;
-import com.lambdaworks.redis.ConnectionBuilder;
-import com.lambdaworks.redis.ConnectionPoint;
-import com.lambdaworks.redis.RedisConnectionException;
-import com.lambdaworks.redis.RedisException;
-import com.lambdaworks.redis.RedisURI;
-import com.lambdaworks.redis.SslConnectionBuilder;
+import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.codec.Utf8StringCodec;
 import com.lambdaworks.redis.protocol.CommandHandler;
 import com.lambdaworks.redis.protocol.RedisCommand;
-import io.netty.channel.ChannelOption;
 
 /**
  * A scalable thread-safe Disque client. Multiple threads may share one connection if they avoid blocking operations.
- * 
+ * {@link DisqueClient} is an expensive resource. It holds a set of netty's {@link io.netty.channel.EventLoopGroup}'s that
+ * consist of up to {@code Number of CPU's * 4} threads. Reuse this instance as much as possible.
+ *
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public class DisqueClient extends AbstractRedisClient {
     private final DisqueURI disqueURI;
 
     /**
-     * Creates a uri-less DisqueClient. You can connect to different disque servers but you must supply a {@link DisqueURI} on
-     * connecting. Methods without having a {@link DisqueURI} will fail with a {@link java.lang.IllegalStateException}.
+     * Creates a uri-less {@link DisqueClient}. You can connect to different Disque servers but you must supply a
+     * {@link DisqueURI} on connecting. Methods without having a {@link DisqueURI} will fail with a
+     * {@link java.lang.IllegalStateException}.
      */
     public DisqueClient() {
         disqueURI = null;
@@ -50,7 +46,7 @@ public class DisqueClient extends AbstractRedisClient {
 
     /**
      * Create a new client that connects to the supplied host on the default port.
-     * 
+     *
      * @param uri a Disque URI.
      *
      */
@@ -61,7 +57,7 @@ public class DisqueClient extends AbstractRedisClient {
     /**
      * Create a new client that connects to the supplied host and port. Connection attempts and non-blocking commands will
      * {@link #setDefaultTimeout timeout} after 60 seconds.
-     * 
+     *
      * @param host Server hostname.
      * @param port Server port.
      */
@@ -72,7 +68,7 @@ public class DisqueClient extends AbstractRedisClient {
     /**
      * Create a new client that connects to the supplied host and port. Connection attempts and non-blocking commands will
      * {@link #setDefaultTimeout timeout} after 60 seconds.
-     * 
+     *
      * @param disqueURI Disque URI.
      */
     public DisqueClient(DisqueURI disqueURI) {
@@ -83,7 +79,8 @@ public class DisqueClient extends AbstractRedisClient {
     }
 
     /**
-     * Connect to a Disque server that treats keys and values as UTF-8 strings.
+     * Open a new connection to a Disque server that treats keys and values as UTF-8 strings. This method requires to have the
+     * {@link DisqueURI} specified when constructing the client.
      *
      * @return A new connection.
      */
@@ -92,8 +89,7 @@ public class DisqueClient extends AbstractRedisClient {
     }
 
     /**
-     * Open a new synchronous connection to the disque server. Use the supplied {@link RedisCodec codec} to encode/decode keys
-     * and values.
+     * Open a new connection to a Disque server. Use the supplied {@link RedisCodec codec} to encode/decode keys and values.
      *
      * @param codec Use this codec to encode/decode keys and values, must note be {@literal null}
      * @param <K> Key type.
@@ -102,22 +98,45 @@ public class DisqueClient extends AbstractRedisClient {
      */
     public <K, V> DisqueConnection<K, V> connect(RedisCodec<K, V> codec) {
         checkForDisqueURI();
-        checkArgument(codec != null, "RedisCodec must not be null");
-        return connect(codec, this.disqueURI);
+        return connect(codec, this.disqueURI, SocketAddressSupplierFactory.Factories.ROUND_ROBIN);
     }
 
     /**
-     * Connect to a Disque server with the supplied {@link DisqueURI} that treats keys and values as UTF-8 strings.
+     * Open a new connection to a Disque server with the supplied {@link DisqueURI} that treats keys and values as UTF-8
+     * strings.
      *
      * @param disqueURI the disque server to connect to, must not be {@literal null}
      * @return A new connection.
      */
     public DisqueConnection<String, String> connect(DisqueURI disqueURI) {
-        checkValidDisqueURI(disqueURI);
-        return connect(new Utf8StringCodec(), disqueURI);
+        return connect(new Utf8StringCodec(), disqueURI, SocketAddressSupplierFactory.Factories.ROUND_ROBIN);
     }
 
-    private <K, V> DisqueConnectionImpl<K, V> connect(RedisCodec<K, V> codec, final DisqueURI disqueURI) {
+    /**
+     * Open a new connection to a Disque server using the supplied {@link DisqueURI} and the supplied {@link RedisCodec codec}
+     * to encode/decode keys.
+     *
+     * @param codec Use this codec to encode/decode keys and values, must not be {@literal null}
+     * @param disqueURI the Disque server to connect to, must not be {@literal null}
+     * @param socketAddressSupplierFactory factory for {@link SocketAddress} for connecting to Disque based on multiple
+     *        connection points.
+     * @param <K> Key type.
+     * @param <V> Value type.
+     * 
+     * @return A new connection.
+     */
+    public <K, V> DisqueConnection<K, V> connect(RedisCodec<K, V> codec, DisqueURI disqueURI,
+            SocketAddressSupplierFactory socketAddressSupplierFactory) {
+        return connect0(codec, disqueURI, socketAddressSupplierFactory);
+    }
+
+    private <K, V> DisqueConnectionImpl<K, V> connect0(RedisCodec<K, V> codec, final DisqueURI disqueURI,
+            SocketAddressSupplierFactory socketAddressSupplierFactory) {
+
+        checkArgument(codec != null, "RedisCodec must not be null");
+        checkValidDisqueURI(disqueURI);
+        checkArgument(socketAddressSupplierFactory != null, "SocketAddressSupplierFactory must not be null");
+
         BlockingQueue<RedisCommand<K, V, ?>> queue = new LinkedBlockingQueue<RedisCommand<K, V, ?>>();
 
         checkArgument(!disqueURI.getConnectionPoints().isEmpty(), "No connection points specified");
@@ -146,17 +165,20 @@ public class DisqueClient extends AbstractRedisClient {
         validateUrisAreOfSameConnectionType(disqueURI.getConnectionPoints());
 
         int connectionAttempts = disqueURI.getConnectionPoints().size();
-        final Supplier<ConnectionPoint> connectionPointSupplier = new RoundRobinConnectionPointSupplier(
-                copyOf(disqueURI.getConnectionPoints()));
+        final SocketAddressSupplier socketAddressSupplier = socketAddressSupplierFactory.newSupplier(disqueURI);
 
         channelType(connectionBuilder, disqueURI.getConnectionPoints().get(0));
         connectionBuilder.socketAddressSupplier(new Supplier<SocketAddress>() {
             @Override
             public SocketAddress get() {
 
-                ConnectionPoint connectionPoint = connectionPointSupplier.get();
-                toRedisURI(disqueURI, connectionPoint, redisURI);
-                return getSocketAddress(connectionPoint);
+                SocketAddress socketAddress = socketAddressSupplier.get();
+                if (socketAddress instanceof InetSocketAddress) {
+                    InetSocketAddress isa = (InetSocketAddress) socketAddress;
+                    redisURI.setPort(isa.getPort());
+                    redisURI.setHost(isa.getHostName());
+                }
+                return socketAddress;
             }
         });
 
@@ -228,13 +250,6 @@ public class DisqueClient extends AbstractRedisClient {
         return new DisqueConnectionImpl<K, V>(commandHandler, codec, timeout, unit);
     }
 
-    private static SocketAddress getSocketAddress(ConnectionPoint connectionPoint) {
-        if (connectionPoint instanceof DisqueURI.DisqueSocket) {
-            return ((DisqueURI.DisqueSocket) connectionPoint).getResolvedAddress();
-        }
-        return ((DisqueURI.DisqueHostAndPort) connectionPoint).getResolvedAddress();
-    }
-
     private void checkValidDisqueURI(DisqueURI disqueURI) {
         checkArgument(disqueURI != null && !disqueURI.getConnectionPoints().isEmpty(),
                 "A valid DisqueURI with a host is needed");
@@ -246,41 +261,4 @@ public class DisqueClient extends AbstractRedisClient {
                 "DisqueURI is not available. Use DisqueClient(Host), DisqueClient(Host, Port) or DisqueClient(DisqueURI) to construct your client.");
     }
 
-    /**
-     * Round-Robin socket address supplier. Connection points are iterated circular without an end.
-     */
-    static class RoundRobinConnectionPointSupplier implements Supplier<ConnectionPoint> {
-
-        private final Collection<? extends ConnectionPoint> connectionPoint;
-        private ConnectionPoint offset;
-
-        public RoundRobinConnectionPointSupplier(Collection<? extends ConnectionPoint> connectionPoints) {
-            this(connectionPoints, null);
-        }
-
-        public RoundRobinConnectionPointSupplier(Collection<? extends ConnectionPoint> connectionPoints, ConnectionPoint offset) {
-            this.connectionPoint = connectionPoints;
-            this.offset = offset;
-        }
-
-        @Override
-        public ConnectionPoint get() {
-
-            if (offset != null) {
-                boolean accept = false;
-                for (ConnectionPoint point : connectionPoint) {
-                    if (point == offset) {
-                        accept = true;
-                        continue;
-                    }
-
-                    if (accept) {
-                        return offset = point;
-                    }
-                }
-            }
-
-            return offset = connectionPoint.iterator().next();
-        }
-    }
 }

@@ -7,14 +7,14 @@ import java.util.Collection;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import biz.paluch.spinach.DisqueClient.RoundRobinConnectionPointSupplier;
+import biz.paluch.spinach.impl.RoundRobinSocketAddressSupplier;
 
 import com.google.common.collect.ImmutableList;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public class RoundRobinConnectionPointSupplierTest {
+public class RoundRobinSocketAddressSupplierTest {
 
     private static DisqueURI.DisqueHostAndPort hap1 = new DisqueURI.DisqueHostAndPort("127.0.0.1", 1);
     private static DisqueURI.DisqueHostAndPort hap2 = new DisqueURI.DisqueHostAndPort("127.0.0.1", 2);
@@ -32,22 +32,22 @@ public class RoundRobinConnectionPointSupplierTest {
     @Test
     public void noOffset() throws Exception {
 
-        RoundRobinConnectionPointSupplier sut = new RoundRobinConnectionPointSupplier(points, null);
+        RoundRobinSocketAddressSupplier sut = new RoundRobinSocketAddressSupplier(points, null);
 
-        assertThat(sut.get()).isSameAs(hap1);
-        assertThat(sut.get()).isSameAs(hap2);
-        assertThat(sut.get()).isSameAs(hap3);
-        assertThat(sut.get()).isSameAs(hap1);
+        assertThat(sut.get()).isSameAs(hap1.getResolvedAddress());
+        assertThat(sut.get()).isSameAs(hap2.getResolvedAddress());
+        assertThat(sut.get()).isSameAs(hap3.getResolvedAddress());
+        assertThat(sut.get()).isSameAs(hap1.getResolvedAddress());
     }
 
     @Test
     public void withOffset() throws Exception {
 
-        RoundRobinConnectionPointSupplier sut = new RoundRobinConnectionPointSupplier(points, hap2);
+        RoundRobinSocketAddressSupplier sut = new RoundRobinSocketAddressSupplier(points, hap2);
 
-        assertThat(sut.get()).isSameAs(hap3);
-        assertThat(sut.get()).isSameAs(hap1);
-        assertThat(sut.get()).isSameAs(hap2);
-        assertThat(sut.get()).isSameAs(hap3);
+        assertThat(sut.get()).isSameAs(hap3.getResolvedAddress());
+        assertThat(sut.get()).isSameAs(hap1.getResolvedAddress());
+        assertThat(sut.get()).isSameAs(hap2.getResolvedAddress());
+        assertThat(sut.get()).isSameAs(hap3.getResolvedAddress());
     }
 }

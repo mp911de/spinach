@@ -1,11 +1,13 @@
 package biz.paluch.spinach;
 
-import static com.google.code.tempusfugit.temporal.Duration.*;
-import static com.google.code.tempusfugit.temporal.WaitFor.*;
-import static org.assertj.core.api.Assertions.*;
+import static com.google.code.tempusfugit.temporal.Duration.seconds;
+import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.ConnectException;
+import java.net.SocketAddress;
 import java.nio.channels.UnresolvedAddressException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Level;
@@ -15,11 +17,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import biz.paluch.spinach.api.DisqueConnection;
 import biz.paluch.spinach.commands.AbstractCommandTest;
+import biz.paluch.spinach.impl.RoundRobinSocketAddressSupplier;
+import biz.paluch.spinach.impl.SocketAddressSupplier;
+import biz.paluch.spinach.impl.SocketAddressSupplierFactory;
 
 import com.google.code.tempusfugit.temporal.Condition;
 import com.google.code.tempusfugit.temporal.Timeout;
 import com.lambdaworks.redis.*;
+import com.lambdaworks.redis.codec.Utf8StringCodec;
 import com.lambdaworks.redis.protocol.CommandHandler;
 
 /**
@@ -220,4 +227,43 @@ public class ClientTest extends AbstractCommandTest {
         assertThat(e).hasCauseExactlyInstanceOf(RuntimeException.class);
     }
 
+    @Test
+    public void connectWithCustomStrategyConnectLast() throws Exception {
+
+        int port0 = TestSettings.port(0);
+        int port1 = TestSettings.port(1);
+        DisqueURI disqueURI = DisqueURI.Builder.disque(host, port0).withDisque(host, port1).build();
+        final List<ConnectionPoint> connectionPoints = disqueURI.getConnectionPoints();
+
+        DisqueConnection<String, String> connect = client.connect(new Utf8StringCodec(), disqueURI,
+                new SocketAddressSupplierFactory() {
+                    @Override
+                    public SocketAddressSupplier newSupplier(final DisqueURI disqueURI) {
+                        return new RoundRobinSocketAddressSupplier(connectionPoints) {
+                            @Override
+                            public SocketAddress get() {
+                                return getSocketAddress(connectionPoints.get(connectionPoints.size() - 1));
+                            }
+                        };
+                    }
+                });
+
+        String info = connect.sync().info("server");
+        connect.close();
+        assertThat(info).contains("tcp_port:" + port1);
+    }
+
+    @Test
+    public void clusterConnectionTest() throws Exception {
+
+        int port0 = TestSettings.port(0);
+        int port1 = TestSettings.port(1);
+        DisqueURI disqueURI = DisqueURI.Builder.disque(host, port0).withDisque(host, port1).build();
+
+        DisqueConnection<String, String> connect = client.connect(disqueURI);
+        assertThat(connect.sync().info("server")).contains("tcp_port:" + port0);
+        connect.sync().quit();
+        assertThat(connect.sync().info("server")).contains("tcp_port:" + port1);
+        connect.close();
+    }
 }
