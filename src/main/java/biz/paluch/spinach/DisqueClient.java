@@ -28,9 +28,10 @@ import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.codec.Utf8StringCodec;
 import com.lambdaworks.redis.protocol.CommandHandler;
 import com.lambdaworks.redis.protocol.RedisCommand;
+import io.netty.channel.ChannelOption;
 
 /**
- * A scalable thread-safe Disquelient. Multiple threads may share one connection if they avoid blocking operations.
+ * A scalable thread-safe Disque client. Multiple threads may share one connection if they avoid blocking operations.
  * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */

@@ -7,7 +7,7 @@ So the reconnect sticks to the broken host/connection point without trying the o
 specified connection points. The current release addresses this issue by using round-robin
 and utilizes all provided connection points for a reconnect.
 
-Features
+Fixes
 ------------
 * Reconnect sticks to the last known connection point and does not use additional connection points #7
 
