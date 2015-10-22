@@ -7,11 +7,10 @@ import com.google.common.base.Supplier;
 /**
  * Supplier API for {@link SocketAddress}. A {@code SocketAddressSupplier} is typically used to provide a {@link SocketAddress}
  * for connecting to Disque. The client requests a socket address from the supplier to establish initially a connection or to
- * reconnect. The supplier is required to supply an infinite number of elements. The sequence and ordering of elements is detail
- * of the particular implementation.
+ * reconnect. The supplier is required to supply an infinite number of elements. The sequence and ordering of elements are a
+ * detail of the particular implementation.
  * <p>
- * Instances of {@link SocketAddressSupplier SocketAddressSuppliers} should not be shared between connections altough this is
- * possible.
+ * {@link SocketAddressSupplier} instances should not be shared between connections although this is possible.
  * </p>
  *
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>

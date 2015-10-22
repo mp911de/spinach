@@ -48,7 +48,7 @@ public class HelloClusterSocketAddressSupplier extends ClusterAwareNodeSupport i
     }
 
     @Override
-    protected void reloadNodes() {
+    public void reloadNodes() {
         super.reloadNodes();
         roundRobin = new RoundRobin<DisqueNode>(getNodes());
     }
