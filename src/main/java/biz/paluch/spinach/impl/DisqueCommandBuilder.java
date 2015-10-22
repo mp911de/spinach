@@ -192,9 +192,9 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(CLIENT, new KeyOutput<K, V>(codec), args);
     }
 
-    public Command<K, V, String> clientSetname(K name) {
+    public Command<K, V, String> clientSetname(String name) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(
-                com.lambdaworks.redis.protocol.CommandKeyword.SETNAME).addKey(name);
+                com.lambdaworks.redis.protocol.CommandKeyword.SETNAME).add(name);
         return createCommand(CLIENT, new StatusOutput<K, V>(codec), args);
     }
 

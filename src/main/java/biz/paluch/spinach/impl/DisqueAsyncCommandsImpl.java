@@ -194,7 +194,7 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     }
 
     @Override
-    public RedisFuture<String> clientSetname(K name) {
+    public RedisFuture<String> clientSetname(String name) {
         return dispatch(commandBuilder.clientSetname(name));
     }
 

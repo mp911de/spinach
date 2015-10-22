@@ -1,6 +1,5 @@
 package biz.paluch.spinach.impl;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
@@ -8,16 +7,25 @@ import biz.paluch.spinach.api.DisqueConnection;
 import biz.paluch.spinach.cluster.DisqueNode;
 
 /**
+ * Supplier for {@link SocketAddress adresses} that is aware of the cluster nodes.
+ * <p>
+ * This class performs a {@code HELLO} command handshake upon connection and retrieves the nodes from the command result. The
+ * node set is not refreshed once it is retrieved. The nodes are used in the order of their priority in a round-robin fashion.
+ * Until the handshake is completed a fallback {@link SocketAddressSupplier} is used.
+ * </p>
+ *
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public class HelloClusterSocketAddressSupplier extends ClusterAwareNodeSupport implements SocketAddressSupplier,
         ConnectionAware {
 
-    private final SocketAddressSupplier bootstrap;
+    protected final SocketAddressSupplier bootstrap;
+    protected RoundRobin<DisqueNode> roundRobin;
 
-    private RoundRobin<DisqueNode> roundRobin;
-    private String preferredNodeIdPrefix;
-
+    /**
+     * 
+     * @param bootstrap bootstrap/fallback {@link SocketAddressSupplier} for bootstrapping before any communication is done.
+     */
     public HelloClusterSocketAddressSupplier(SocketAddressSupplier bootstrap) {
         this.bootstrap = bootstrap;
     }
@@ -42,20 +50,7 @@ public class HelloClusterSocketAddressSupplier extends ClusterAwareNodeSupport i
     @Override
     protected void reloadNodes() {
         super.reloadNodes();
-
-        if (preferredNodeIdPrefix != null) {
-            for (DisqueNode disqueNode : getNodes()) {
-                if (disqueNode.getNodeId().startsWith(preferredNodeIdPrefix)) {
-                    roundRobin = new RoundRobin<DisqueNode>(getNodes(), disqueNode);
-                    return;
-                }
-            }
-        }
-
         roundRobin = new RoundRobin<DisqueNode>(getNodes());
     }
 
-    public void setPreferredNodeIdPrefix(String preferredNodeIdPrefix) {
-        this.preferredNodeIdPrefix = preferredNodeIdPrefix;
-    }
 }

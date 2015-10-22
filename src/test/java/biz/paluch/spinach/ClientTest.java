@@ -164,7 +164,7 @@ public class ClientTest extends AbstractCommandTest {
             assertThat(e).hasRootCauseExactlyInstanceOf(UnresolvedAddressException.class);
         }
 
-        client.shutdown(1, 1, TimeUnit.MILLISECONDS);
+        client.shutdown(0, 0, TimeUnit.MILLISECONDS);
     }
 
     @Test
@@ -176,7 +176,7 @@ public class ClientTest extends AbstractCommandTest {
             assertThat(e).hasRootCauseExactlyInstanceOf(ConnectException.class);
             assertThat(e.getCause().getCause()).hasMessageContaining("Connection refused");
         }
-        client.shutdown(1, 1, TimeUnit.MILLISECONDS);
+        client.shutdown(0, 0, TimeUnit.MILLISECONDS);
     }
 
     private class TestConnectionListener implements RedisConnectionStateListener {
@@ -218,7 +218,7 @@ public class ClientTest extends AbstractCommandTest {
             assertThat(e).hasMessageContaining("DisqueURI");
         }
 
-        client.shutdown();
+        client.shutdown(0, 0, TimeUnit.MILLISECONDS);
     }
 
     @Test

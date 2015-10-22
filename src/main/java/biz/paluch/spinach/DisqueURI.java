@@ -440,12 +440,10 @@ public class DisqueURI implements Serializable {
 
         @Override
         public String toString() {
-            final StringBuffer sb = new StringBuffer();
-            sb.append("[").append(socket);
-            sb.append(']');
+            final StringBuffer sb = new StringBuffer(socket.length());
+            sb.append(socket);
             return sb.toString();
         }
-
     }
 
     /**
@@ -500,9 +498,8 @@ public class DisqueURI implements Serializable {
         @Override
         public String toString() {
             final StringBuffer sb = new StringBuffer();
-            sb.append("[").append(host);
+            sb.append(host);
             sb.append(":").append(port);
-            sb.append(']');
             return sb.toString();
         }
 
@@ -515,5 +512,4 @@ public class DisqueURI implements Serializable {
             return port >= 1 && port <= 65535;
         }
     }
-
 }

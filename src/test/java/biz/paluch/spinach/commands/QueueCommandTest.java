@@ -70,15 +70,6 @@ public class QueueCommandTest extends AbstractCommandTest {
         disque.working("DIb043347c89a98df8dea195c47bcd715f2f78ee7705a1SQ");
     }
 
-    @Test
-    public void getJobWithoutJob() throws Exception {
-
-        assertThat(disque.qlen(queue)).isEqualTo(0);
-
-        Job<String, String> job = disque.getjob(1, TimeUnit.SECONDS, queue);
-
-        assertThat(job).isNull();
-    }
 
     @Test
     public void qpeek() throws Exception {

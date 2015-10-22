@@ -169,5 +169,14 @@ class ReactiveCommandDispatcher<K, V, T> implements Observable.OnSubscribe<T> {
         public CommandArgs<K, V> getArgs() {
             return command.getArgs();
         }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append(getClass().getSimpleName());
+            sb.append(" [").append(command.toString());
+            sb.append(']');
+            return sb.toString();
+        }
     }
 }

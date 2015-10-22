@@ -89,7 +89,7 @@ public class DisqueClient extends AbstractRedisClient {
     /**
      * Open a new connection to a Disque server. Use the supplied {@link RedisCodec codec} to encode/decode keys and values.
      *
-     * @param codec Use this codec to encode/decode keys and values, must note be {@literal null}
+     * @param codec use this codec to encode/decode keys and values, must note be {@literal null}
      * @param <K> Key type.
      * @param <V> Value type.
      * @return A new connection.
@@ -114,7 +114,7 @@ public class DisqueClient extends AbstractRedisClient {
      * Open a new connection to a Disque server using the supplied {@link DisqueURI} and the supplied {@link RedisCodec codec}
      * to encode/decode keys.
      *
-     * @param codec Use this codec to encode/decode keys and values, must not be {@literal null}
+     * @param codec use this codec to encode/decode keys and values, must not be {@literal null}
      * @param disqueURI the Disque server to connect to, must not be {@literal null}
      * @param socketAddressSupplierFactory factory for {@link SocketAddress} for connecting to Disque based on multiple
      *        connection points.

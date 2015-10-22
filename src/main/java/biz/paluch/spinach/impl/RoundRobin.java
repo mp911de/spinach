@@ -8,7 +8,7 @@ import java.util.Collection;
  * 
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-class RoundRobin<V> {
+public class RoundRobin<V> {
 
     protected final Collection<? extends V> collection;
     protected V offset;

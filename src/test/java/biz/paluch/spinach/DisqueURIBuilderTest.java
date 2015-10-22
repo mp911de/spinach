@@ -53,7 +53,7 @@ public class DisqueURIBuilderTest {
         DisqueURI.DisqueSocket socket = new DisqueURI.DisqueSocket();
         socket.setSocket("/path");
 
-        assertThat(socket.toString()).contains("[/path]");
+        assertThat(socket.toString()).contains("/path");
 
         uri.getConnectionPoints().add(hap);
         uri.getConnectionPoints().add(socket);

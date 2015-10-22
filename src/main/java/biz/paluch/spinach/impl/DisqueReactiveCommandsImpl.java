@@ -192,7 +192,7 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
-    public Observable<String> clientSetname(K name) {
+    public Observable<String> clientSetname(String name) {
         return createObservable(commandBuilder.clientSetname(name));
     }
 

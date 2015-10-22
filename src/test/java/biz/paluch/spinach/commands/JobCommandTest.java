@@ -79,7 +79,7 @@ public class JobCommandTest extends AbstractCommandTest {
 
     @Test
     public void getJobsWithTimeout() throws Exception {
-        List<Job<String, String>> result = disque.getjobs(1, TimeUnit.SECONDS, 1, queue);
+        List<Job<String, String>> result = disque.getjobs(200, TimeUnit.MILLISECONDS, 1, "other-queue");
 
         assertThat(result).hasSize(0);
     }
@@ -87,9 +87,9 @@ public class JobCommandTest extends AbstractCommandTest {
     @Test
     public void getJobWithoutJob() throws Exception {
 
-        assertThat(disque.qlen(queue)).isEqualTo(0);
+        assertThat(disque.qlen("other-queue")).isEqualTo(0);
 
-        Job<String, String> job = disque.getjob(1, TimeUnit.SECONDS, queue);
+        Job<String, String> job = disque.getjob(200, TimeUnit.MILLISECONDS, "other-queue");
 
         assertThat(job).isNull();
     }

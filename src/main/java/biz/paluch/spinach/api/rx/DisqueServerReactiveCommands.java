@@ -33,7 +33,7 @@ public interface DisqueServerReactiveCommands<K, V> {
      * @param name the client name
      * @return simple-string-reply {@code OK} if the connection name was successfully set.
      */
-    Observable<String> clientSetname(K name);
+    Observable<String> clientSetname(String name);
 
     /**
      * Kill the connection of a client identified by ip:port.

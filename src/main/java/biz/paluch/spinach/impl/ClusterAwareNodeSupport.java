@@ -22,6 +22,9 @@ public abstract class ClusterAwareNodeSupport {
     private DisqueConnection<Object, Object> disqueConnection;
     private final List<DisqueNode> nodes = Lists.newArrayList();
 
+    /**
+     * Load/reload cluster nodes and order the nodes by its priority.
+     */
     protected void reloadNodes() {
 
         Hello hello = HelloParser.parse(disqueConnection.sync().hello());
@@ -46,6 +49,10 @@ public abstract class ClusterAwareNodeSupport {
         this.disqueConnection = (DisqueConnection<Object, Object>) disqueConnection;
     }
 
+    /**
+     *
+     * @return the list of {@link DisqueNode nodes}
+     */
     public List<DisqueNode> getNodes() {
         return nodes;
     }

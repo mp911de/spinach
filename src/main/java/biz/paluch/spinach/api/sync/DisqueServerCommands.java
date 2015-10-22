@@ -35,7 +35,7 @@ public interface DisqueServerCommands<K, V> {
      * @param name the client name
      * @return simple-string-reply {@code OK} if the connection name was successfully set.
      */
-    String clientSetname(K name);
+    String clientSetname(String name);
 
     /**
      * Kill the connection of a client identified by ip:port.

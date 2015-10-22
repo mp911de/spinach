@@ -36,7 +36,7 @@ public interface DisqueServerAsyncCommands<K, V> {
      * @param name the client name
      * @return simple-string-reply {@code OK} if the connection name was successfully set.
      */
-    RedisFuture<String> clientSetname(K name);
+    RedisFuture<String> clientSetname(String name);
 
     /**
      * Kill the connection of a client identified by ip:port.

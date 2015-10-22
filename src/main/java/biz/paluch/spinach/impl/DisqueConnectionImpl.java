@@ -14,6 +14,7 @@ import com.lambdaworks.redis.AbstractRedisClient;
 import com.lambdaworks.redis.RedisChannelHandler;
 import com.lambdaworks.redis.RedisChannelWriter;
 import com.lambdaworks.redis.codec.RedisCodec;
+import com.lambdaworks.redis.protocol.CommandKeyword;
 import com.lambdaworks.redis.protocol.RedisCommand;
 import io.netty.channel.ChannelHandler;
 
@@ -36,6 +37,7 @@ public class DisqueConnectionImpl<K, V> extends RedisChannelHandler<K, V> implem
     protected DisqueReactiveCommandsImpl<K, V> reactive;
 
     private char[] password;
+    private String clientName;
 
     /**
      * Initialize a new connection.
@@ -122,6 +124,18 @@ public class DisqueConnectionImpl<K, V> extends RedisChannelHandler<K, V> implem
                     }
                 }, MoreExecutors.sameThreadExecutor());
             }
+
+            if (local.getType() == CommandType.CLIENT && local.getArgs() != null
+                    && local.getArgs().getKeywords().indexOf(CommandKeyword.SETNAME) == 0) {
+                local.addListener(new Runnable() {
+                    @Override
+                    public void run() {
+                        if ("OK".equals(local.getOutput().get())) {
+                            DisqueConnectionImpl.this.clientName = local.getArgs().getStrings().get(0);
+                        }
+                    }
+                }, MoreExecutors.sameThreadExecutor());
+            }
         }
 
         return super.dispatch(cmd);
@@ -139,6 +153,10 @@ public class DisqueConnectionImpl<K, V> extends RedisChannelHandler<K, V> implem
         // do not block in here, since the channel flow will be interrupted.
         if (password != null) {
             getAsyncCommands().auth(new String(password));
+        }
+
+        if (clientName != null) {
+            getAsyncCommands().clientSetname(clientName);
         }
 
     }
