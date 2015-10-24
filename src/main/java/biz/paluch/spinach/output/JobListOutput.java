@@ -2,7 +2,9 @@ package biz.paluch.spinach.output;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import rx.Subscriber;
 import biz.paluch.spinach.api.Job;
@@ -12,7 +14,7 @@ import com.lambdaworks.redis.protocol.CommandOutput;
 
 /**
  * Output handler for commands returning a {@link List} of {@link Job Jobs} data structres.
- * 
+ *
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public class JobListOutput<K, V> extends CommandOutput<K, V, List<Job<K, V>>> implements SupportsObservables {
@@ -21,6 +23,8 @@ public class JobListOutput<K, V> extends CommandOutput<K, V, List<Job<K, V>>> im
     private K queue;
     private String id;
     private V body;
+    private Map<String, Long> counters;
+    private String lastKey;
     private Subscriber<Object> subscriber;
 
     public JobListOutput(RedisCodec<K, V> codec) {
@@ -49,14 +53,25 @@ public class JobListOutput<K, V> extends CommandOutput<K, V, List<Job<K, V>>> im
             return;
         }
 
-        body = codec.decodeValue(bytes);
+        if (body == null) {
+            counters = new HashMap<String, Long>();
+            body = codec.decodeValue(bytes);
+            return;
+        }
+
+        lastKey = decodeAscii(bytes);
+    }
+
+    @Override
+    public void set(long integer) {
+        counters.put(lastKey, integer);
     }
 
     @Override
     public void complete(int depth) {
 
         if (id != null && body != null) {
-            Job<K, V> job = new Job<K, V>(queue, id, body);
+            Job<K, V> job = new Job<K, V>(queue, id, body, counters);
             if (subscriber != null && !subscriber.isUnsubscribed()) {
                 subscriber.onNext(job);
             }

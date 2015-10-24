@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.api.AddJobArgs;
+import biz.paluch.spinach.api.GetJobArgs;
 import biz.paluch.spinach.api.JScanArgs;
 import biz.paluch.spinach.api.Job;
 
@@ -65,6 +66,16 @@ public interface DisqueJobCommands<K, V> {
     Job<K, V> getjob(long timeout, TimeUnit timeUnit, K... queues);
 
     /**
+     * Get jobs from the specified queue. If there are no jobs in the specified queue the command will block.
+     * Given a timeout or if noHang option is passed, the command returns null if no job can be found.
+     *
+     * @param getJobArgs job arguments
+     * @param queues the queue
+     * @return the job or null
+     */
+    Job<K, V> getjob(GetJobArgs getJobArgs, K... queues);
+
+    /**
      * Get jobs from the specified queues. By default COUNT is 1, so just one job will be returned. If there are no jobs in any
      * of the specified queues the command will block.
      *
@@ -91,6 +102,22 @@ public interface DisqueJobCommands<K, V> {
      * @return the jobs
      */
     List<Job<K, V>> getjobs(long timeout, TimeUnit timeUnit, long count, K... queues);
+
+    /**
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command will block
+     * until timeout unless noHang option is passed.
+     *
+     * When there are jobs in more than one of the queues, the command guarantees to return jobs in the order the queues are
+     * specified. If COUNT allows more jobs to be returned, queues are scanned again and again in the same order popping more
+     * elements.
+     *
+     * If there are not enough jobs in any of the specified queues the command will return less than COUNT jobs after timeout.
+     *
+     * @param getJobArgs job arguments
+     * @param queues queue names
+     * @return the jobs
+     */
+    List<Job<K, V>> getjobs(GetJobArgs getJobArgs, K... queues);
 
     /**
      * Evict (and possibly remove from queue) all the jobs in memeory matching the specified job IDs. Jobs are evicted whatever

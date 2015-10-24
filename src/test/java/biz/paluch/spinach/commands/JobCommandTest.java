@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.api.AddJobArgs;
+import biz.paluch.spinach.api.GetJobArgs;
 import biz.paluch.spinach.api.JScanArgs;
 import biz.paluch.spinach.api.Job;
 import com.lambdaworks.redis.KeyScanCursor;
@@ -67,6 +68,26 @@ public class JobCommandTest extends AbstractCommandTest {
         assertThat(job.getQueue()).isEqualTo(queue);
         assertThat(job.getId()).startsWith("DI").endsWith("SQ").isEqualTo(result);
         assertThat(job.getBody()).isEqualTo(value);
+        assertThat(job.getCounters()).isEmpty();
+    }
+
+    @Test
+    public void getJobWithScores() throws Exception {
+        String id = disque.addjob(queue, value, 5, TimeUnit.SECONDS);
+        long qlen = disque.qlen(queue);
+
+        assertThat(qlen).isEqualTo(1);
+
+        disque.nack(id);
+        disque.nack(id);
+
+        GetJobArgs args = GetJobArgs.builder().withCounters(true).build();
+        Job<String, String> job = disque.getjob(args, queue);
+
+        assertThat(job.getQueue()).isEqualTo(queue);
+        assertThat(job.getId()).startsWith("DI").endsWith("SQ").isEqualTo(id);
+        assertThat(job.getBody()).isEqualTo(value);
+        assertThat(job.getCounters()).containsKeys("nacks", "additional-deliveries");
     }
 
     @Test
