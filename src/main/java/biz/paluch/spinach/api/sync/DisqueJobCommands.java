@@ -48,10 +48,10 @@ public interface DisqueJobCommands<K, V> {
      * Get jobs from the specified queue. By default COUNT is 1, so just one job will be returned. If there are no jobs in any
      * of the specified queues the command will block.
      *
-     * @param queue the queue
+     * @param queues queues
      * @return the job
      */
-    Job<K, V> getjob(K queue);
+    Job<K, V> getjob(K... queues);
 
     /**
      * Get jobs from the specified queue. By default COUNT is 1, so just one job will be returned. If there are no jobs in any
@@ -59,10 +59,10 @@ public interface DisqueJobCommands<K, V> {
      *
      * @param timeout timeout to wait
      * @param timeUnit timeout unit
-     * @param queue the queue
+     * @param queues queues
      * @return the job.
      */
-    Job<K, V> getjob(long timeout, TimeUnit timeUnit, K queue);
+    Job<K, V> getjob(long timeout, TimeUnit timeUnit, K... queues);
 
     /**
      * Get jobs from the specified queues. By default COUNT is 1, so just one job will be returned. If there are no jobs in any

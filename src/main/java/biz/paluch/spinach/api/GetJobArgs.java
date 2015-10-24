@@ -60,27 +60,27 @@ public class GetJobArgs {
 
         }
 
-        public Builder noHang(boolean noHang) {
+        public Builder noHang(Boolean noHang) {
             this.noHang = noHang;
             return this;
         }
 
-        public Builder timeout(long timeoutMs) {
+        public Builder timeout(Long timeoutMs) {
             this.timeout = timeoutMs;
             return this;
         }
 
         public Builder timeout(long timeout, TimeUnit timeUnit) {
-            this.timeout = timeUnit.toSeconds(timeout);
+            this.timeout = timeUnit.toMillis(timeout);
             return this;
         }
 
-        public Builder count(long count) {
+        public Builder count(Long count) {
             this.count = count;
             return this;
         }
 
-        public Builder withCounters(boolean withCounters) {
+        public Builder withCounters(Boolean withCounters) {
             this.withCounters = withCounters;
             return this;
         }

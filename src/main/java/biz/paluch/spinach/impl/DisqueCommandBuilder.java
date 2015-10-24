@@ -48,7 +48,7 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
         getJobArgs
             .copyBuilder()
-            .count(1)
+            .count(1L)
             .build()
             .build(args, queues);
 
