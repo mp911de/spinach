@@ -44,29 +44,21 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(ADDJOB, new StatusOutput<K, V>(codec), args);
     }
 
-    public Command<K, V, Job<K, V>> getjob(long duration, TimeUnit timeUnit, K... queues) {
+    public Command<K, V, Job<K, V>> getjob(GetJobArgs getJobArgs, K... queues) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
-        if (timeUnit != null) {
-            args.add(CommandKeyword.TIMEOUT).add(timeUnit.toMillis(duration));
-        }
-
-        args.add(CommandKeyword.FROM).addKeys(queues);
+        getJobArgs
+            .copyBuilder()
+            .count(1)
+            .build()
+            .build(args, queues);
 
         return createCommand(GETJOB, new JobOutput<K, V>(codec), args);
     }
 
-    public Command<K, V, List<Job<K, V>>> getjobs(long count, long duration, TimeUnit timeUnit, K... queues) {
+
+    public Command<K, V, List<Job<K, V>>> getjobs(GetJobArgs getJobArgs, K... queues) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
-        if (timeUnit != null && duration > 0) {
-            args.add(CommandKeyword.TIMEOUT).add(timeUnit.toMillis(duration));
-        }
-
-        if (count > 0) {
-            args.add(CommandKeyword.COUNT).add(count);
-        }
-
-        args.add(CommandKeyword.FROM).addKeys(queues);
-
+        getJobArgs.build(args, queues);
         return createCommand(GETJOB, new JobListOutput<K, V>(codec), args);
     }
 

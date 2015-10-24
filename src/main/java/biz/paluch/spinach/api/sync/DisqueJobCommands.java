@@ -13,7 +13,7 @@ import com.lambdaworks.redis.ScanCursor;
 /**
  *
  * Synchronous executed commands related with Disque Jobs.
- * 
+ *
  * @param <K> Key type.
  * @param <V> Value type.
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>

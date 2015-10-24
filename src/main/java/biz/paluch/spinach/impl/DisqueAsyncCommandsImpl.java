@@ -50,23 +50,40 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     }
 
     @Override
-    public RedisFuture<Job<K, V>> getjob(K queue) {
-        return dispatch(commandBuilder.getjob(0, null, queue));
+    public RedisFuture<Job<K, V>> getjob(K... queues) {
+        GetJobArgs args = GetJobArgs.builder().noHang(true).build();
+        return dispatch(commandBuilder.getjob(args, queues));
     }
 
     @Override
-    public RedisFuture<Job<K, V>> getjob(long duration, TimeUnit timeUnit, K queue) {
-        return dispatch(commandBuilder.getjob(duration, timeUnit, queue));
+    public RedisFuture<Job<K, V>> getjob(long duration, TimeUnit timeUnit, K... queues) {
+        GetJobArgs args = GetJobArgs.builder().timeout(duration, timeUnit).build();
+        return dispatch(commandBuilder.getjob(args, queues));
+    }
+
+    @Override
+    public RedisFuture<Job<K, V>> getjob(GetJobArgs args, K... queues) {
+        return dispatch(commandBuilder.getjob(args, queues));
     }
 
     @Override
     public RedisFuture<List<Job<K, V>>> getjobs(K... queues) {
-        return dispatch(commandBuilder.getjobs(0, 0, null, queues));
+        GetJobArgs args = GetJobArgs.builder().noHang(true).build();
+        return dispatch(commandBuilder.getjobs(args, queues));
     }
 
     @Override
     public RedisFuture<List<Job<K, V>>> getjobs(long duration, TimeUnit timeUnit, long count, K... queues) {
-        return dispatch(commandBuilder.getjobs(count, duration, timeUnit, queues));
+        GetJobArgs args = GetJobArgs.builder()
+                .timeout(duration, timeUnit)
+                .count(count)
+                .build();
+        return dispatch(commandBuilder.getjobs(args, queues));
+    }
+
+    @Override
+    public RedisFuture<List<Job<K, V>>> getjobs(GetJobArgs args, K... queues) {
+        return dispatch(commandBuilder.getjobs(args, queues));
     }
 
     @Override

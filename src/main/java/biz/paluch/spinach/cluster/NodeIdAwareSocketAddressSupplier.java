@@ -37,7 +37,7 @@ public class NodeIdAwareSocketAddressSupplier extends HelloClusterSocketAddressS
     }
 
     @Override
-    protected void reloadNodes() {
+    public void reloadNodes() {
         super.reloadNodes();
         resolveCurrentNodeId();
     }

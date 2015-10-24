@@ -52,23 +52,40 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
-    public Observable<Job<K, V>> getjob(K queue) {
-        return createObservable(commandBuilder.getjob(0, null, queue));
+    public Observable<Job<K, V>> getjob(K... queues) {
+        GetJobArgs args = GetJobArgs.builder().noHang(true).build();
+        return createObservable(commandBuilder.getjob(args, queues));
     }
 
     @Override
-    public Observable<Job<K, V>> getjob(long duration, TimeUnit timeUnit, K queue) {
-        return createObservable(commandBuilder.getjob(duration, timeUnit, queue));
+    public Observable<Job<K, V>> getjob(long duration, TimeUnit timeUnit, K... queues) {
+        GetJobArgs args = GetJobArgs.builder().timeout(duration, timeUnit).build();
+        return createObservable(commandBuilder.getjob(args, queues));
+    }
+
+    @Override
+    public  Observable<Job<K, V>> getjob(GetJobArgs args, K... queues) {
+        return createObservable(commandBuilder.getjob(args, queues));
     }
 
     @Override
     public Observable<Job<K, V>> getjobs(K... queues) {
-        return createDissolvingObservable(commandBuilder.getjobs(0, 0, null, queues));
+        GetJobArgs args = GetJobArgs.builder().noHang(true).build();
+        return createDissolvingObservable(commandBuilder.getjob(args, queues));
     }
 
     @Override
     public Observable<Job<K, V>> getjobs(long duration, TimeUnit timeUnit, long count, K... queues) {
-        return createDissolvingObservable(commandBuilder.getjobs(count, duration, timeUnit, queues));
+        GetJobArgs args = GetJobArgs.builder()
+                .timeout(duration, timeUnit)
+                .count(count)
+                .build();
+        return createDissolvingObservable(commandBuilder.getjobs(args, queues));
+    }
+
+    @Override
+    public Observable<Job<K, V>> getjobs(GetJobArgs args, K... queues) {
+        return createDissolvingObservable(commandBuilder.getjobs(args, queues));
     }
 
     @Override
