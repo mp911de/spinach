@@ -53,8 +53,7 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
 
     @Override
     public Observable<Job<K, V>> getjob(K... queues) {
-        GetJobArgs args = GetJobArgs.builder().noHang(true).build();
-        return createObservable(commandBuilder.getjob(args, queues));
+        return createObservable(commandBuilder.getjob(new GetJobArgs(), queues));
     }
 
     @Override
@@ -70,8 +69,7 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
 
     @Override
     public Observable<Job<K, V>> getjobs(K... queues) {
-        GetJobArgs args = GetJobArgs.builder().noHang(true).build();
-        return createDissolvingObservable(commandBuilder.getjob(args, queues));
+        return createDissolvingObservable(commandBuilder.getjob(new GetJobArgs(), queues));
     }
 
     @Override
