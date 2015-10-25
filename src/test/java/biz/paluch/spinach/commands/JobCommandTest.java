@@ -72,7 +72,7 @@ public class JobCommandTest extends AbstractCommandTest {
     }
 
     @Test
-    public void getJobWithScores() throws Exception {
+    public void getJobWithCounters() throws Exception {
         String id = disque.addjob(queue, value, 5, TimeUnit.SECONDS);
         long qlen = disque.qlen(queue);
 
@@ -88,6 +88,14 @@ public class JobCommandTest extends AbstractCommandTest {
         assertThat(job.getId()).startsWith("DI").endsWith("SQ").isEqualTo(id);
         assertThat(job.getBody()).isEqualTo(value);
         assertThat(job.getCounters()).containsKeys("nacks", "additional-deliveries");
+    }
+
+    @Test
+    public void getJobNohang() throws Exception {
+        GetJobArgs args = GetJobArgs.builder().noHang(true).build();
+        Job<String, String> job = disque.getjob(args, queue);
+
+        assertThat(job).isNull();
     }
 
     @Test
