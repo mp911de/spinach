@@ -453,7 +453,6 @@ public class DisqueURI implements Serializable {
 
         private String host;
         private int port;
-        private transient SocketAddress resolvedAddress;
 
         public DisqueHostAndPort() {
         }
@@ -489,10 +488,7 @@ public class DisqueURI implements Serializable {
         }
 
         public SocketAddress getResolvedAddress() {
-            if (resolvedAddress == null) {
-                resolvedAddress = new InetSocketAddress(host, port);
-            }
-            return resolvedAddress;
+            return new InetSocketAddress(host, port);
         }
 
         @Override

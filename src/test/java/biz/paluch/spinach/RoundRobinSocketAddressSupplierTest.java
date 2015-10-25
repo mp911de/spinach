@@ -34,10 +34,10 @@ public class RoundRobinSocketAddressSupplierTest {
 
         RoundRobinSocketAddressSupplier sut = new RoundRobinSocketAddressSupplier(points, null);
 
-        assertThat(sut.get()).isSameAs(hap1.getResolvedAddress());
-        assertThat(sut.get()).isSameAs(hap2.getResolvedAddress());
-        assertThat(sut.get()).isSameAs(hap3.getResolvedAddress());
-        assertThat(sut.get()).isSameAs(hap1.getResolvedAddress());
+        assertThat(sut.get()).isEqualTo(hap1.getResolvedAddress());
+        assertThat(sut.get()).isEqualTo(hap2.getResolvedAddress());
+        assertThat(sut.get()).isEqualTo(hap3.getResolvedAddress());
+        assertThat(sut.get()).isEqualTo(hap1.getResolvedAddress());
     }
 
     @Test
@@ -45,9 +45,9 @@ public class RoundRobinSocketAddressSupplierTest {
 
         RoundRobinSocketAddressSupplier sut = new RoundRobinSocketAddressSupplier(points, hap2);
 
-        assertThat(sut.get()).isSameAs(hap3.getResolvedAddress());
-        assertThat(sut.get()).isSameAs(hap1.getResolvedAddress());
-        assertThat(sut.get()).isSameAs(hap2.getResolvedAddress());
-        assertThat(sut.get()).isSameAs(hap3.getResolvedAddress());
+        assertThat(sut.get()).isEqualTo(hap3.getResolvedAddress());
+        assertThat(sut.get()).isEqualTo(hap1.getResolvedAddress());
+        assertThat(sut.get()).isEqualTo(hap2.getResolvedAddress());
+        assertThat(sut.get()).isEqualTo(hap3.getResolvedAddress());
     }
 }
