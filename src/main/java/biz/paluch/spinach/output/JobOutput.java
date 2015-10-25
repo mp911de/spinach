@@ -19,7 +19,7 @@ public class JobOutput<K, V> extends CommandOutput<K, V, Job<K, V>> {
     private K queue;
     private String id;
     private V body;
-    private Map<String, Long> counters;
+    private Map<String, Long> counters = new HashMap<String, Long>();
     private String lastKey;
 
     public JobOutput(RedisCodec<K, V> codec) {
@@ -50,7 +50,10 @@ public class JobOutput<K, V> extends CommandOutput<K, V, Job<K, V>> {
 
     @Override
     public void set(long integer) {
-        counters.put(lastKey, integer);
+        if (lastKey != null) {
+            counters.put(lastKey, integer);
+            lastKey = null;
+        }
     }
 
     @Override

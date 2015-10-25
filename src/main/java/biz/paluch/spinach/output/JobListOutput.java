@@ -23,7 +23,7 @@ public class JobListOutput<K, V> extends CommandOutput<K, V, List<Job<K, V>>> im
     private K queue;
     private String id;
     private V body;
-    private Map<String, Long> counters;
+    private Map<String, Long> counters = new HashMap<String, Long>();
     private String lastKey;
     private Subscriber<Object> subscriber;
 
@@ -64,7 +64,10 @@ public class JobListOutput<K, V> extends CommandOutput<K, V, List<Job<K, V>>> im
 
     @Override
     public void set(long integer) {
-        counters.put(lastKey, integer);
+        if (lastKey != null) {
+            counters.put(lastKey, integer);
+            lastKey = null;
+        }
     }
 
     @Override
