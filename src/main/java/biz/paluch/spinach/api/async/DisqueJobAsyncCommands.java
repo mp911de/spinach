@@ -46,8 +46,8 @@ public interface DisqueJobAsyncCommands<K, V> {
     RedisFuture<String> addjob(K queue, V job, long timeout, TimeUnit timeUnit, AddJobArgs addJobArgs);
 
     /**
-     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block until
-     * given timeout and return null.
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block.
+     * If timeout is given, the command will block until given timeout and return null.
      *
      * @param queues queue names
      * @return the job or null
@@ -55,8 +55,8 @@ public interface DisqueJobAsyncCommands<K, V> {
     RedisFuture<Job<K, V>> getjob(K... queues);
 
     /**
-     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block until
-     * given timeout and return null.
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block.
+     * If timeout is given, the command will block until given timeout and return null.
      *
      * @param timeout max timeout to wait
      * @param timeUnit timeout unit
@@ -67,8 +67,8 @@ public interface DisqueJobAsyncCommands<K, V> {
 
 
     /**
-     * Get jobs from the specified queue. If there are no jobs in the specified queue the command will block.
-     * Given a timeout or if noHang option is passed, the command returns null if no job can be found.
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block.
+     * If timeout is given, the command will block until given timeout and return null.
      *
      * @param getJobArgs job arguments
      * @param queues the queue

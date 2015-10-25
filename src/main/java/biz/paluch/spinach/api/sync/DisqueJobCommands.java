@@ -46,28 +46,28 @@ public interface DisqueJobCommands<K, V> {
     String addjob(K queue, V job, long timeout, TimeUnit timeUnit, AddJobArgs addJobArgs);
 
     /**
-     * Get jobs from the specified queue. By default COUNT is 1, so just one job will be returned. If there are no jobs in any
-     * of the specified queues the command will block.
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block.
+     * If timeout is given, the command will block until given timeout and return null.
      *
-     * @param queues queues
-     * @return the job
+     * @param queues queue names
+     * @return the job or null
      */
     Job<K, V> getjob(K... queues);
 
     /**
-     * Get jobs from the specified queue. By default COUNT is 1, so just one job will be returned. If there are no jobs in any
-     * of the specified queues the command will block.
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block.
+     * If timeout is given, the command will block until given timeout and return null.
      *
-     * @param timeout timeout to wait
+     * @param timeout max timeout to wait
      * @param timeUnit timeout unit
-     * @param queues queues
-     * @return the job.
+     * @param queues queue names
+     * @return the job or null
      */
     Job<K, V> getjob(long timeout, TimeUnit timeUnit, K... queues);
 
     /**
-     * Get jobs from the specified queue. If there are no jobs in the specified queue the command will block.
-     * Given a timeout or if noHang option is passed, the command returns null if no job can be found.
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block.
+     * If timeout is given, the command will block until given timeout and return null.
      *
      * @param getJobArgs job arguments
      * @param queues the queue
@@ -76,12 +76,13 @@ public interface DisqueJobCommands<K, V> {
     Job<K, V> getjob(GetJobArgs getJobArgs, K... queues);
 
     /**
-     * Get jobs from the specified queues. By default COUNT is 1, so just one job will be returned. If there are no jobs in any
-     * of the specified queues the command will block.
+     * Get jobs from the specified queues. By default COUNT is 1, so just one job will be returned.
      *
      * When there are jobs in more than one of the queues, the command guarantees to return jobs in the order the queues are
      * specified. If COUNT allows more jobs to be returned, queues are scanned again and again in the same order popping more
      * elements.
+     *
+     * If there are not enough jobs in any of the specified queues the command will return less than COUNT jobs after timeout.
      *
      * @param queues queue names
      * @return the jobs
@@ -89,11 +90,13 @@ public interface DisqueJobCommands<K, V> {
     List<Job<K, V>> getjobs(K... queues);
 
     /**
-     * Get jobs from the specified queues. If there are no jobs in any of the specified queues the command will block.
+     * Get jobs from the specified queues. By default COUNT is 1, so just one job will be returned.
      *
      * When there are jobs in more than one of the queues, the command guarantees to return jobs in the order the queues are
      * specified. If COUNT allows more jobs to be returned, queues are scanned again and again in the same order popping more
      * elements.
+     *
+     * If there are not enough jobs in any of the specified queues the command will return less than COUNT jobs after timeout.
      *
      * @param timeout timeout to wait
      * @param timeUnit timeout unit
@@ -104,8 +107,7 @@ public interface DisqueJobCommands<K, V> {
     List<Job<K, V>> getjobs(long timeout, TimeUnit timeUnit, long count, K... queues);
 
     /**
-     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command will block
-     * until timeout unless noHang option is passed.
+     * Get jobs from the specified queues. By default COUNT is 1, so just one job will be returned.
      *
      * When there are jobs in more than one of the queues, the command guarantees to return jobs in the order the queues are
      * specified. If COUNT allows more jobs to be returned, queues are scanned again and again in the same order popping more
@@ -114,10 +116,11 @@ public interface DisqueJobCommands<K, V> {
      * If there are not enough jobs in any of the specified queues the command will return less than COUNT jobs after timeout.
      *
      * @param getJobArgs job arguments
+     * @param count count of jobs to return
      * @param queues queue names
      * @return the jobs
      */
-    List<Job<K, V>> getjobs(GetJobArgs getJobArgs, K... queues);
+    List<Job<K, V>> getjobs(GetJobArgs getJobArgs, long count, K... queues);
 
     /**
      * Evict (and possibly remove from queue) all the jobs in memeory matching the specified job IDs. Jobs are evicted whatever

@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Arguments for adding a job.
  *
- * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
+ * @author <a href="mailto:karl@heapanalytics.com">Karl-Aksel Puulmann</a>
  */
 public class GetJobArgs {
 
