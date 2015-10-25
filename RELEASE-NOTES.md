@@ -133,6 +133,7 @@ Enhancements
 ------------
 * Support a pluggable reconnect mechanism #9
 * Keep track of nodeId's that were obtained by GETJOB #8
+* Getjob NOHANG, WITHARGUMENTS #14 #15 (thanks to @macobo) 
 
 Other Changes
 -------------

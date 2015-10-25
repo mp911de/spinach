@@ -74,7 +74,6 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     public RedisFuture<List<Job<K, V>>> getjobs(long duration, TimeUnit timeUnit, long count, K... queues) {
         GetJobArgs args = GetJobArgs.builder()
                 .timeout(duration, timeUnit)
-                .count(count)
                 .build();
         return dispatch(commandBuilder.getjobs(count, args, queues));
     }

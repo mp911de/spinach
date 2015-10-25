@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.api.GetJobArgs;
-import com.lambdaworks.redis.RedisFuture;
 import rx.Observable;
 import biz.paluch.spinach.api.AddJobArgs;
 import biz.paluch.spinach.api.JScanArgs;
@@ -47,8 +46,8 @@ public interface DisqueJobReactiveCommands<K, V> {
     Observable<String> addjob(K queue, V job, long timeout, TimeUnit timeUnit, AddJobArgs addJobArgs);
 
     /**
-     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block.
-     * If timeout is given, the command will block until given timeout and return null.
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command will block the
+     * connection.
      *
      * @param queues queue names
      * @return the job or null
@@ -56,8 +55,8 @@ public interface DisqueJobReactiveCommands<K, V> {
     Observable<Job<K, V>> getjob(K... queues);
 
     /**
-     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block.
-     * If timeout is given, the command will block until given timeout and return null.
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command will block the
+     * connection. If timeout is given, the command will block until given timeout and return null.
      *
      * @param timeout max timeout to wait
      * @param timeUnit timeout unit
@@ -66,10 +65,9 @@ public interface DisqueJobReactiveCommands<K, V> {
      */
     Observable<Job<K, V>> getjob(long timeout, TimeUnit timeUnit, K... queues);
 
-
     /**
-     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block.
-     * If timeout is given, the command will block until given timeout and return null.
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command will block the
+     * connection. If timeout is given, the command will block until given timeout and return null.
      *
      * @param getJobArgs job arguments
      * @param queues the queue
@@ -78,13 +76,8 @@ public interface DisqueJobReactiveCommands<K, V> {
     Observable<Job<K, V>> getjob(GetJobArgs getJobArgs, K... queues);
 
     /**
-     * Get jobs from the specified queues. By default COUNT is 1, so just one job will be returned.
-     *
-     * When there are jobs in more than one of the queues, the command guarantees to return jobs in the order the queues are
-     * specified. If COUNT allows more jobs to be returned, queues are scanned again and again in the same order popping more
-     * elements.
-     *
-     * If there are not enough jobs in any of the specified queues the command will return less than COUNT jobs after timeout.
+     * Get jobs from the specified queues. If there are no jobs in any of the specified queues the command will block the
+     * connection.
      *
      * @param queues queue names
      * @return the jobs
@@ -92,15 +85,18 @@ public interface DisqueJobReactiveCommands<K, V> {
     Observable<Job<K, V>> getjobs(K... queues);
 
     /**
-     * Get jobs from the specified queues. If there are no jobs in any of the specified queues the command will block
-     * until timeout unless noHang option is passed.
-     *
+     * Get jobs from the specified queues. If there are no jobs in any of the specified queues the command will block the
+     * connection.
+     * <p>
      * When there are jobs in more than one of the queues, the command guarantees to return jobs in the order the queues are
-     * specified. If COUNT allows more jobs to be returned, queues are scanned again and again in the same order popping more
-     * elements.
-     *
-     * If there are not enough jobs in any of the specified queues the command will return less than COUNT jobs after timeout.
-     *
+     * specified. If {@code count} allows more jobs to be returned, queues are scanned again and again in the same order popping
+     * more elements.
+     * </p>
+     * <p>
+     * If there are not enough jobs in any of the specified queues the command will return less than {@code count} jobs after
+     * the timeout.
+     * </p>
+     * 
      * @param timeout timeout to wait
      * @param timeUnit timeout unit
      * @param count count of jobs to return
@@ -110,14 +106,17 @@ public interface DisqueJobReactiveCommands<K, V> {
     Observable<Job<K, V>> getjobs(long timeout, TimeUnit timeUnit, long count, K... queues);
 
     /**
-     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command will block
-     * until timeout unless noHang option is passed.
-     *
+     * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command will block until
+     * timeout unless {@link GetJobArgs#getNoHang()} option is passed.
+     * <p>
      * When there are jobs in more than one of the queues, the command guarantees to return jobs in the order the queues are
-     * specified. If COUNT allows more jobs to be returned, queues are scanned again and again in the same order popping more
-     * elements.
-     *
-     * If there are not enough jobs in any of the specified queues the command will return less than COUNT jobs after timeout.
+     * specified. If {@code count} allows more jobs to be returned, queues are scanned again and again in the same order popping
+     * more elements.
+     * </p>
+     * <p>
+     * If there are not enough jobs in any of the specified queues the command will return less than {@code count} jobs after
+     * the timeout.
+     * </p>
      *
      * @param getJobArgs job arguments
      * @param count count of jobs to return

@@ -387,7 +387,7 @@ public class DisqueURI implements Serializable {
         }
 
         /**
-         * 
+         * Build a the {@link DisqueURI}.
          * @return the DisqueURI.
          */
         public DisqueURI build() {

@@ -15,21 +15,48 @@ public class GetJobArgs {
     private Long timeout;
     private Boolean withCounters;
 
-
+    /**
+     *
+     * @return {@literal true} if the command should return immediately if there are no jobs in the queue.
+     */
     public Boolean getNoHang() {
         return noHang;
     }
 
-    public void setNoHang(Boolean noHang) { this.noHang = noHang; }
+    public void setNoHang(Boolean noHang) {
+        this.noHang = noHang;
+    }
 
-    public Long getTimeout() { return timeout; }
+    /**
+     *
+     * @return the maximal timeout for waiting in milliseconds until the command comes back with either a job or an empty
+     *         result.
+     */
+    public Long getTimeout() {
+        return timeout;
+    }
 
-    public void setTimeout(Long timeout) { this.timeout = timeout; }
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
+    }
 
-    public Boolean getWithCounters() { return withCounters; }
+    /**
+     *
+     * @return {@literal true} if the command should return counters related to the job
+     */
+    public Boolean getWithCounters() {
+        return withCounters;
+    }
 
-    public void setWithCounters(Boolean withCounters) { this.withCounters = withCounters; }
+    public void setWithCounters(Boolean withCounters) {
+        this.withCounters = withCounters;
+    }
 
+    /**
+     * Create a new builder populated with the current settings.
+     * 
+     * @return a new {@link biz.paluch.spinach.api.GetJobArgs.Builder}
+     */
     public Builder copyBuilder() {
         return GetJobArgs.builder().noHang(noHang).timeout(timeout).withCounters(withCounters);
     }
@@ -55,31 +82,56 @@ public class GetJobArgs {
 
         }
 
+        /**
+         * Set if the command should return immediately if there are no jobs in the queue.
+         * 
+         * @param noHang {@literal true} if the command should return immediately if there are no jobs in the queue.
+         * @return the builder
+         */
         public Builder noHang(Boolean noHang) {
             this.noHang = noHang;
             return this;
         }
 
+        /**
+         * Set the maximal timeout for waiting until the command comes back with either a job or an empty result.
+         * 
+         * @param timeoutMs the timeout in milliseconds
+         * @return the builder
+         */
         public Builder timeout(Long timeoutMs) {
             this.timeout = timeoutMs;
             return this;
         }
 
+        /**
+         * Set the maximal timeout for waiting until the command comes back with either a job or an empty result.
+         * 
+         * @param timeout timeout duration
+         * @param timeUnit timeout unit
+         * @return the builder
+         */
         public Builder timeout(long timeout, TimeUnit timeUnit) {
             this.timeout = timeUnit.toMillis(timeout);
             return this;
         }
 
-        public Builder count(Long count) {
-            this.count = count;
-            return this;
-        }
-
+        /**
+         * Set whether the command should return counters related to the job
+         * 
+         * @param withCounters {@literal true} if the command should return counters related to the job
+         * @return the builder
+         */
         public Builder withCounters(Boolean withCounters) {
             this.withCounters = withCounters;
             return this;
         }
 
+        /**
+         * Create a new builder for {@link GetJobArgs}.
+         * 
+         * @return a new builder for {@link GetJobArgs}
+         */
         public GetJobArgs build() {
             GetJobArgs getJobArgs = new GetJobArgs();
             getJobArgs.setNoHang(noHang);
@@ -90,6 +142,13 @@ public class GetJobArgs {
         }
     }
 
+    /**
+     * Build argument sequence and populate {@code args}.
+     *
+     * @param args the target command args, must not be {@literal null}
+     * @param count the count
+     * @param queues the queue names
+     */
     public <K, V> void build(CommandArgs<K, V> args, Long count, K... queues) {
 
         // GETJOB [NOHANG] [TIMEOUT <ms-timeout>] [COUNT <count>] [WITHCOUNTERS] FROM queue1 queue2 ... queueN
