@@ -119,10 +119,11 @@ public interface DisqueJobAsyncCommands<K, V> {
      * If there are not enough jobs in any of the specified queues the command will return less than COUNT jobs after timeout.
      *
      * @param getJobArgs job arguments
+     * @param count count of jobs to return
      * @param queues queue names
      * @return the jobs
      */
-    RedisFuture<List<Job<K, V>>> getjobs(GetJobArgs getJobArgs, K... queues);
+    RedisFuture<List<Job<K, V>>> getjobs(GetJobArgs getJobArgs, long count, K... queues);
 
     /**
      * Evict (and possibly remove from queue) all the jobs in memeory matching the specified job IDs. Jobs are evicted whatever

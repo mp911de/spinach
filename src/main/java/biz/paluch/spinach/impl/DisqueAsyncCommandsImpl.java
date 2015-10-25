@@ -69,7 +69,7 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     @Override
     public RedisFuture<List<Job<K, V>>> getjobs(K... queues) {
         GetJobArgs args = GetJobArgs.builder().noHang(true).build();
-        return dispatch(commandBuilder.getjobs(args, queues));
+        return dispatch(commandBuilder.getjobs(1L, args, queues));
     }
 
     @Override
@@ -78,12 +78,12 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
                 .timeout(duration, timeUnit)
                 .count(count)
                 .build();
-        return dispatch(commandBuilder.getjobs(args, queues));
+        return dispatch(commandBuilder.getjobs(count, args, queues));
     }
 
     @Override
-    public RedisFuture<List<Job<K, V>>> getjobs(GetJobArgs args, K... queues) {
-        return dispatch(commandBuilder.getjobs(args, queues));
+    public RedisFuture<List<Job<K, V>>> getjobs(GetJobArgs args, long count, K... queues) {
+        return dispatch(commandBuilder.getjobs(count, args, queues));
     }
 
     @Override

@@ -13,7 +13,6 @@ public class GetJobArgs {
 
     private Boolean noHang;
     private Long timeout;
-    private Long count;
     private Boolean withCounters;
 
 
@@ -27,16 +26,12 @@ public class GetJobArgs {
 
     public void setTimeout(Long timeout) { this.timeout = timeout; }
 
-    public Long getCount() { return count; }
-
-    public void setCount(Long count) { this.count = count; }
-
     public Boolean getWithCounters() { return withCounters; }
 
     public void setWithCounters(Boolean withCounters) { this.withCounters = withCounters; }
 
     public Builder copyBuilder() {
-        return GetJobArgs.builder().noHang(noHang).timeout(timeout).count(count).withCounters(withCounters);
+        return GetJobArgs.builder().noHang(noHang).timeout(timeout).withCounters(withCounters);
     }
 
     public static Builder builder() {
@@ -89,14 +84,13 @@ public class GetJobArgs {
             GetJobArgs getJobArgs = new GetJobArgs();
             getJobArgs.setNoHang(noHang);
             getJobArgs.setTimeout(timeout);
-            getJobArgs.setCount(count);
             getJobArgs.setWithCounters(withCounters);
             return getJobArgs;
 
         }
     }
 
-    public <K, V> void build(CommandArgs<K, V> args, K... queues) {
+    public <K, V> void build(CommandArgs<K, V> args, Long count, K... queues) {
 
         // GETJOB [NOHANG] [TIMEOUT <ms-timeout>] [COUNT <count>] [WITHCOUNTERS] FROM queue1 queue2 ... queueN
 
@@ -108,7 +102,7 @@ public class GetJobArgs {
             args.add(CommandKeyword.TIMEOUT.bytes).add(timeout);
         }
 
-        if (count != null && count.intValue() != 1) {
+        if (count != null && count.longValue() != 1L) {
             args.add(CommandKeyword.COUNT.bytes).add(count);
         }
 

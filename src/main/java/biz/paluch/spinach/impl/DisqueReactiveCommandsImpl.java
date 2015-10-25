@@ -80,12 +80,12 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
                 .timeout(duration, timeUnit)
                 .count(count)
                 .build();
-        return createDissolvingObservable(commandBuilder.getjobs(args, queues));
+        return createDissolvingObservable(commandBuilder.getjobs(1L, args, queues));
     }
 
     @Override
-    public Observable<Job<K, V>> getjobs(GetJobArgs args, K... queues) {
-        return createDissolvingObservable(commandBuilder.getjobs(args, queues));
+    public Observable<Job<K, V>> getjobs(GetJobArgs args, long count, K... queues) {
+        return createDissolvingObservable(commandBuilder.getjobs(count, args, queues));
     }
 
     @Override

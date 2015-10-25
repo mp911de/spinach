@@ -46,19 +46,15 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
 
     public Command<K, V, Job<K, V>> getjob(GetJobArgs getJobArgs, K... queues) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
-        getJobArgs
-            .copyBuilder()
-            .count(1L)
-            .build()
-            .build(args, queues);
+        getJobArgs.build(args, 1L, queues);
 
         return createCommand(GETJOB, new JobOutput<K, V>(codec), args);
     }
 
 
-    public Command<K, V, List<Job<K, V>>> getjobs(GetJobArgs getJobArgs, K... queues) {
+    public Command<K, V, List<Job<K, V>>> getjobs(long count, GetJobArgs getJobArgs, K... queues) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
-        getJobArgs.build(args, queues);
+        getJobArgs.build(args, count, queues);
         return createCommand(GETJOB, new JobListOutput<K, V>(codec), args);
     }
 
