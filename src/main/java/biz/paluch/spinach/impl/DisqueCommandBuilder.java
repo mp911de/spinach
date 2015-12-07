@@ -320,6 +320,20 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(CLUSTER, new StatusOutput<K, V>(codec), args);
     }
 
+    public Command<K, V, String> clusterLeaving(boolean state) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(LEAVING);
+
+        args.add(state ? "yes" : "no");
+
+        return createCommand(CLUSTER, new StatusOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> clusterLeaving() {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(LEAVING);
+
+        return createCommand(CLUSTER, new StatusOutput<K, V>(codec), args);
+    }
+
     public Command<K, V, String> clusterMyId() {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).add(CommandType.MYID);
 

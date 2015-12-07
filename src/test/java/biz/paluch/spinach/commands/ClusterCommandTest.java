@@ -1,9 +1,11 @@
 package biz.paluch.spinach.commands;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.util.Collection;
 
+import com.lambdaworks.redis.RedisException;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -63,6 +65,22 @@ public class ClusterCommandTest extends AbstractCommandTest {
 
         Collection<DisqueNode> result = ClusterNodesParser.parse(output);
         assertThat(result.size()).isGreaterThan(1);
+    }
+
+    @Test
+    public void clusterLeaving() throws Exception {
+        assertThat(disque.clusterLeaving()).isEqualTo("no");
+        assertThat(disque.clusterLeaving(true)).isEqualTo("OK");
+        assertThat(disque.clusterLeaving()).isEqualTo("yes");
+
+        try {
+            disque.getjob(queue);
+            fail("Missing exception");
+        }catch (RedisException e) {
+            assertThat(e).hasMessageStartingWith("LEAVING");
+        }
+
+        assertThat(disque.clusterLeaving(false)).isEqualTo("OK");
     }
 
     @Test

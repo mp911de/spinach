@@ -338,6 +338,16 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     }
 
     @Override
+    public RedisFuture<String> clusterLeaving(boolean state) {
+        return dispatch(commandBuilder.clusterLeaving(state));
+    }
+
+    @Override
+    public RedisFuture<String> clusterLeaving() {
+        return dispatch(commandBuilder.clusterLeaving());
+    }
+
+    @Override
     public RedisFuture<String> clusterMyId() {
         return dispatch(commandBuilder.clusterMyId());
     }

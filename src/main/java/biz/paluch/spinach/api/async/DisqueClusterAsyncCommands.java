@@ -37,6 +37,21 @@ public interface DisqueClusterAsyncCommands<K, V> {
     RedisFuture<String> clusterInfo();
 
     /**
+     * Enable/disable cluster leaving state for a graceful cluster leave.
+     *
+     * @param state {@literal true} to set the leaving state, {@literal false} to un-set the leaving state
+     * @return String simple-string-reply
+     */
+    RedisFuture<String> clusterLeaving(boolean state);
+
+    /**
+     * Retrieve cluster leaving state.
+     *
+     * @return String simple-string-reply
+     */
+    RedisFuture<String> clusterLeaving();
+
+    /**
      * Obtain the nodeId for the currently connected node.
      *
      * @return String simple-string-reply

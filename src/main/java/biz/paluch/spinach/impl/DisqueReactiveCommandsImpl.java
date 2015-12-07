@@ -63,7 +63,7 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
-    public  Observable<Job<K, V>> getjob(GetJobArgs args, K... queues) {
+    public Observable<Job<K, V>> getjob(GetJobArgs args, K... queues) {
         return createObservable(commandBuilder.getjob(args, queues));
     }
 
@@ -74,9 +74,7 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
 
     @Override
     public Observable<Job<K, V>> getjobs(long duration, TimeUnit timeUnit, long count, K... queues) {
-        GetJobArgs args = GetJobArgs.builder()
-                .timeout(duration, timeUnit)
-                .build();
+        GetJobArgs args = GetJobArgs.builder().timeout(duration, timeUnit).build();
         return createDissolvingObservable(commandBuilder.getjobs(count, args, queues));
     }
 
@@ -328,6 +326,16 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     @Override
     public Observable<String> clusterForget(String nodeId) {
         return createObservable(commandBuilder.clusterForget(nodeId));
+    }
+
+    @Override
+    public Observable<String> clusterLeaving(boolean state) {
+        return createObservable(commandBuilder.clusterLeaving(state));
+    }
+
+    @Override
+    public Observable<String> clusterLeaving() {
+        return createObservable(commandBuilder.clusterLeaving());
     }
 
     @Override
