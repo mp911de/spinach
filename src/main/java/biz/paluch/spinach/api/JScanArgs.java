@@ -53,8 +53,8 @@ public class JScanArgs<K> {
         this.jobStates = jobStates;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static <K> Builder builder() {
+        return new Builder<K>();
     }
 
     /**
@@ -80,7 +80,7 @@ public class JScanArgs<K> {
          * @param count number of items
          * @return the current builder
          */
-        public Builder count(long count) {
+        public Builder<K> count(long count) {
             this.count = count;
             return this;
         }
@@ -90,7 +90,7 @@ public class JScanArgs<K> {
          * 
          * @return the current builder
          */
-        public Builder busyloop() {
+        public Builder<K> busyloop() {
             return busyloop(true);
         }
 
@@ -100,7 +100,7 @@ public class JScanArgs<K> {
          * @param busyloop {@literal true} or {@literal false}
          * @return the current builder
          */
-        public Builder busyloop(boolean busyloop) {
+        public Builder<K> busyloop(boolean busyloop) {
             this.busyloop = busyloop;
             return this;
         }
@@ -111,7 +111,7 @@ public class JScanArgs<K> {
          * @param queue id of the queue
          * @return the current builder
          */
-        public Builder queue(K queue) {
+        public Builder<K> queue(K queue) {
             this.queue = queue;
             return this;
         }
@@ -122,7 +122,7 @@ public class JScanArgs<K> {
          * @param jobState Array of job states. Duplicate states are omitted.
          * @return the current builder
          */
-        public Builder jobstates(JobState... jobState) {
+        public Builder<K> jobstates(JobState... jobState) {
             for (JobState state : jobState) {
                 this.jobStates.add(state);
             }

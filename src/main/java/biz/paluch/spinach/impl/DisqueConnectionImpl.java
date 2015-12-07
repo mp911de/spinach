@@ -141,6 +141,7 @@ public class DisqueConnectionImpl<K, V> extends RedisChannelHandler<K, V> implem
         return super.dispatch(cmd);
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> T syncHandler(Object asyncApi, Class<?>... interfaces) {
         FutureSyncInvocationHandler<K, V> h = new FutureSyncInvocationHandler<K, V>(this, asyncApi);
         return (T) Proxy.newProxyInstance(AbstractRedisClient.class.getClassLoader(), interfaces, h);
@@ -158,6 +159,5 @@ public class DisqueConnectionImpl<K, V> extends RedisChannelHandler<K, V> implem
         if (clientName != null) {
             getAsyncCommands().clientSetname(clientName);
         }
-
     }
 }

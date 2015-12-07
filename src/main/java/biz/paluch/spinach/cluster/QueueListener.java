@@ -43,7 +43,7 @@ class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
 
     private final Scheduler scheduler;
     private final Supplier<LocalityAwareConnection<K, V>> disqueConnectionSupplier;
-    private final Set<GetJobsAction> actions = Sets.newConcurrentHashSet();
+    private final Set<GetJobsAction<K, V>> actions = Sets.newConcurrentHashSet();
     private final GetJobsArgs<K> getJobsArgs;
 
     private long improveLocalityInterval = 0;
@@ -52,7 +52,7 @@ class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
 
     private volatile Subscription reconnectTrigger;
 
-    QueueListener(Scheduler scheduler, Supplier<LocalityAwareConnection<K, V>> disqueConnectionSupplier, GetJobsArgs getJobsArgs) {
+    QueueListener(Scheduler scheduler, Supplier<LocalityAwareConnection<K, V>> disqueConnectionSupplier, GetJobsArgs<K> getJobsArgs) {
 
         this.scheduler = scheduler;
         this.disqueConnectionSupplier = disqueConnectionSupplier;
@@ -78,7 +78,7 @@ class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
         try {
             Scheduler.Worker worker = scheduler.createWorker();
 
-            GetJobsAction getJobsAction = new GetJobsAction(disqueConnectionSupplier, subscriberId, subscriber,
+            GetJobsAction<K, V> getJobsAction = new GetJobsAction<K, V>(disqueConnectionSupplier, subscriberId, subscriber,
                     jobLocalityTracking, getJobsArgs);
 
             actions.add(getJobsAction);
@@ -102,7 +102,7 @@ class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
      * Disable the queue listeners.
      */
     public void disable() {
-        for (GetJobsAction getJobsAction : actions) {
+        for (GetJobsAction<K, V> getJobsAction : actions) {
             getJobsAction.disable();
         }
     }
@@ -117,7 +117,7 @@ class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
 
         disable();
 
-        for (GetJobsAction getJobsAction : actions) {
+        for (GetJobsAction<K, V> getJobsAction : actions) {
             getJobsAction.close(timeout, timeUnit);
         }
 

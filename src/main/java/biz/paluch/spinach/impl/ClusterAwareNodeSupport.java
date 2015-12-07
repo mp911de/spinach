@@ -91,7 +91,7 @@ public abstract class ClusterAwareNodeSupport {
 
     }
 
-    static class HelloParser implements Serializable {
+    static class HelloParser {
 
         public static Hello parse(List<Object> hello) {
 
