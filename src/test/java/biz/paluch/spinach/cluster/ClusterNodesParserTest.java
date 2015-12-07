@@ -78,4 +78,10 @@ public class ClusterNodesParserTest {
 
     }
 
+    @Test
+    public void testGetNodeIdPrefixFromJobId() throws Exception {
+        String result = GetJobsAction.getNodeIdPrefix("D-ff010e8a-6FH7ewVysl5mZmXbW0/GRqvG-05a1A$");
+        assertThat(result).isEqualTo("ff010e8a");
+    }
+
 }

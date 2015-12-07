@@ -32,9 +32,9 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
  */
 class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
 
-    public static final int DISQUE_JOB_ID_LENGTH = 48;
-    public static final String JOB_ID_PREFIX = "DI";
-    public static final String JOB_ID_SUFFIX = "SQ";
+    public static final int DISQUE_JOB_ID_LENGTH = 42;
+    public static final String JOB_ID_PREFIX = "D-";
+    public static final String JOB_ID_SUFFIX = "$";
 
     private static final InternalLogger log = InternalLoggerFactory.getInstance(QueueListener.class);
     private static final AtomicInteger queueListenerIds = new AtomicInteger();

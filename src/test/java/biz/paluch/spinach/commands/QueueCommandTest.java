@@ -67,7 +67,7 @@ public class QueueCommandTest extends AbstractCommandTest {
 
     @Test(expected = RedisException.class)
     public void workingWithoutJob() throws Exception {
-        disque.working("DIb043347c89a98df8dea195c47bcd715f2f78ee7705a1SQ");
+        disque.working("D-ff010e8a-ld0SEoOs7Pi9PROZmU+w8EQE-05a1A$");
     }
 
 
@@ -87,13 +87,13 @@ public class QueueCommandTest extends AbstractCommandTest {
 
         assertThat(job1.getBody()).isEqualTo(value);
         assertThat(job1.getQueue()).isEqualTo(queue);
-        assertThat(job1.getId()).startsWith("DI");
+        assertThat(job1.getId()).startsWith("D-");
 
         Job<String, String> job2 = result.get(1);
 
         assertThat(job2.getBody()).isEqualTo(value);
         assertThat(job2.getQueue()).isEqualTo(queue);
-        assertThat(job2.getId()).startsWith("DI");
+        assertThat(job2.getId()).startsWith("D-");
     }
 
     @Test

@@ -191,12 +191,12 @@ class GetJobsAction<K, V> implements Action0 {
     private void trackNodeStats(String id) {
         if (jobLocalityTracking && id.length() >= QueueListener.DISQUE_JOB_ID_LENGTH
                 && id.startsWith(QueueListener.JOB_ID_PREFIX) && id.endsWith(QueueListener.JOB_ID_SUFFIX)) {
-            String nodePrefix = getNodePrefix(id);
+            String nodePrefix = getNodeIdPrefix(id);
             nodePrefixes.add(nodePrefix);
         }
     }
 
-    private String getNodePrefix(String id) {
+    protected static String getNodeIdPrefix(String id) {
         return id.substring(2, 10);
     }
 
@@ -298,9 +298,9 @@ class GetJobsAction<K, V> implements Action0 {
 
     private String getCurrentNodeIdPrefix() {
         if (socketAddressSupplier.getCurrentNodeId() != null) {
-            return getNodePrefix(socketAddressSupplier.getCurrentNodeId());
+            return getNodeIdPrefix(socketAddressSupplier.getCurrentNodeId());
         }
-        return getNodePrefix(disqueConnection.sync().clusterMyId());
+        return getNodeIdPrefix(disqueConnection.sync().clusterMyId());
     }
 
 }

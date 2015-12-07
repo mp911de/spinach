@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import rx.Observable;
@@ -39,6 +40,12 @@ public class QueueListenerFactoryTest extends AbstractCommandTest {
 
     private DisqueConnection<String, String> connection0 = client.connect(disqueURI0);
     private DisqueConnection<String, String> connection1 = client.connect(disqueURI1);
+
+    @Before
+    public void before() throws Exception {
+        connection0.sync().clusterLeaving(false);
+        connection1.sync().clusterLeaving(false);
+    }
 
     @After
     public void after() throws Exception {

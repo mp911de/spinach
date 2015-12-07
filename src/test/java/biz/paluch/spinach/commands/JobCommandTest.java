@@ -21,7 +21,7 @@ public class JobCommandTest extends AbstractCommandTest {
     public void addJob() throws Exception {
 
         String result = disque.addjob(queue, value, 5, TimeUnit.SECONDS);
-        assertThat(result).startsWith("DI").endsWith("SQ");
+        assertThat(result).startsWith("D-").endsWith("$");
     }
 
     @Test
@@ -30,7 +30,7 @@ public class JobCommandTest extends AbstractCommandTest {
         AddJobArgs args = AddJobArgs.builder().async(true).delay(1).replicate(1).retry(1).ttl(10).maxlen(5).build();
         String result = disque.addjob(queue, value, 5, TimeUnit.SECONDS, args);
 
-        assertThat(result).startsWith("DI").endsWith("SQ");
+        assertThat(result).startsWith("D-").endsWith("$");
 
         assertThat(args.getAsync()).isTrue();
         assertThat(args.getDelay()).isEqualTo(1);
@@ -46,7 +46,7 @@ public class JobCommandTest extends AbstractCommandTest {
                 .ttl(10, TimeUnit.MINUTES).build();
         String result = disque.addjob(queue, value, 5, TimeUnit.SECONDS, args);
 
-        assertThat(result).startsWith("DI").endsWith("SQ");
+        assertThat(result).startsWith("D-").endsWith("$");
 
         assertThat(args.getAsync()).isTrue();
         assertThat(args.getDelay()).isEqualTo(1);
@@ -66,7 +66,7 @@ public class JobCommandTest extends AbstractCommandTest {
         Job<String, String> job = disque.getjob(queue);
 
         assertThat(job.getQueue()).isEqualTo(queue);
-        assertThat(job.getId()).startsWith("DI").endsWith("SQ").isEqualTo(result);
+        assertThat(job.getId()).startsWith("D-").endsWith("A$").isEqualTo(result);
         assertThat(job.getBody()).isEqualTo(value);
         assertThat(job.getCounters()).isEmpty();
     }
@@ -85,7 +85,7 @@ public class JobCommandTest extends AbstractCommandTest {
         Job<String, String> job = disque.getjob(args, queue);
 
         assertThat(job.getQueue()).isEqualTo(queue);
-        assertThat(job.getId()).startsWith("DI").endsWith("SQ").isEqualTo(id);
+        assertThat(job.getId()).startsWith("D-").endsWith("A$").isEqualTo(id);
         assertThat(job.getBody()).isEqualTo(value);
         assertThat(job.getCounters()).containsKeys("nacks", "additional-deliveries");
     }
