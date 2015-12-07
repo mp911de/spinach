@@ -19,6 +19,8 @@ import com.google.common.collect.Lists;
  */
 public abstract class ClusterAwareNodeSupport {
 
+    public final static int MAX_ALLOWED_PRIORITY = 99;
+
     private DisqueConnection<Object, Object> disqueConnection;
     private final List<DisqueNode> nodes = Lists.newArrayList();
 
@@ -41,8 +43,23 @@ public abstract class ClusterAwareNodeSupport {
         this.nodes.clear();
 
         for (PrioritizedDisqueNode node : hello.nodes) {
+            if (isFiltered(node)) {
+                continue;
+            }
+
             this.nodes.add(node.disqueNode);
         }
+    }
+
+    /**
+     * @param node the cluster node
+     * @return {@literal true} if the {@code node} is filtered
+     */
+    protected boolean isFiltered(PrioritizedDisqueNode node) {
+        if (node.priority > MAX_ALLOWED_PRIORITY) {
+            return true;
+        }
+        return false;
     }
 
     public <K, V> void setConnection(DisqueConnection<K, V> disqueConnection) {

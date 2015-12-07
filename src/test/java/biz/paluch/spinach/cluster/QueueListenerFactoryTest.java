@@ -215,6 +215,24 @@ public class QueueListenerFactoryTest extends AbstractCommandTest {
     }
 
     @Test
+    public void gracefulClusterLeave() throws Exception {
+        connection0.sync().clusterLeaving(false);
+        queueListenerFactory.withLocalityTracking().getjobs(50, TimeUnit.MILLISECONDS, 1).subscribe(subscriber);
+
+        createJobs(connection0);
+        waitForSomeReceivedJobs();
+        connection0.sync().clusterLeaving(true);
+
+        createJobs(connection0);
+        waitForSomeReceivedJobs();
+        TimeUnit.SECONDS.sleep(1);
+
+        assertThat(connection0.sync().clientList()).doesNotContain("QueueListener-");
+        assertThat(connection1.sync().clientList()).contains("QueueListener-");
+        connection0.sync().clusterLeaving(false);
+    }
+
+    @Test
     public void sharedRedisClient() throws Exception {
 
         QueueListenerFactory sharedClientListener = QueueListenerFactory.create(client, Schedulers.io(), disqueURI0,

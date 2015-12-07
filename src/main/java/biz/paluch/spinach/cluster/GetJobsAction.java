@@ -20,6 +20,7 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
 import com.lambdaworks.redis.RedisChannelHandler;
 import com.lambdaworks.redis.RedisChannelWriter;
+import com.lambdaworks.redis.RedisException;
 import com.lambdaworks.redis.protocol.CommandHandler;
 
 import io.netty.channel.Channel;
@@ -38,7 +39,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
  */
 class GetJobsAction<K, V> implements Action0 {
 
-    private static final InternalLogger log = InternalLoggerFactory.getInstance(QueueListener.class);
+    private static final InternalLogger log = InternalLoggerFactory.getInstance(GetJobsAction.class);
 
     private final DisqueConnection<K, V> disqueConnection;
     private final String subscriptionId;
@@ -86,7 +87,7 @@ class GetJobsAction<K, V> implements Action0 {
 
         if (switchNodesCheck) {
             switchNodesCheck = false;
-            reconnectToNearestProducer(disqueConnection);
+            reconnectToNearestProducer(disqueConnection, false);
         }
 
         if (!disqueConnection.isOpen()) {
@@ -99,15 +100,35 @@ class GetJobsAction<K, V> implements Action0 {
                 return;
             }
 
-            List<Job<K, V>> getjobs = disqueConnection.sync().getjobs(getJobsArgs.getTimeout(), getJobsArgs.getTimeUnit(),
-                    getJobsArgs.getCount(), getJobsArgs.getQueues());
-            for (Job<K, V> job : getjobs) {
-                trackNodeStats(job.getId());
-                subscriber.onNext(job);
+            try {
+                List<Job<K, V>> getjobs = disqueConnection.sync().getjobs(getJobsArgs.getTimeout(), getJobsArgs.getTimeUnit(),
+                        getJobsArgs.getCount(), getJobsArgs.getQueues());
+                for (Job<K, V> job : getjobs) {
+                    trackNodeStats(job.getId());
+                    subscriber.onNext(job);
+                }
+            } catch (RedisException e) {
+                if (e.getMessage() != null && e.getMessage().startsWith("LEAVING")) {
+                    String nodeIdPrefix = getCurrentNodeIdPrefix();
+                    nodePrefixes.remove(nodeIdPrefix);
+                    log.info("Received LEAVING from NodeId with prefix {}", nodeIdPrefix);
+                    forcedReconnect();
+                    return;
+                }
+
+                throw e;
             }
         } finally {
             reentrantLock.unlock();
         }
+    }
+
+    /**
+     * Forced reconnect. Avoid stats biasing the reconnect towards the current host, so clear the stats for the current nodeId.
+     */
+    private void forcedReconnect() {
+        socketAddressSupplier.reloadNodes();
+        reconnectToNearestProducer(disqueConnection, true);
     }
 
     protected void setSelfSubscription(Subscription self) {
@@ -170,27 +191,36 @@ class GetJobsAction<K, V> implements Action0 {
     private void trackNodeStats(String id) {
         if (jobLocalityTracking && id.length() >= QueueListener.DISQUE_JOB_ID_LENGTH
                 && id.startsWith(QueueListener.JOB_ID_PREFIX) && id.endsWith(QueueListener.JOB_ID_SUFFIX)) {
-            String nodePrefix = id.substring(2, 10);
+            String nodePrefix = getNodePrefix(id);
             nodePrefixes.add(nodePrefix);
         }
     }
 
-    private void reconnectToNearestProducer(DisqueConnection<K, V> disqueConnection) {
+    private String getNodePrefix(String id) {
+        return id.substring(2, 10);
+    }
+
+    private void reconnectToNearestProducer(DisqueConnection<K, V> disqueConnection, boolean forcedReconnect) {
         log.debug("reconnectToNearestProducer()");
         Set<Multiset.Entry<String>> stats = Multisets.copyHighestCountFirst(nodePrefixes).entrySet();
         nodePrefixes.clear();
 
-        if (!isNodeSwitchNecessary(stats)) {
+        if (!isNodeSwitchNecessary(stats) && !forcedReconnect) {
             return;
         }
 
         String nodeIdPrefix = getNodeIdPrefix(stats);
-
-        log.debug("Set preferred node prefix to NodeId with prefix {}", nodeIdPrefix);
-        socketAddressSupplier.setPreferredNodeIdPrefix(nodeIdPrefix);
+        if (nodeIdPrefix != null) {
+            log.debug("Set preferred node prefix to {}", nodeIdPrefix);
+            socketAddressSupplier.setPreferredNodeIdPrefix(nodeIdPrefix);
+        }
 
         if (disqueConnection.isOpen()) {
-            log.info("Initiaing reconnect to NodeId with prefix {}", nodeIdPrefix);
+            if (nodeIdPrefix == null) {
+                log.info("Initiating reconnect");
+            } else {
+                log.info("Initiating reconnect to preferred node with prefix {}", nodeIdPrefix);
+            }
             disconnect((RedisChannelHandler<?, ?>) disqueConnection);
         }
     }
@@ -234,6 +264,11 @@ class GetJobsAction<K, V> implements Action0 {
         }
 
         String nodeIdPrefix = getNodeIdPrefix(stats);
+
+        if (nodeIdPrefix == null) {
+            return true;
+        }
+
         if (isConnectedToNode(nodeIdPrefix)) {
             return false;
         }
@@ -247,6 +282,11 @@ class GetJobsAction<K, V> implements Action0 {
     }
 
     private String getNodeIdPrefix(Set<Multiset.Entry<String>> entries) {
+
+        if (entries.isEmpty()) {
+            return null;
+        }
+
         Multiset.Entry<String> entry = entries.iterator().next();
         return entry.getElement();
     }
@@ -254,6 +294,13 @@ class GetJobsAction<K, V> implements Action0 {
     private boolean isConnectedToNode(String nodeIdPrefix) {
         return socketAddressSupplier.getCurrentNodeId() != null
                 && socketAddressSupplier.getCurrentNodeId().startsWith(nodeIdPrefix);
+    }
+
+    private String getCurrentNodeIdPrefix() {
+        if (socketAddressSupplier.getCurrentNodeId() != null) {
+            return getNodePrefix(socketAddressSupplier.getCurrentNodeId());
+        }
+        return getNodePrefix(disqueConnection.sync().clusterMyId());
     }
 
 }
