@@ -21,7 +21,7 @@ public class JobCommandTest extends AbstractCommandTest {
     public void addJob() throws Exception {
 
         String result = disque.addjob(queue, value, 5, TimeUnit.SECONDS);
-        assertThat(result).startsWith("D-").endsWith("$");
+        assertThat(result).startsWith("D-");
     }
 
     @Test
@@ -30,7 +30,7 @@ public class JobCommandTest extends AbstractCommandTest {
         AddJobArgs args = AddJobArgs.builder().async(true).delay(1).replicate(1).retry(1).ttl(10).maxlen(5).build();
         String result = disque.addjob(queue, value, 5, TimeUnit.SECONDS, args);
 
-        assertThat(result).startsWith("D-").endsWith("$");
+        assertThat(result).startsWith("D-");
 
         assertThat(args.getAsync()).isTrue();
         assertThat(args.getDelay()).isEqualTo(1);
@@ -44,9 +44,7 @@ public class JobCommandTest extends AbstractCommandTest {
 
         AddJobArgs args = AddJobArgs.builder().async(true).delay(1, TimeUnit.SECONDS).replicate(1).retry(1, TimeUnit.SECONDS)
                 .ttl(10, TimeUnit.MINUTES).build();
-        String result = disque.addjob(queue, value, 5, TimeUnit.SECONDS, args);
-
-        assertThat(result).startsWith("D-").endsWith("$");
+        disque.addjob(queue, value, 5, TimeUnit.SECONDS, args);
 
         assertThat(args.getAsync()).isTrue();
         assertThat(args.getDelay()).isEqualTo(1);
@@ -66,7 +64,7 @@ public class JobCommandTest extends AbstractCommandTest {
         Job<String, String> job = disque.getjob(queue);
 
         assertThat(job.getQueue()).isEqualTo(queue);
-        assertThat(job.getId()).startsWith("D-").endsWith("A$").isEqualTo(result);
+        assertThat(job.getId()).startsWith("D-").isEqualTo(result);
         assertThat(job.getBody()).isEqualTo(value);
         assertThat(job.getCounters()).isEmpty();
     }
@@ -85,7 +83,6 @@ public class JobCommandTest extends AbstractCommandTest {
         Job<String, String> job = disque.getjob(args, queue);
 
         assertThat(job.getQueue()).isEqualTo(queue);
-        assertThat(job.getId()).startsWith("D-").endsWith("A$").isEqualTo(id);
         assertThat(job.getBody()).isEqualTo(value);
         assertThat(job.getCounters()).containsKeys("nacks", "additional-deliveries");
     }
@@ -168,7 +165,7 @@ public class JobCommandTest extends AbstractCommandTest {
 
     @Test
     public void showNonExistent() throws Exception {
-        List<Object> result = disque.show("DI81c186ad5ea6105d040bb684ddbcb117af91716605s0SQ");
+        List<Object> result = disque.show("D-ff010e8a-ld0SEoOs7Pi9PROZmU+w8EQE-05a1AA");
         assertThat(result).hasSize(1);
     }
 

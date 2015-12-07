@@ -190,7 +190,7 @@ class GetJobsAction<K, V> implements Action0 {
 
     private void trackNodeStats(String id) {
         if (jobLocalityTracking && id.length() >= QueueListener.DISQUE_JOB_ID_LENGTH
-                && id.startsWith(QueueListener.JOB_ID_PREFIX) && id.endsWith(QueueListener.JOB_ID_SUFFIX)) {
+                && id.startsWith(QueueListener.JOB_ID_PREFIX)) {
             String nodePrefix = getNodeIdPrefix(id);
             nodePrefixes.add(nodePrefix);
         }
@@ -302,5 +302,4 @@ class GetJobsAction<K, V> implements Action0 {
         }
         return getNodeIdPrefix(disqueConnection.sync().clusterMyId());
     }
-
 }

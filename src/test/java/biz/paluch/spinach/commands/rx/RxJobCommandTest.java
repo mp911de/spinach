@@ -31,7 +31,7 @@ public class RxJobCommandTest extends JobCommandTest {
     public void addJob() throws Exception {
 
         String result = rx.addjob(queue, value, 5, TimeUnit.SECONDS).toBlocking().first();
-        assertThat(result).startsWith("D-").endsWith("A$");
+        assertThat(result).startsWith("D-");
     }
 
     @Test
