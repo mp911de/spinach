@@ -30,12 +30,12 @@ public interface DisqueServerCommands<K, V> {
     K clientGetname();
 
     /**
-     * Set the current connection name.
-     * 
-     * @param name the client name
-     * @return simple-string-reply {@code OK} if the connection name was successfully set.
+     * Kill connections of clients which are filtered by {@code killArgs}
+     *
+     * @param killArgs args for the kill operation
+     * @return Long integer-reply number of killed connections
      */
-    String clientSetname(String name);
+    Long clientKill(KillArgs killArgs);
 
     /**
      * Kill the connection of a client identified by ip:port.
@@ -46,12 +46,12 @@ public interface DisqueServerCommands<K, V> {
     String clientKill(String addr);
 
     /**
-     * Kill connections of clients which are filtered by {@code killArgs}
-     *
-     * @param killArgs args for the kill operation
-     * @return Long integer-reply number of killed connections
+     * Get the list of client connections.
+     * 
+     * @return String bulk-string-reply a unique string, formatted as follows: One client connection per line (separated by LF),
+     *         each line is composed of a succession of property=value fields separated by a space character.
      */
-    Long clientKill(KillArgs killArgs);
+    String clientList();
 
     /**
      * Stop processing commands from clients for some time.
@@ -62,12 +62,12 @@ public interface DisqueServerCommands<K, V> {
     String clientPause(long timeout);
 
     /**
-     * Get the list of client connections.
+     * Set the current connection name.
      * 
-     * @return String bulk-string-reply a unique string, formatted as follows: One client connection per line (separated by LF),
-     *         each line is composed of a succession of property=value fields separated by a space character.
+     * @param name the client name
+     * @return simple-string-reply {@code OK} if the connection name was successfully set.
      */
-    String clientList();
+    String clientSetname(String name);
 
     /**
      * Returns an array reply of details about all Redis commands.
@@ -77,12 +77,11 @@ public interface DisqueServerCommands<K, V> {
     List<Object> command();
 
     /**
-     * Returns an array reply of details about the requested commands.
+     * Get total number of Redis commands.
      * 
-     * @param commands the commands to query for
-     * @return List&lt;Object&gt; array-reply
+     * @return Long integer-reply of number of total commands in this Redis server.
      */
-    List<Object> commandInfo(String... commands);
+    Long commandCount();
 
     /**
      * Returns an array reply of details about the requested commands.
@@ -93,11 +92,12 @@ public interface DisqueServerCommands<K, V> {
     List<Object> commandInfo(CommandType... commands);
 
     /**
-     * Get total number of Redis commands.
+     * Returns an array reply of details about the requested commands.
      * 
-     * @return Long integer-reply of number of total commands in this Redis server.
+     * @param commands the commands to query for
+     * @return List&lt;Object&gt; array-reply
      */
-    Long commandCount();
+    List<Object> commandInfo(String... commands);
 
     /**
      * Get the value of a configuration parameter.
@@ -130,6 +130,15 @@ public interface DisqueServerCommands<K, V> {
      * @return String simple-string-reply: {@code OK} when the configuration was set properly. Otherwise an error is returned.
      */
     String configSet(String parameter, String value);
+
+    /**
+     * Remove all the server state: jobs, queues, and everything else to start like a fresh instance just rebooted.
+     * 
+     * @return always OK
+     */
+    String debugFlushall();
+
+    List<Object> hello();
 
     /**
      * Get information and statistics about the server.
@@ -192,14 +201,5 @@ public interface DisqueServerCommands<K, V> {
      *         unix time in seconds. microseconds.
      */
     List<V> time();
-
-    /**
-     * Remove all the server state: jobs, queues, and everything else to start like a fresh instance just rebooted.
-     * 
-     * @return always OK
-     */
-    String debugFlushall();
-
-    List<Object> hello();
 
 }

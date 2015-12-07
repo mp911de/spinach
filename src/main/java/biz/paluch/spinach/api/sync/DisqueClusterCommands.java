@@ -10,16 +10,6 @@ package biz.paluch.spinach.api.sync;
 public interface DisqueClusterCommands<K, V> {
 
     /**
-     * Meet another cluster node to include the node into the cluster. The command starts the cluster handshake and returns with
-     * {@literal OK} when the node was added to the cluster.
-     *
-     * @param ip IP address of the host
-     * @param port port number.
-     * @return String simple-string-reply
-     */
-    String clusterMeet(String ip, int port);
-
-    /**
      * Blacklist and remove the cluster node from the cluster.
      *
      * @param nodeId the node Id
@@ -35,6 +25,13 @@ public interface DisqueClusterCommands<K, V> {
     String clusterInfo();
 
     /**
+     * Retrieve cluster leaving state.
+     *
+     * @return String simple-string-reply
+     */
+    String clusterLeaving();
+
+    /**
      * Enable/disable cluster leaving state for a graceful cluster leave.
      *
      * @param state {@literal true} to set the leaving state, {@literal false} to un-set the leaving state
@@ -43,11 +40,14 @@ public interface DisqueClusterCommands<K, V> {
     String clusterLeaving(boolean state);
 
     /**
-     * Retrieve cluster leaving state.
+     * Meet another cluster node to include the node into the cluster. The command starts the cluster handshake and returns with
+     * {@literal OK} when the node was added to the cluster.
      *
+     * @param ip IP address of the host
+     * @param port port number.
      * @return String simple-string-reply
      */
-    String clusterLeaving();
+    String clusterMeet(String ip, int port);
 
     /**
      * Obtain the nodeId for the currently connected node.

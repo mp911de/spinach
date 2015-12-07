@@ -24,6 +24,23 @@ public interface DisqueCommands<K, V> extends DisqueJobCommands<K, V>, DisqueQue
     String auth(String password);
 
     /**
+     * Close the connection. The connection will become not usable anymore as soon as this method was called.
+     */
+    void close();
+
+    /**
+     *
+     * @return the underlying connection.
+     */
+    DisqueConnection<K, V> getConnection();
+
+    /**
+     *
+     * @return true if the connection is open (connected and not closed).
+     */
+    boolean isOpen();
+
+    /**
      * Ping the server.
      *
      * @return simple-string-reply
@@ -36,23 +53,6 @@ public interface DisqueCommands<K, V> extends DisqueJobCommands<K, V>, DisqueQue
      * @return String simple-string-reply always OK.
      */
     String quit();
-
-    /**
-     * Close the connection. The connection will become not usable anymore as soon as this method was called.
-     */
-    void close();
-
-    /**
-     *
-     * @return true if the connection is open (connected and not closed).
-     */
-    boolean isOpen();
-
-    /**
-     *
-     * @return the underlying connection.
-     */
-    DisqueConnection<K, V> getConnection();
 
     /**
      * Set the default timeout for operations.

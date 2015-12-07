@@ -19,6 +19,14 @@ import com.lambdaworks.redis.ScanCursor;
 public interface DisqueQueueCommands<K, V> {
 
     /**
+     * Remove the job from the queue.
+     * 
+     * @param jobIds the job Id's
+     * @return the number of jobs actually moved from queue to active state
+     */
+    long dequeue(String... jobIds);
+
+    /**
      * Queue jobs if not already queued.
      * 
      * @param jobIds the job Id's
@@ -33,31 +41,6 @@ public interface DisqueQueueCommands<K, V> {
      * @return the number of jobs actually move from active to queued state
      */
     long nack(String... jobIds);
-
-    /**
-     * Remove the job from the queue.
-     * 
-     * @param jobIds the job Id's
-     * @return the number of jobs actually moved from queue to active state
-     */
-    long dequeue(String... jobIds);
-
-    /**
-     * If the job is queued, remove it from queue and change state to active. Postpone the job requeue time in the future so
-     * that we'll wait the retry time before enqueueing again.
-     *
-     * * Return how much time the worker likely have before the next requeue event or an error:
-     * <ul>
-     * <li>-ACKED: The job is already acknowledged, so was processed already.</li>
-     * <li>-NOJOB We don't know about this job. The job was either already acknowledged and purged, or this node never received
-     * a copy.</li>
-     * <li>-TOOLATE 50% of the job TTL already elapsed, is no longer possible to delay it.</li>
-     * </ul>
-     *
-     * @param jobId the job Id
-     * @return retry count.
-     */
-    long working(String jobId);
 
     /**
      * Return the number of jobs queued.
@@ -96,17 +79,34 @@ public interface DisqueQueueCommands<K, V> {
      * Incrementally iterate the keys space.
      *
      * @param scanCursor cursor to resume from a previous scan
+     * @return KeyScanCursor&lt;K&gt; scan cursor.
+     */
+    KeyScanCursor<K> qscan(ScanCursor scanCursor);
+
+    /**
+     * Incrementally iterate the keys space.
+     *
+     * @param scanCursor cursor to resume from a previous scan
      * @param scanArgs scan arguments
      * @return KeyScanCursor&lt;K&gt; scan cursor.
      */
     KeyScanCursor<K> qscan(ScanCursor scanCursor, QScanArgs scanArgs);
 
     /**
-     * Incrementally iterate the keys space.
+     * If the job is queued, remove it from queue and change state to active. Postpone the job requeue time in the future so
+     * that we'll wait the retry time before enqueueing again.
      *
-     * @param scanCursor cursor to resume from a previous scan
-     * @return KeyScanCursor&lt;K&gt; scan cursor.
+     * * Return how much time the worker likely have before the next requeue event or an error:
+     * <ul>
+     * <li>-ACKED: The job is already acknowledged, so was processed already.</li>
+     * <li>-NOJOB We don't know about this job. The job was either already acknowledged and purged, or this node never received
+     * a copy.</li>
+     * <li>-TOOLATE 50% of the job TTL already elapsed, is no longer possible to delay it.</li>
+     * </ul>
+     *
+     * @param jobId the job Id
+     * @return retry count.
      */
-    KeyScanCursor<K> qscan(ScanCursor scanCursor);
+    long working(String jobId);
 
 }
