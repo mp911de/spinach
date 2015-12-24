@@ -32,7 +32,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
  */
 class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
 
-    public static final int DISQUE_JOB_ID_LENGTH = 42;
+    public static final int MIN_DISQUE_JOB_ID_LENGTH = 12;
     public static final String JOB_ID_PREFIX = "D-";
 
     private static final InternalLogger log = InternalLoggerFactory.getInstance(QueueListener.class);
