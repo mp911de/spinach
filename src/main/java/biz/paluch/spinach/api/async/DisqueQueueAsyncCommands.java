@@ -3,6 +3,7 @@ package biz.paluch.spinach.api.async;
 import java.util.List;
 
 import biz.paluch.spinach.api.Job;
+import biz.paluch.spinach.api.PauseArgs;
 import biz.paluch.spinach.api.QScanArgs;
 
 import com.lambdaworks.redis.KeyScanCursor;
@@ -41,6 +42,21 @@ public interface DisqueQueueAsyncCommands<K, V> {
      * @return the number of jobs actually move from active to queued state
      */
     RedisFuture<Long> nack(String... jobIds);
+
+    /**
+     * Change the {@literal PAUSE} pause state to:
+     * <ul>
+     * <li>Pause a queue</li>
+     * <li>Clear the pause state for a queue</li>
+     * <li>Query the pause state</li>
+     * <li>Broadcast the pause state</li>
+     * </ul>
+     * 
+     * @param queue the queue
+     * @param pauseArgs the pause args
+     * @return pause state of the queue.
+     */
+    RedisFuture<String> pause(K queue, PauseArgs pauseArgs);
 
     /**
      * Return the number of jobs queued.
@@ -108,5 +124,4 @@ public interface DisqueQueueAsyncCommands<K, V> {
      * @return retry count.
      */
     RedisFuture<Long> working(String jobId);
-
 }

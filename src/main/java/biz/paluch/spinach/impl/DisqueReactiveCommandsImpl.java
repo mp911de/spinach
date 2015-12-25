@@ -3,8 +3,10 @@ package biz.paluch.spinach.impl;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import rx.Observable;
 import biz.paluch.spinach.api.*;
 import biz.paluch.spinach.api.rx.DisqueReactiveCommands;
+
 import com.google.common.base.Supplier;
 import com.lambdaworks.redis.KeyScanCursor;
 import com.lambdaworks.redis.KillArgs;
@@ -13,7 +15,6 @@ import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.protocol.Command;
 import com.lambdaworks.redis.protocol.CommandArgs;
 import com.lambdaworks.redis.protocol.CommandOutput;
-import rx.Observable;
 
 /**
  * An asynchronous and thread-safe API for a Disque connection.
@@ -186,6 +187,11 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     @Override
     public Observable<String> auth(String password) {
         return createObservable(commandBuilder.auth(password));
+    }
+
+    @Override
+    public Observable<String> pause(K queue, PauseArgs pauseArgs) {
+        return createObservable(commandBuilder.pause(queue, pauseArgs));
     }
 
     @Override

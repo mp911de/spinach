@@ -1,15 +1,20 @@
 package biz.paluch.spinach.commands;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import biz.paluch.spinach.api.Job;
-import biz.paluch.spinach.api.QScanArgs;
-import com.lambdaworks.redis.KeyScanCursor;
-import com.lambdaworks.redis.RedisException;
 import org.junit.Test;
+
+import biz.paluch.spinach.api.Job;
+import biz.paluch.spinach.api.PauseArgs;
+import biz.paluch.spinach.api.QScanArgs;
+
+import com.lambdaworks.redis.KeyScanCursor;
+import com.lambdaworks.redis.RedisCommandExecutionException;
+import com.lambdaworks.redis.RedisException;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
@@ -70,6 +75,38 @@ public class QueueCommandTest extends AbstractCommandTest {
         disque.working("D-ff010e8a-ld0SEoOs7Pi9PROZmU+w8EQE-05a1AA");
     }
 
+    @Test
+    public void pause() throws Exception {
+
+        String pause = disque.pause(queue, PauseArgs.builder().none().build());
+        assertThat(pause).isEqualToIgnoringCase("none");
+
+        pause = disque.pause(queue, PauseArgs.builder().in().out().none().all().bcast().build());
+        assertThat(pause).isEqualToIgnoringCase("all");
+
+        pause = disque.pause(queue, PauseArgs.builder().none().bcast().build());
+        assertThat(pause).isEqualToIgnoringCase("none");
+
+        pause = disque.pause(queue, PauseArgs.builder().state().build());
+        assertThat(pause).isEqualToIgnoringCase("none");
+    }
+
+    @Test
+    public void pauseOperations() throws Exception {
+
+        disque.pause(queue, PauseArgs.builder().all().bcast().build());
+
+        try {
+            disque.addjob(queue, "job", 1, TimeUnit.MINUTES);
+            fail("Missing RedisCommandExecutionException");
+        } catch (RedisCommandExecutionException e) {
+            assertThat(e).hasMessageContaining("PAUSED");
+        }
+
+        assertThat(disque.getjob(1, TimeUnit.SECONDS, queue)).isNull();
+
+        disque.pause(queue, PauseArgs.builder().none().bcast().build());
+    }
 
     @Test
     public void qpeek() throws Exception {

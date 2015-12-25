@@ -10,6 +10,7 @@ import biz.paluch.spinach.api.*;
 import biz.paluch.spinach.output.JobListOutput;
 import biz.paluch.spinach.output.JobOutput;
 import biz.paluch.spinach.output.StringScanOutput;
+
 import com.lambdaworks.redis.KeyScanCursor;
 import com.lambdaworks.redis.KillArgs;
 import com.lambdaworks.redis.ScanCursor;
@@ -49,7 +50,6 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
 
         return createCommand(ADDJOB, new StatusOutput<K, V>(codec), args);
     }
-
 
     public Command<K, V, String> auth(String password) {
 
@@ -171,7 +171,6 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
     }
 
     public Command<K, V, List<Object>> commandInfo(String... commands) {
-
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec);
         args.add(INFO);
 
@@ -282,6 +281,13 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         DisqueCommandArgs<K, V> args = withJobIds(jobIds);
 
         return createCommand(NACK, new IntegerOutput<K, V>(codec), args);
+    }
+
+    public Command<K, V, String> pause(K queue, PauseArgs pauseArgs) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).addKey(queue);
+        pauseArgs.build(args);
+
+        return createCommand(PAUSE, new StatusOutput<K, V>(codec), args);
     }
 
     public Command<K, V, String> ping() {

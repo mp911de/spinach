@@ -3,6 +3,7 @@ package biz.paluch.spinach.api.sync;
 import java.util.List;
 
 import biz.paluch.spinach.api.Job;
+import biz.paluch.spinach.api.PauseArgs;
 import biz.paluch.spinach.api.QScanArgs;
 
 import com.lambdaworks.redis.KeyScanCursor;
@@ -41,6 +42,21 @@ public interface DisqueQueueCommands<K, V> {
      * @return the number of jobs actually move from active to queued state
      */
     long nack(String... jobIds);
+
+    /**
+     * Change the {@literal PAUSE} pause state to:
+     * <ul>
+     * <li>Pause a queue</li>
+     * <li>Clear the pause state for a queue</li>
+     * <li>Query the pause state</li>
+     * <li>Broadcast the pause state</li>
+     * </ul>
+     * 
+     * @param queue the queue
+     * @param pauseArgs the pause args
+     * @return pause state of the queue.
+     */
+    String pause(K queue, PauseArgs pauseArgs);
 
     /**
      * Return the number of jobs queued.
@@ -96,7 +112,7 @@ public interface DisqueQueueCommands<K, V> {
      * If the job is queued, remove it from queue and change state to active. Postpone the job requeue time in the future so
      * that we'll wait the retry time before enqueueing again.
      *
-     * * Return how much time the worker likely have before the next requeue event or an error:
+     * Return how much time the worker likely have before the next requeue event or an error:
      * <ul>
      * <li>-ACKED: The job is already acknowledged, so was processed already.</li>
      * <li>-NOJOB We don't know about this job. The job was either already acknowledged and purged, or this node never received
@@ -108,5 +124,4 @@ public interface DisqueQueueCommands<K, V> {
      * @return retry count.
      */
     long working(String jobId);
-
 }

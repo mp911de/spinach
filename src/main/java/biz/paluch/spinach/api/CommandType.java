@@ -8,16 +8,16 @@ import com.lambdaworks.redis.protocol.ProtocolKeyword;
  */
 public enum CommandType implements ProtocolKeyword {
     // Jobs
-    ADDJOB, GETJOB, ACKJOB, FASTACK, DELJOB, SHOW, JSCAN,
+    ADDJOB, ACKJOB, DELJOB, FASTACK, GETJOB, JSCAN, SHOW,
 
     // Queues
-    QLEN, QPEEK, ENQUEUE, NACK, DEQUEUE, QSCAN, WORKING,
+    ENQUEUE, DEQUEUE, NACK, PAUSE, QLEN, QPEEK, QSCAN, WORKING,
 
     // AOF
     BGREWRITEAOF,
 
     // Server commands
-    AUTH, PING, INFO, SHUTDOWN, DEBUG, CONFIG, CLUSTER, CLIENT, SLOWLOG, TIME, COMMAND, /* LATENCY, */HELLO, QUIT;
+    AUTH, CONFIG, CLUSTER, CLIENT, COMMAND, DEBUG, INFO, /* LATENCY, */HELLO, PING, QUIT, SHUTDOWN, SLOWLOG, TIME;
 
     public final byte[] bytes;
 
