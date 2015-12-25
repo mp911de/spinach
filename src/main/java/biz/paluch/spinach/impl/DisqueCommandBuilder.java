@@ -4,11 +4,13 @@ import static biz.paluch.spinach.api.CommandKeyword.*;
 import static biz.paluch.spinach.api.CommandType.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.api.*;
 import biz.paluch.spinach.output.JobListOutput;
 import biz.paluch.spinach.output.JobOutput;
+import biz.paluch.spinach.output.QstatMapOutput;
 import biz.paluch.spinach.output.StringScanOutput;
 
 import com.lambdaworks.redis.KeyScanCursor;
@@ -317,6 +319,13 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         }
 
         return createCommand(QSCAN, new KeyScanOutput<K, V>(codec), args);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Command<K, V, Map<String, Object>> qstat(K queue) {
+        DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).addKey(queue);
+
+        return createCommand(QSTAT, new QstatMapOutput<K, V>(codec), args);
     }
 
     public Command<K, V, String> quit() {

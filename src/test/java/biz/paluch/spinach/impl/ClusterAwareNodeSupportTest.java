@@ -23,7 +23,7 @@ public class ClusterAwareNodeSupportTest extends AbstractCommandTest {
         sut.reloadNodes();
 
         List<DisqueNode> nodes = sut.getNodes();
-        assertThat(nodes).hasSize(2);
+        assertThat(nodes.size()).isGreaterThan(1);
         assertThat(nodes.get(0).getPort()).isEqualTo(port);
         assertThat(nodes.get(0).getAddr()).isNotNull();
         assertThat(nodes.get(0).getNodeId()).isNotNull();

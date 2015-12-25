@@ -1,5 +1,7 @@
 package biz.paluch.spinach.api.rx;
 
+import java.util.Map;
+
 import rx.Observable;
 import biz.paluch.spinach.api.Job;
 import biz.paluch.spinach.api.PauseArgs;
@@ -105,6 +107,14 @@ public interface DisqueQueueReactiveCommands<K, V> {
      * @return KeyScanCursor&lt;K&gt; scan cursor.
      */
     Observable<KeyScanCursor<K>> qscan(ScanCursor scanCursor, QScanArgs scanArgs);
+
+    /**
+     * Retrieve information about a queue as key value pairs.
+     * 
+     * @param queue the queue
+     * @return map containing the statistics (Key-Value pairs)
+     */
+    Observable<Map<String, Object>> qstat(K queue);
 
     /**
      * If the job is queued, remove it from queue and change state to active. Postpone the job requeue time in the future so

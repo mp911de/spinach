@@ -1,6 +1,7 @@
 package biz.paluch.spinach.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import biz.paluch.spinach.api.*;
@@ -338,6 +339,11 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     @Override
     public RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor, QScanArgs scanArgs) {
         return dispatch(commandBuilder.qscan(scanCursor, scanArgs));
+    }
+
+    @Override
+    public RedisFuture<Map<String, Object>> qstat(K queue) {
+        return dispatch(commandBuilder.qstat(queue));
     }
 
     @Override

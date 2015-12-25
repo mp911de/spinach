@@ -26,6 +26,16 @@ unixsocket $(ROOT_DIR)/work/disque-7712/socket
 unixsocketperm 777
 endef
 
+define DISQUE3_CONF
+daemonize yes
+port 7713
+pidfile disque.pid
+logfile disque.log
+appendonly no
+unixsocket $(ROOT_DIR)/work/disque-7713/socket
+unixsocketperm 777
+endef
+
 define STUNNEL_CONF
 cert=$(ROOT_DIR)/work/cert.pem
 key=$(ROOT_DIR)/work/key.pem
@@ -43,17 +53,21 @@ endef
 
 export DISQUE1_CONF
 export DISQUE2_CONF
+export DISQUE3_CONF
 
 export STUNNEL_CONF
 
 start: cleanup
 	mkdir -p work/disque-7711
 	mkdir -p work/disque-7712
+	mkdir -p work/disque-7713
 	echo "$$DISQUE1_CONF" > work/disque-7711/disque.conf && cd work/disque-7711 && ../disque-git/src/disque-server disque.conf
 	echo "$$DISQUE2_CONF" > work/disque-7712/disque.conf && cd work/disque-7712 && ../disque-git/src/disque-server disque.conf
+	echo "$$DISQUE3_CONF" > work/disque-7713/disque.conf && cd work/disque-7713 && ../disque-git/src/disque-server disque.conf
 	echo "$$STUNNEL_CONF" > work/stunnel.conf
 	which stunnel4 >/dev/null 2>&1 && stunnel4 work/stunnel.conf || stunnel work/stunnel.conf
 	work/disque-git/src/disque cluster meet 127.0.0.1 7712
+	work/disque-git/src/disque cluster meet 127.0.0.1 7713
 
 
 cleanup: stop

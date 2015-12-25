@@ -24,7 +24,7 @@ public class BasicCommandTest extends AbstractCommandTest {
 
         List<Object> result = disque.hello();
         // 1, nodeId, two nested nodes
-        assertThat(result).hasSize(4);
+        assertThat(result.size()).isGreaterThan(3);
     }
 
     @Test

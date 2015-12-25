@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
+import biz.paluch.spinach.DisqueURI;
 import biz.paluch.spinach.api.Job;
 import biz.paluch.spinach.api.PauseArgs;
 import biz.paluch.spinach.api.QScanArgs;
@@ -175,4 +177,23 @@ public class QueueCommandTest extends AbstractCommandTest {
         assertThat(result.isFinished()).isTrue();
     }
 
+    @Test
+    public void qstat() throws Exception {
+        client.connect(DisqueURI.create("localhost", 7712)).sync().addjob(queue, "job", 1, TimeUnit.MINUTES);
+        client.connect(DisqueURI.create("localhost", 7713)).sync().addjob(queue, "job", 1, TimeUnit.MINUTES);
+        disque.getjob(1, TimeUnit.SECONDS, queue);
+        disque.getjob(1, TimeUnit.SECONDS, queue);
+
+        Map<String, Object> qstat = disque.qstat(queue);
+        assertThat(qstat.get("import-from")).isInstanceOf(List.class);
+        assertThat(qstat.get("jobs-in")).isInstanceOf(Number.class); // "jobs-in" and "jobs-out" come are returned after
+                                                                     // "import-from", so check that there is no bug in parsing
+                                                                     // the output
+        assertThat(qstat.get("jobs-out")).isInstanceOf(Number.class);
+        assertThat(qstat).isNotNull().containsEntry("name", queue);
+        assertThat(qstat.size()).isGreaterThan(2);
+
+        Map<String, Object> doNotExistResult = disque.qstat("i-do-not-exist");
+        assertThat(doNotExistResult).isNotNull().isEmpty();
+    }
 }

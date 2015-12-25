@@ -1,6 +1,7 @@
 package biz.paluch.spinach.api.async;
 
 import java.util.List;
+import java.util.Map;
 
 import biz.paluch.spinach.api.Job;
 import biz.paluch.spinach.api.PauseArgs;
@@ -107,6 +108,14 @@ public interface DisqueQueueAsyncCommands<K, V> {
      * @return KeyScanCursor&lt;K&gt; scan cursor.
      */
     RedisFuture<KeyScanCursor<K>> qscan(ScanCursor scanCursor, QScanArgs scanArgs);
+
+    /**
+     * Retrieve information about a queue as key value pairs.
+     * 
+     * @param queue the queue
+     * @return map containing the statistics (Key-Value pairs)
+     */
+    RedisFuture<Map<String, Object>> qstat(K queue);
 
     /**
      * If the job is queued, remove it from queue and change state to active. Postpone the job requeue time in the future so

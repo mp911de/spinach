@@ -1,6 +1,7 @@
 package biz.paluch.spinach.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
@@ -202,6 +203,11 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     @Override
     public Observable<String> quit() {
         return createObservable(commandBuilder.quit());
+    }
+
+    @Override
+    public Observable<Map<String, Object>> qstat(K queue) {
+        return createObservable(commandBuilder.qstat(queue));
     }
 
     @Override
