@@ -30,9 +30,9 @@ public interface DisqueJobAsyncCommands<K, V> {
     RedisFuture<Long> ackjob(String... jobIds);
 
     /**
-     * Add job tot the {@code queue} with the body of {@code job}
+     * Add a job to the {@code queue} with the body {@code job}.
      *
-     * @param queue the target queue
+     * @param queue the queue name
      * @param job job body
      * @param timeout TTL timeout
      * @param timeUnit TTL timeout time unit
@@ -42,9 +42,9 @@ public interface DisqueJobAsyncCommands<K, V> {
 
     /**
      *
-     * Add job tot the {@code queue} with the body of {@code job}
+     * Add a job to the {@code queue} with the body {@code job}.
      *
-     * @param queue the target queue
+     * @param queue the queue name
      * @param job job body
      * @param timeout TTL timeout
      * @param timeUnit TTL timeout time unit
@@ -75,7 +75,7 @@ public interface DisqueJobAsyncCommands<K, V> {
      * connection. If timeout is given, the command will block until given timeout and return null.
      *
      * @param getJobArgs job arguments
-     * @param queues the queue
+     * @param queues the queue names
      * @return the job or null
      */
     RedisFuture<Job<K, V>> getjob(GetJobArgs getJobArgs, K... queues);
@@ -83,7 +83,7 @@ public interface DisqueJobAsyncCommands<K, V> {
     /**
      * Get jobs from the specified queue. If there are no jobs in any of the specified queues the command block.
      *
-     * @param queues queue names
+     * @param queues the queue names
      * @return the job or null
      */
     RedisFuture<Job<K, V>> getjob(K... queues);
@@ -94,7 +94,7 @@ public interface DisqueJobAsyncCommands<K, V> {
      *
      * @param timeout max timeout to wait
      * @param timeUnit timeout unit
-     * @param queues queue names
+     * @param queues the queue names
      * @return the job or null
      */
     RedisFuture<Job<K, V>> getjob(long timeout, TimeUnit timeUnit, K... queues);
@@ -114,7 +114,7 @@ public interface DisqueJobAsyncCommands<K, V> {
      *
      * @param getJobArgs job arguments
      * @param count count of jobs to return
-     * @param queues queue names
+     * @param queues the queue names
      * @return the jobs
      */
     RedisFuture<List<Job<K, V>>> getjobs(GetJobArgs getJobArgs, long count, K... queues);
@@ -123,7 +123,7 @@ public interface DisqueJobAsyncCommands<K, V> {
      * Get jobs from the specified queues. If there are no jobs in any of the specified queues the command will block the
      * connection.
      *
-     * @param queues queue names
+     * @param queues the queue names
      * @return the jobs
      */
     RedisFuture<List<Job<K, V>>> getjobs(K... queues);
@@ -144,7 +144,7 @@ public interface DisqueJobAsyncCommands<K, V> {
      * @param timeout timeout to wait
      * @param timeUnit timeout unit
      * @param count count of jobs to return
-     * @param queues queue names
+     * @param queues the queue names
      * @return the jobs
      */
     RedisFuture<List<Job<K, V>>> getjobs(long timeout, TimeUnit timeUnit, long count, K... queues);

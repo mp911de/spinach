@@ -108,7 +108,7 @@ public class JScanArgs<K> {
         /**
          * Scan a specific queue
          * 
-         * @param queue id of the queue
+         * @param queue the queue name
          * @return the current builder
          */
         public Builder<K> queue(K queue) {

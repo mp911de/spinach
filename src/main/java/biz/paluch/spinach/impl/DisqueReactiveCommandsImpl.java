@@ -44,6 +44,11 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
+    public Observable<Long> ackjob(String... jobIds) {
+        return createObservable(commandBuilder.ackjob(jobIds));
+    }
+
+    @Override
     public Observable<String> addjob(K queue, V job, long duration, TimeUnit timeUnit) {
         return createObservable(commandBuilder.addjob(queue, job, duration, timeUnit, null));
     }
@@ -51,6 +56,171 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     @Override
     public Observable<String> addjob(K queue, V job, long duration, TimeUnit timeUnit, AddJobArgs addJobArgs) {
         return createObservable(commandBuilder.addjob(queue, job, duration, timeUnit, addJobArgs));
+    }
+
+    @Override
+    public Observable<String> auth(String password) {
+        return createObservable(commandBuilder.auth(password));
+    }
+
+    @Override
+    public Observable<String> bgrewriteaof() {
+        return createObservable(commandBuilder.bgrewriteaof());
+    }
+
+    @Override
+    public Observable<K> clientGetname() {
+        return createObservable(commandBuilder.clientGetname());
+    }
+
+    @Override
+    public Observable<Long> clientKill(KillArgs killArgs) {
+        return createObservable(commandBuilder.clientKill(killArgs));
+    }
+
+    @Override
+    public Observable<String> clientKill(String addr) {
+        return createObservable(commandBuilder.clientKill(addr));
+    }
+
+    @Override
+    public Observable<String> clientList() {
+        return createObservable(commandBuilder.clientList());
+    }
+
+    @Override
+    public Observable<String> clientPause(long timeout) {
+        return createObservable(commandBuilder.clientPause(timeout));
+    }
+
+    @Override
+    public Observable<String> clientSetname(String name) {
+        return createObservable(commandBuilder.clientSetname(name));
+    }
+
+    @Override
+    public void close() {
+        connection.close();
+    }
+
+    @Override
+    public Observable<String> clusterForget(String nodeId) {
+        return createObservable(commandBuilder.clusterForget(nodeId));
+    }
+
+    @Override
+    public Observable<String> clusterInfo() {
+        return createObservable(commandBuilder.clusterInfo());
+    }
+
+    @Override
+    public Observable<String> clusterLeaving() {
+        return createObservable(commandBuilder.clusterLeaving());
+    }
+
+    @Override
+    public Observable<String> clusterLeaving(boolean state) {
+        return createObservable(commandBuilder.clusterLeaving(state));
+    }
+
+    @Override
+    public Observable<String> clusterMeet(String ip, int port) {
+        return createObservable(commandBuilder.clusterMeet(ip, port));
+    }
+
+    @Override
+    public Observable<String> clusterMyId() {
+        return createObservable(commandBuilder.clusterMyId());
+    }
+
+    @Override
+    public Observable<String> clusterNodes() {
+        return createObservable(commandBuilder.clusterNodes());
+    }
+
+    @Override
+    public Observable<String> clusterReset(boolean hard) {
+        return createObservable(commandBuilder.clusterReset(hard));
+    }
+
+    @Override
+    public Observable<String> clusterSaveconfig() {
+        return createObservable(commandBuilder.clusterSaveconfig());
+    }
+
+    @Override
+    public Observable<Object> command() {
+        return createDissolvingObservable(commandBuilder.command());
+    }
+
+    @Override
+    public Observable<Long> commandCount() {
+        return createObservable(commandBuilder.commandCount());
+    }
+
+    @Override
+    public Observable<Object> commandInfo(CommandType... commands) {
+        String[] stringCommands = new String[commands.length];
+        for (int i = 0; i < commands.length; i++) {
+            stringCommands[i] = commands[i].name();
+        }
+
+        return commandInfo(stringCommands);
+    }
+
+    @Override
+    public Observable<Object> commandInfo(String... commands) {
+        return createDissolvingObservable(commandBuilder.commandInfo(commands));
+    }
+
+    @Override
+    public Observable<String> configGet(String parameter) {
+        return createDissolvingObservable(commandBuilder.configGet(parameter));
+    }
+
+    @Override
+    public Observable<String> configResetstat() {
+        return createObservable(commandBuilder.configResetstat());
+    }
+
+    @Override
+    public Observable<String> configRewrite() {
+        return createObservable(commandBuilder.configRewrite());
+    }
+
+    @Override
+    public Observable<String> configSet(String parameter, String value) {
+        return createObservable(commandBuilder.configSet(parameter, value));
+    }
+
+    @Override
+    public Observable<String> debugFlushall() {
+        return createObservable(commandBuilder.debugFlushall());
+    }
+
+    @Override
+    public Observable<Long> deljob(String... jobIds) {
+        return createObservable(commandBuilder.deljob(jobIds));
+    }
+
+    @Override
+    public Observable<Long> dequeue(String... jobIds) {
+        return createObservable(commandBuilder.dequeue(jobIds));
+    }
+
+    @Override
+    public Observable<Long> enqueue(String... jobIds) {
+        return createObservable(commandBuilder.enqueue(jobIds));
+    }
+
+    @Override
+    public Observable<Long> fastack(String... jobIds) {
+        return createObservable(commandBuilder.fastack(jobIds));
+    }
+
+    @Override
+    public Observable<Job<K, V>> getjob(GetJobArgs args, K... queues) {
+        return createObservable(commandBuilder.getjob(args, queues));
     }
 
     @Override
@@ -65,8 +235,8 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
-    public Observable<Job<K, V>> getjob(GetJobArgs args, K... queues) {
-        return createObservable(commandBuilder.getjob(args, queues));
+    public Observable<Job<K, V>> getjobs(GetJobArgs args, long count, K... queues) {
+        return createDissolvingObservable(commandBuilder.getjobs(count, args, queues));
     }
 
     @Override
@@ -81,88 +251,23 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
-    public Observable<Job<K, V>> getjobs(GetJobArgs args, long count, K... queues) {
-        return createDissolvingObservable(commandBuilder.getjobs(count, args, queues));
-    }
-
-    @Override
-    public Observable<List<Object>> show(String jobId) {
-        return createDissolvingObservable(commandBuilder.show(jobId));
-    }
-
-    @Override
-    public Observable<Long> enqueue(String... jobIds) {
-        return createObservable(commandBuilder.enqueue(jobIds));
-    }
-
-    @Override
-    public Observable<Long> nack(String... jobIds) {
-        return createObservable(commandBuilder.nack(jobIds));
-    }
-
-    @Override
-    public Observable<Long> dequeue(String... jobIds) {
-        return createObservable(commandBuilder.dequeue(jobIds));
-    }
-
-    @Override
-    public Observable<Long> deljob(String... jobIds) {
-        return createObservable(commandBuilder.deljob(jobIds));
-    }
-
-    @Override
-    public Observable<Long> ackjob(String... jobIds) {
-        return createObservable(commandBuilder.ackjob(jobIds));
-    }
-
-    @Override
-    public Observable<Long> fastack(String... jobIds) {
-        return createObservable(commandBuilder.fastack(jobIds));
-    }
-
-    @Override
-    public Observable<Long> working(String jobId) {
-        return createObservable(commandBuilder.working(jobId));
-    }
-
-    @Override
-    public Observable<Long> qlen(K queue) {
-        return createObservable(commandBuilder.qlen(queue));
-    }
-
-    @Override
-    public Observable<Job<K, V>> qpeek(K queue, long count) {
-        return createDissolvingObservable(commandBuilder.qpeek(queue, count));
-    }
-
-    @Override
     public Observable<Object> hello() {
         return createDissolvingObservable(commandBuilder.hello());
     }
 
     @Override
-    public Observable<String> debugFlushall() {
-        return createObservable(commandBuilder.debugFlushall());
+    public Observable<String> info() {
+        return createObservable(commandBuilder.info());
     }
 
     @Override
-    public Observable<KeyScanCursor<K>> qscan() {
-        return createObservable(commandBuilder.qscan(null, null));
+    public Observable<String> info(String section) {
+        return createObservable(commandBuilder.info(section));
     }
 
     @Override
-    public Observable<KeyScanCursor<K>> qscan(QScanArgs scanArgs) {
-        return createObservable(commandBuilder.qscan(null, scanArgs));
-    }
-
-    @Override
-    public Observable<KeyScanCursor<K>> qscan(ScanCursor scanCursor, QScanArgs scanArgs) {
-        return createObservable(commandBuilder.qscan(scanCursor, scanArgs));
-    }
-
-    @Override
-    public Observable<KeyScanCursor<K>> qscan(ScanCursor scanCursor) {
-        return createObservable(commandBuilder.qscan(scanCursor, null));
+    public boolean isOpen() {
+        return connection.isOpen();
     }
 
     @Override
@@ -176,18 +281,18 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
-    public Observable<KeyScanCursor<String>> jscan(ScanCursor scanCursor, JScanArgs<K> scanArgs) {
-        return createObservable(commandBuilder.jscan(scanCursor, scanArgs));
-    }
-
-    @Override
     public Observable<KeyScanCursor<String>> jscan(ScanCursor scanCursor) {
         return createObservable(commandBuilder.jscan(scanCursor, null));
     }
 
     @Override
-    public Observable<String> auth(String password) {
-        return createObservable(commandBuilder.auth(password));
+    public Observable<KeyScanCursor<String>> jscan(ScanCursor scanCursor, JScanArgs<K> scanArgs) {
+        return createObservable(commandBuilder.jscan(scanCursor, scanArgs));
+    }
+
+    @Override
+    public Observable<Long> nack(String... jobIds) {
+        return createObservable(commandBuilder.nack(jobIds));
     }
 
     @Override
@@ -201,8 +306,33 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
-    public Observable<String> quit() {
-        return createObservable(commandBuilder.quit());
+    public Observable<Long> qlen(K queue) {
+        return createObservable(commandBuilder.qlen(queue));
+    }
+
+    @Override
+    public Observable<Job<K, V>> qpeek(K queue, long count) {
+        return createDissolvingObservable(commandBuilder.qpeek(queue, count));
+    }
+
+    @Override
+    public Observable<KeyScanCursor<K>> qscan() {
+        return createObservable(commandBuilder.qscan(null, null));
+    }
+
+    @Override
+    public Observable<KeyScanCursor<K>> qscan(QScanArgs scanArgs) {
+        return createObservable(commandBuilder.qscan(null, scanArgs));
+    }
+
+    @Override
+    public Observable<KeyScanCursor<K>> qscan(ScanCursor scanCursor) {
+        return createObservable(commandBuilder.qscan(scanCursor, null));
+    }
+
+    @Override
+    public Observable<KeyScanCursor<K>> qscan(ScanCursor scanCursor, QScanArgs scanArgs) {
+        return createObservable(commandBuilder.qscan(scanCursor, scanArgs));
     }
 
     @Override
@@ -211,83 +341,18 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
-    public Observable<K> clientGetname() {
-        return createObservable(commandBuilder.clientGetname());
+    public Observable<String> quit() {
+        return createObservable(commandBuilder.quit());
     }
 
     @Override
-    public Observable<String> clientSetname(String name) {
-        return createObservable(commandBuilder.clientSetname(name));
+    public Observable<List<Object>> show(String jobId) {
+        return createDissolvingObservable(commandBuilder.show(jobId));
     }
 
     @Override
-    public Observable<String> clientKill(String addr) {
-        return createObservable(commandBuilder.clientKill(addr));
-    }
-
-    @Override
-    public Observable<Long> clientKill(KillArgs killArgs) {
-        return createObservable(commandBuilder.clientKill(killArgs));
-    }
-
-    @Override
-    public Observable<String> clientPause(long timeout) {
-        return createObservable(commandBuilder.clientPause(timeout));
-    }
-
-    @Override
-    public Observable<String> clientList() {
-        return createObservable(commandBuilder.clientList());
-    }
-
-    @Override
-    public Observable<Object> command() {
-        return createDissolvingObservable(commandBuilder.command());
-    }
-
-    @Override
-    public Observable<Object> commandInfo(String... commands) {
-        return createDissolvingObservable(commandBuilder.commandInfo(commands));
-    }
-
-    @Override
-    public Observable<Object> commandInfo(CommandType... commands) {
-        String[] stringCommands = new String[commands.length];
-        for (int i = 0; i < commands.length; i++) {
-            stringCommands[i] = commands[i].name();
-        }
-
-        return commandInfo(stringCommands);
-    }
-
-    @Override
-    public Observable<Long> commandCount() {
-        return createObservable(commandBuilder.commandCount());
-    }
-
-    @Override
-    public Observable<String> configGet(String parameter) {
-        return createDissolvingObservable(commandBuilder.configGet(parameter));
-    }
-
-    @Override
-    public Observable<String> configResetstat() {
-        return createObservable(commandBuilder.configResetstat());
-    }
-
-    @Override
-    public Observable<String> configSet(String parameter, String value) {
-        return createObservable(commandBuilder.configSet(parameter, value));
-    }
-
-    @Override
-    public Observable<String> configRewrite() {
-        return createObservable(commandBuilder.configRewrite());
-    }
-
-    @Override
-    public Observable<V> time() {
-        return createDissolvingObservable(commandBuilder.time());
+    public void shutdown(boolean save) {
+        connection.dispatch(commandBuilder.shutdown(save));
     }
 
     @Override
@@ -311,78 +376,36 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
-    public Observable<String> info() {
-        return createObservable(commandBuilder.info());
+    public Observable<V> time() {
+        return createDissolvingObservable(commandBuilder.time());
     }
 
     @Override
-    public Observable<String> info(String section) {
-        return createObservable(commandBuilder.info(section));
+    public Observable<Long> working(String jobId) {
+        return createObservable(commandBuilder.working(jobId));
     }
-
+    
     @Override
-    public void shutdown(boolean save) {
-        connection.dispatch(commandBuilder.shutdown(save));
+    public DisqueConnection<K, V> getConnection() {
+        return connection;
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected <T, R> R createDissolvingObservable(Supplier<Command<K, V, T>> commandSupplier) {
+        return (R) Observable.create(new ReactiveCommandDispatcher<K, V, T>(commandSupplier, connection, true));
     }
 
-    @Override
-    public Observable<String> bgrewriteaof() {
-        return createObservable(commandBuilder.bgrewriteaof());
-    }
-
-    @Override
-    public Observable<String> clusterMeet(String ip, int port) {
-        return createObservable(commandBuilder.clusterMeet(ip, port));
-    }
-
-    @Override
-    public Observable<String> clusterForget(String nodeId) {
-        return createObservable(commandBuilder.clusterForget(nodeId));
-    }
-
-    @Override
-    public Observable<String> clusterLeaving(boolean state) {
-        return createObservable(commandBuilder.clusterLeaving(state));
-    }
-
-    @Override
-    public Observable<String> clusterLeaving() {
-        return createObservable(commandBuilder.clusterLeaving());
-    }
-
-    @Override
-    public Observable<String> clusterInfo() {
-        return createObservable(commandBuilder.clusterInfo());
-    }
-
-    @Override
-    public Observable<String> clusterMyId() {
-        return createObservable(commandBuilder.clusterMyId());
-    }
-
-    @Override
-    public Observable<String> clusterNodes() {
-        return createObservable(commandBuilder.clusterNodes());
-    }
-
-    @Override
-    public Observable<String> clusterReset(boolean hard) {
-        return createObservable(commandBuilder.clusterReset(hard));
-    }
-
-    @Override
-    public Observable<String> clusterSaveconfig() {
-        return createObservable(commandBuilder.clusterSaveconfig());
-    }
-
-    protected <T> Observable<T> createObservable(final CommandType type, final CommandOutput<K, V, T> output,
-            final CommandArgs<K, V> args) {
+    protected <T> Observable<T> createObservable(final Command<K, V, T> command) {
         return createObservable(new Supplier<Command<K, V, T>>() {
             @Override
             public Command<K, V, T> get() {
-                return new Command<K, V, T>(type, output, args);
+                return command;
             }
         });
+    }
+
+    protected <T> Observable<T> createObservable(Supplier<Command<K, V, T>> commandSupplier) {
+        return Observable.create(new ReactiveCommandDispatcher<K, V, T>(commandSupplier, connection, false));
     }
 
     protected <T, R> R createDissolvingObservable(final Command<K, V, T> command) {
@@ -394,36 +417,13 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
         });
     }
 
-    public <T> Observable<T> createObservable(final Command<K, V, T> command) {
+    protected <T> Observable<T> createObservable(final CommandType type, final CommandOutput<K, V, T> output,
+            final CommandArgs<K, V> args) {
         return createObservable(new Supplier<Command<K, V, T>>() {
             @Override
             public Command<K, V, T> get() {
-                return command;
+                return new Command<K, V, T>(type, output, args);
             }
         });
-    }
-
-    public <T> Observable<T> createObservable(Supplier<Command<K, V, T>> commandSupplier) {
-        return Observable.create(new ReactiveCommandDispatcher<K, V, T>(commandSupplier, connection, false));
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T, R> R createDissolvingObservable(Supplier<Command<K, V, T>> commandSupplier) {
-        return (R) Observable.create(new ReactiveCommandDispatcher<K, V, T>(commandSupplier, connection, true));
-    }
-
-    @Override
-    public void close() {
-        connection.close();
-    }
-
-    @Override
-    public boolean isOpen() {
-        return connection.isOpen();
-    }
-
-    @Override
-    public DisqueConnection<K, V> getConnection() {
-        return connection;
     }
 }

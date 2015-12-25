@@ -86,7 +86,7 @@ public class QueueListenerFactory<K, V> {
      * 
      * @param disqueURI the DisqueURI
      * @param codec use this codec to encode/decode keys and values, must note be {@literal null}
-     * @param queues queue names
+     * @param queues the queue names
      * @param <K> Key type
      * @param <V> Value type
      * @return a new instance of {@link QueueListenerFactory}
@@ -102,7 +102,7 @@ public class QueueListenerFactory<K, V> {
      * @param scheduler a scheduler from rxjava for I/O operations
      * @param disqueURI the DisqueURI
      * @param codec use this codec to encode/decode keys and values, must note be {@literal null}
-     * @param queues queue names
+     * @param queues the queue names
      * @param <K> Key type
      * @param <V> Value type
      * @return a new instance of {@link QueueListenerFactory}
@@ -120,7 +120,7 @@ public class QueueListenerFactory<K, V> {
      * @param scheduler a scheduler from rxjava for I/O operations, must not be {@literal null}
      * @param disqueURI the DisqueURI
      * @param codec use this codec to encode/decode keys and values, must note be {@literal null}
-     * @param queues queue names
+     * @param queues the queue names
      * @param <K> Key type
      * @param <V> Value type
      * @return a new instance of {@link QueueListenerFactory}

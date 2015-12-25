@@ -53,7 +53,7 @@ public interface DisqueQueueAsyncCommands<K, V> {
      * <li>Broadcast the pause state</li>
      * </ul>
      * 
-     * @param queue the queue
+     * @param queue the queue name
      * @param pauseArgs the pause args
      * @return pause state of the queue.
      */
@@ -62,7 +62,7 @@ public interface DisqueQueueAsyncCommands<K, V> {
     /**
      * Return the number of jobs queued.
      * 
-     * @param queue the queue
+     * @param queue the queue name
      * @return the number of jobs queued
      */
     RedisFuture<Long> qlen(K queue);
@@ -71,7 +71,7 @@ public interface DisqueQueueAsyncCommands<K, V> {
      * Return an array of at most "count" jobs available inside the queue "queue" without removing the jobs from the queue. This
      * is basically an introspection and debugging command.
      * 
-     * @param queue the queue
+     * @param queue the queue name
      * @param count number of jobs to return
      * @return List of jobs.
      */
@@ -112,8 +112,8 @@ public interface DisqueQueueAsyncCommands<K, V> {
     /**
      * Retrieve information about a queue as key value pairs.
      * 
-     * @param queue the queue
-     * @return map containing the statistics (Key-Value pairs)
+     * @param queue the queue name
+     * @return map containing the statistics (key value pairs)
      */
     RedisFuture<Map<String, Object>> qstat(K queue);
 
