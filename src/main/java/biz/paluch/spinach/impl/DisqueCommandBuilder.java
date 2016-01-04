@@ -38,10 +38,10 @@ class DisqueCommandBuilder<K, V> extends BaseCommandBuilder<K, V> {
         return createCommand(ACKJOB, new IntegerOutput<K, V>(codec), args);
     }
 
-    public Command<K, V, String> addjob(K queue, V job, long duration, TimeUnit timeUnit, AddJobArgs addJobArgs) {
+    public Command<K, V, String> addjob(K queue, V job, long commandTimeout, TimeUnit timeUnit, AddJobArgs addJobArgs) {
         DisqueCommandArgs<K, V> args = new DisqueCommandArgs<K, V>(codec).addKey(queue).addValue(job);
         if (timeUnit != null) {
-            args.add(timeUnit.toMillis(duration));
+            args.add(timeUnit.toMillis(commandTimeout));
         } else {
             args.add(0);
         }

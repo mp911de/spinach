@@ -49,13 +49,13 @@ public class DisqueReactiveCommandsImpl<K, V> implements DisqueReactiveCommands<
     }
 
     @Override
-    public Observable<String> addjob(K queue, V job, long duration, TimeUnit timeUnit) {
-        return createObservable(commandBuilder.addjob(queue, job, duration, timeUnit, null));
+    public Observable<String> addjob(K queue, V job, long commandTimeout, TimeUnit timeUnit) {
+        return createObservable(commandBuilder.addjob(queue, job, commandTimeout, timeUnit, null));
     }
 
     @Override
-    public Observable<String> addjob(K queue, V job, long duration, TimeUnit timeUnit, AddJobArgs addJobArgs) {
-        return createObservable(commandBuilder.addjob(queue, job, duration, timeUnit, addJobArgs));
+    public Observable<String> addjob(K queue, V job, long commandTimeout, TimeUnit timeUnit, AddJobArgs addJobArgs) {
+        return createObservable(commandBuilder.addjob(queue, job, commandTimeout, timeUnit, addJobArgs));
     }
 
     @Override

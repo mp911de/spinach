@@ -34,11 +34,11 @@ public interface DisqueJobAsyncCommands<K, V> {
      *
      * @param queue the queue name
      * @param job job body
-     * @param timeout TTL timeout
-     * @param timeUnit TTL timeout time unit
+     * @param commandTimeout command timeout to reach replication level
+     * @param timeUnit command timeout unit
      * @return the job id
      */
-    RedisFuture<String> addjob(K queue, V job, long timeout, TimeUnit timeUnit);
+    RedisFuture<String> addjob(K queue, V job, long commandTimeout, TimeUnit timeUnit);
 
     /**
      *
@@ -46,12 +46,12 @@ public interface DisqueJobAsyncCommands<K, V> {
      *
      * @param queue the queue name
      * @param job job body
-     * @param timeout TTL timeout
-     * @param timeUnit TTL timeout time unit
+     * @param commandTimeout command timeout to reach replication level
+     * @param timeUnit command timeout unit
      * @param addJobArgs additional job arguments
      * @return the job id
      */
-    RedisFuture<String> addjob(K queue, V job, long timeout, TimeUnit timeUnit, AddJobArgs addJobArgs);
+    RedisFuture<String> addjob(K queue, V job, long commandTimeout, TimeUnit timeUnit, AddJobArgs addJobArgs);
 
     /**
      * Evict (and possibly remove from queue) all the jobs in memeory matching the specified job IDs. Jobs are evicted whatever

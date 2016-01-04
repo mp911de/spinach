@@ -46,13 +46,13 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
     }
 
     @Override
-    public RedisFuture<String> addjob(K queue, V job, long duration, TimeUnit timeUnit) {
-        return dispatch(commandBuilder.addjob(queue, job, duration, timeUnit, null));
+    public RedisFuture<String> addjob(K queue, V job, long commandTimeout, TimeUnit timeUnit) {
+        return dispatch(commandBuilder.addjob(queue, job, commandTimeout, timeUnit, null));
     }
 
     @Override
-    public RedisFuture<String> addjob(K queue, V job, long duration, TimeUnit timeUnit, AddJobArgs addJobArgs) {
-        return dispatch(commandBuilder.addjob(queue, job, duration, timeUnit, addJobArgs));
+    public RedisFuture<String> addjob(K queue, V job, long commandTimeout, TimeUnit timeUnit, AddJobArgs addJobArgs) {
+        return dispatch(commandBuilder.addjob(queue, job, commandTimeout, timeUnit, addJobArgs));
     }
 
     @Override
