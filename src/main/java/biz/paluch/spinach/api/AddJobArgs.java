@@ -134,7 +134,7 @@ public class AddJobArgs {
          * Set the number of seconds that should elapse before the job is queued by any server.
          * 
          * @param delaySec the number of seconds that should elapse before the job is queued by any server.
-         * @return
+         * @return the builder
          */
         public Builder delay(long delaySec) {
             this.delay = delaySec;

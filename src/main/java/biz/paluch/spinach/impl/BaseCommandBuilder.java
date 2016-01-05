@@ -1,8 +1,8 @@
 package biz.paluch.spinach.impl;
 
 import com.lambdaworks.redis.codec.RedisCodec;
+import com.lambdaworks.redis.output.CommandOutput;
 import com.lambdaworks.redis.protocol.Command;
-import com.lambdaworks.redis.protocol.CommandOutput;
 import com.lambdaworks.redis.protocol.ProtocolKeyword;
 
 class BaseCommandBuilder<K, V> {

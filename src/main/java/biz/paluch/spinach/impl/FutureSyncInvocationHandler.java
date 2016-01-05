@@ -3,11 +3,14 @@ package biz.paluch.spinach.impl;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import biz.paluch.spinach.api.DisqueConnection;
-
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.lambdaworks.redis.LettuceFutures;
-import com.lambdaworks.redis.protocol.RedisCommand;
+import com.lambdaworks.redis.RedisFuture;
+import com.lambdaworks.redis.api.StatefulConnection;
+import com.lambdaworks.redis.api.StatefulRedisConnection;
 
 /**
  * Invocation-handler to synchronize API calls which use Futures as backend. This class leverages the need to implement a full
@@ -19,12 +22,21 @@ import com.lambdaworks.redis.protocol.RedisCommand;
  */
 class FutureSyncInvocationHandler<K, V> extends AbstractInvocationHandler {
 
-    private final DisqueConnection<?, ?> connection;
+    private final StatefulConnection<?, ?> connection;
     private final Object asyncApi;
+    private LoadingCache<Method, Method> methodCache;
 
-    public FutureSyncInvocationHandler(DisqueConnection<?, ?> connection, Object asyncApi) {
+    public FutureSyncInvocationHandler(StatefulConnection<?, ?> connection, Object asyncApi) {
         this.connection = connection;
         this.asyncApi = asyncApi;
+
+        methodCache = CacheBuilder.newBuilder().build(new CacheLoader<Method, Method>() {
+            @Override
+            public Method load(Method key) throws Exception {
+                return asyncApi.getClass().getMethod(key.getName(), key.getParameterTypes());
+            }
+        });
+
     }
 
     /**
@@ -38,18 +50,21 @@ class FutureSyncInvocationHandler<K, V> extends AbstractInvocationHandler {
 
         try {
 
-            Method targetMethod = asyncApi.getClass().getMethod(method.getName(), method.getParameterTypes());
-
+            Method targetMethod = methodCache.get(method);
             Object result = targetMethod.invoke(asyncApi, args);
 
-            if (result instanceof RedisCommand) {
-                RedisCommand<?, ?, ?> command = (RedisCommand<?, ?, ?>) result;
+            if (result instanceof RedisFuture) {
+                RedisFuture<?> command = (RedisFuture<?>) result;
+                if (!method.getName().equals("exec") && !method.getName().equals("multi")) {
+                    if (connection instanceof StatefulRedisConnection && ((StatefulRedisConnection) connection).isMulti()) {
+                        return null;
+                    }
+                }
 
-                return LettuceFutures.await(command, connection.getTimeout(), connection.getTimeoutUnit());
+                LettuceFutures.awaitOrCancel(command, connection.getTimeout(), connection.getTimeoutUnit());
+                return command.get();
             }
-
             return result;
-
         } catch (InvocationTargetException e) {
             throw e.getTargetException();
         }

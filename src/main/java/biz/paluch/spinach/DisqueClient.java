@@ -395,4 +395,15 @@ public class DisqueClient extends AbstractRedisClient {
         checkArgument(clientResources != null, "ClientResources must not be null");
     }
 
+    /**
+     * Set the {@link ClientOptions} for the client.
+     *
+     * @param clientOptions the new client options
+     * @throws IllegalArgumentException if {@literal clientOptions} is null
+     */
+    @Override
+    public void setOptions(ClientOptions clientOptions) {
+        super.setOptions(clientOptions);
+    }
+
 }

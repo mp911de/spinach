@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 
 import com.lambdaworks.redis.codec.RedisCodec;
-import com.lambdaworks.redis.protocol.CommandOutput;
+import com.lambdaworks.redis.output.CommandOutput;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>

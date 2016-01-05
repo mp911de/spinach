@@ -7,7 +7,7 @@ import java.util.Map;
 import biz.paluch.spinach.api.Job;
 
 import com.lambdaworks.redis.codec.RedisCodec;
-import com.lambdaworks.redis.protocol.CommandOutput;
+import com.lambdaworks.redis.output.CommandOutput;
 
 /**
  * Output handler for commands returning {@link Job} data structres.

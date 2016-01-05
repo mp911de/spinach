@@ -12,6 +12,7 @@ import com.lambdaworks.redis.KillArgs;
 import com.lambdaworks.redis.RedisFuture;
 import com.lambdaworks.redis.ScanCursor;
 import com.lambdaworks.redis.codec.RedisCodec;
+import com.lambdaworks.redis.protocol.AsyncCommand;
 import com.lambdaworks.redis.protocol.RedisCommand;
 
 /**
@@ -205,8 +206,14 @@ public class DisqueAsyncCommandsImpl<K, V> implements DisqueAsyncCommands<K, V> 
         return dispatch(commandBuilder.dequeue(jobIds));
     }
 
-    public <T> RedisCommand<K, V, T> dispatch(RedisCommand<K, V, T> cmd) {
-        return connection.dispatch(cmd);
+    public <T> AsyncCommand<K, V, T> dispatch(RedisCommand<K, V, T> cmd) {
+
+        AsyncCommand<K, V, T> asyncCommand = new AsyncCommand<>(cmd);
+        RedisCommand<K, V, T> dispatched = connection.dispatch(asyncCommand);
+        if (dispatched instanceof AsyncCommand) {
+            return (AsyncCommand<K, V, T>) dispatched;
+        }
+        return asyncCommand;
     }
 
     @Override

@@ -43,9 +43,9 @@
         <!-- You need a running redis+sentinel for all tests, therefore disabled by default -->
         <skipTests>true</skipTests>
         <github.site.upload.skip>true</github.site.upload.skip>
-        <spinach-release-version>0.3</spinach-release-version>
-        <lettuce-version>3.4.1.Final</lettuce-version>
-        <netty-version>4.0.34.Final</netty-version>
+        <spinach-release-version>0.2</spinach-release-version>
+        <lettuce-version>4.1-SNAPSHOT</lettuce-version>
+        <netty-version>4.0.28.Final</netty-version>
         <rxjava-version>1.0.14</rxjava-version>
     </properties>
 
@@ -326,8 +326,8 @@
                     <compilerArgument>-Xlint</compilerArgument>
                     <showWarnings>true</showWarnings>
                     <showDeprecation>true</showDeprecation>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
 

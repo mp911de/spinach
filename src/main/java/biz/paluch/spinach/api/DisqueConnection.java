@@ -1,13 +1,10 @@
 package biz.paluch.spinach.api;
 
-import java.util.concurrent.TimeUnit;
-
 import biz.paluch.spinach.api.async.DisqueAsyncCommands;
 import biz.paluch.spinach.api.rx.DisqueReactiveCommands;
 import biz.paluch.spinach.api.sync.DisqueCommands;
 
-import com.lambdaworks.redis.ClientOptions;
-import com.lambdaworks.redis.protocol.RedisCommand;
+import com.lambdaworks.redis.api.StatefulConnection;
 
 /**
  * A thread-safe connection to a redis server. Multiple threads may share one {@link DisqueConnection}.
@@ -19,7 +16,7 @@ import com.lambdaworks.redis.protocol.RedisCommand;
  * @param <V> Value type.
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public interface DisqueConnection<K, V> {
+public interface DisqueConnection<K, V> extends StatefulConnection<K, V> {
 
     /**
      * Returns the {@link DisqueCommands} API for the current connection. Does not create a new connection.
@@ -42,53 +39,4 @@ public interface DisqueConnection<K, V> {
      */
     DisqueReactiveCommands<K, V> reactive();
 
-    /**
-     * Set the default command timeout for this connection.
-     *
-     * @param timeout Command timeout.
-     * @param unit Unit of time for the timeout.
-     */
-    void setTimeout(long timeout, TimeUnit unit);
-
-    /**
-     * @return the timeout unit.
-     */
-    TimeUnit getTimeoutUnit();
-
-    /**
-     * @return the timeout.
-     */
-    long getTimeout();
-
-    /**
-     * Dispatch a command. Write a command on the channel. The command may be changed/wrapped during write and the written
-     * instance is returned after the call.
-     *
-     * @param command the redis command
-     * @param <T> result type
-     * @return the written redis command
-     */
-    <T> RedisCommand<K, V, T> dispatch(RedisCommand<K, V, T> command);
-
-    /**
-     * Close the connection. The connection will become not usable anymore as soon as this method was called.
-     */
-    void close();
-
-    /**
-     * @return true if the connection is open (connected and not closed).
-     */
-    boolean isOpen();
-
-    /**
-     *
-     * @return the client options valid for this connection.
-     */
-    ClientOptions getOptions();
-
-    /**
-     * Reset the command state. Queued commands will be canceled and the internal state will be reset. This is useful when the
-     * internal state machine gets out of sync with the connection.
-     */
-    void reset();
 }

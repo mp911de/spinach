@@ -1,7 +1,10 @@
 package biz.paluch.spinach.impl;
 
+import static com.lambdaworks.redis.protocol.CommandType.AUTH;
+
 import java.lang.reflect.Proxy;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import biz.paluch.spinach.api.CommandType;
 import biz.paluch.spinach.api.DisqueConnection;
@@ -9,12 +12,11 @@ import biz.paluch.spinach.api.async.DisqueAsyncCommands;
 import biz.paluch.spinach.api.rx.DisqueReactiveCommands;
 import biz.paluch.spinach.api.sync.DisqueCommands;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.lambdaworks.redis.AbstractRedisClient;
 import com.lambdaworks.redis.RedisChannelHandler;
 import com.lambdaworks.redis.RedisChannelWriter;
 import com.lambdaworks.redis.codec.RedisCodec;
-import com.lambdaworks.redis.protocol.CommandKeyword;
+import com.lambdaworks.redis.protocol.CompleteableCommand;
 import com.lambdaworks.redis.protocol.RedisCommand;
 import io.netty.channel.ChannelHandler;
 
@@ -109,33 +111,24 @@ public class DisqueConnectionImpl<K, V> extends RedisChannelHandler<K, V> implem
     }
 
     @Override
-    public <T> RedisCommand<K, V, T> dispatch(RedisCommand<K, V, T> cmd) {
+    public  <T, C extends RedisCommand<K, V, T>> C dispatch(C cmd) {
 
-        if (cmd instanceof DisqueCommand) {
-            final DisqueCommand<K, V, T> local = (DisqueCommand<K, V, T>) cmd;
+        RedisCommand<K, V, T> local = cmd;
 
-            if (local.getType() == CommandType.AUTH) {
-                local.addListener(new Runnable() {
-                    @Override
-                    public void run() {
-                        if ("OK".equals(local.getOutput().get())) {
-                            DisqueConnectionImpl.this.password = local.getArgs().getStrings().get(0).toCharArray();
-                        }
-                    }
-                }, MoreExecutors.sameThreadExecutor());
-            }
-
-            if (local.getType() == CommandType.CLIENT && local.getArgs() != null
-                    && local.getArgs().getKeywords().indexOf(CommandKeyword.SETNAME) == 0) {
-                local.addListener(new Runnable() {
-                    @Override
-                    public void run() {
-                        if ("OK".equals(local.getOutput().get())) {
-                            DisqueConnectionImpl.this.clientName = local.getArgs().getStrings().get(0);
-                        }
-                    }
-                }, MoreExecutors.sameThreadExecutor());
-            }
+        if (local.getType().name().equals(AUTH.name())) {
+            local = attachOnComplete(local, status -> {
+                if ("OK".equals(status) && cmd.getArgs().getFirstString() != null) {
+                    this.password = cmd.getArgs().getFirstString().toCharArray();
+                }
+            });
+        }
+        // todo: expose first protocol keyword as arg
+        if (local.getType() == CommandType.CLIENT && local.getArgs() != null) {
+            local = attachOnComplete(local, status -> {
+                if ("OK".equals(status) && cmd.getArgs().getFirstString() != null) {
+                    DisqueConnectionImpl.this.clientName = cmd.getArgs().getFirstString();
+                }
+            });
         }
 
         return super.dispatch(cmd);
@@ -159,5 +152,14 @@ public class DisqueConnectionImpl<K, V> extends RedisChannelHandler<K, V> implem
         if (clientName != null) {
             getAsyncCommands().clientSetname(clientName);
         }
+    }
+
+    private <T> RedisCommand<K, V, T> attachOnComplete(RedisCommand<K, V, T> command, Consumer<T> consumer) {
+
+        if (command instanceof CompleteableCommand) {
+            CompleteableCommand<T> completeable = (CompleteableCommand<T>) command;
+            completeable.onComplete(consumer);
+        }
+        return command;
     }
 }

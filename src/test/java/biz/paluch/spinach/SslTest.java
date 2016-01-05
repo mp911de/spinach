@@ -77,7 +77,7 @@ public class SslTest {
     @Test(expected = RedisConnectionException.class)
     public void sslWithVerificationWillFail() throws Exception {
 
-        assumeTrue(JavaRuntime.AT_LEAST_JDK_7);
+        assumeTrue(JavaRuntime.AT_LEAST_JDK_8);
         DisqueURI disqueUri = DisqueURI.create("disques://" + host() + ":" + sslPort());
 
         disqueClient.connect(disqueUri);

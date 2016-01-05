@@ -6,8 +6,8 @@ import java.util.concurrent.TimeoutException;
 
 import com.lambdaworks.redis.RedisCommandExecutionException;
 import com.lambdaworks.redis.RedisCommandInterruptedException;
+import com.lambdaworks.redis.output.CommandOutput;
 import com.lambdaworks.redis.protocol.Command;
-import com.lambdaworks.redis.protocol.CommandOutput;
 import com.lambdaworks.redis.protocol.ProtocolKeyword;
 
 /**
@@ -20,36 +20,6 @@ class DisqueCommand<K, V, T> extends Command<K, V, T> {
 
     public DisqueCommand(ProtocolKeyword type, CommandOutput<K, V, T> output, DisqueCommandArgs<K, V> args) {
         super(type, output, args);
-    }
-
-    public T get() throws ExecutionException {
-        try {
-            this.latch.await();
-            if (getException() != null) {
-                throw new ExecutionException(this.getException());
-            }
-
-            if (output.hasError()) {
-                throw new RedisCommandExecutionException(output.getError());
-            }
-
-            return output.get();
-
-        } catch (InterruptedException e) {
-            throw new RedisCommandInterruptedException(e);
-        }
-    }
-
-    public T get(long timeout, TimeUnit unit) throws TimeoutException, ExecutionException {
-        try {
-            if (!this.latch.await(timeout, unit)) {
-                throw new TimeoutException("Command timed out");
-            }
-        } catch (InterruptedException e) {
-            throw new RedisCommandInterruptedException(e);
-        }
-
-        return get();
     }
 
     @Override

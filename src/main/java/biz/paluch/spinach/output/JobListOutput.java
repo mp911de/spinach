@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.lambdaworks.redis.output.CommandOutput;
 import rx.Subscriber;
 import biz.paluch.spinach.api.Job;
 
 import com.lambdaworks.redis.codec.RedisCodec;
-import com.lambdaworks.redis.protocol.CommandOutput;
 
 /**
  * Output handler for commands returning a {@link List} of {@link Job Jobs} data structres.
