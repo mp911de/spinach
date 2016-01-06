@@ -10,6 +10,7 @@ import java.nio.channels.UnresolvedAddressException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import biz.paluch.spinach.support.DefaultDisqueClient;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -22,12 +23,14 @@ import biz.paluch.spinach.commands.AbstractCommandTest;
 import biz.paluch.spinach.impl.RoundRobinSocketAddressSupplier;
 import biz.paluch.spinach.impl.SocketAddressSupplier;
 import biz.paluch.spinach.impl.SocketAddressSupplierFactory;
+import biz.paluch.spinach.support.FastShutdown;
 
 import com.google.code.tempusfugit.temporal.Condition;
 import com.google.code.tempusfugit.temporal.Timeout;
 import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.codec.Utf8StringCodec;
 import com.lambdaworks.redis.protocol.CommandHandler;
+import com.lambdaworks.redis.resource.ClientResources;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
@@ -35,6 +38,8 @@ import com.lambdaworks.redis.protocol.CommandHandler;
 public class ClientTest extends AbstractCommandTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
+
+    private static ClientResources clientResources =  DefaultDisqueClient.getClientResources();
 
     @Override
     public void openConnection() throws Exception {
@@ -71,14 +76,14 @@ public class ClientTest extends AbstractCommandTest {
 
         final TestConnectionListener listener = new TestConnectionListener();
 
-        RedisClient client = new RedisClient(host, port);
+        DisqueClient client = DisqueClient.create(clientResources, DisqueURI.create(host, port));
         client.addListener(listener);
 
         assertThat(listener.onConnected).isNull();
         assertThat(listener.onDisconnected).isNull();
         assertThat(listener.onException).isNull();
 
-        RedisAsyncConnection<String, String> connection = client.connectAsync();
+        DisqueConnection<String, String> connection = client.connect();
         waitOrTimeout(new Condition() {
 
             @Override
@@ -90,7 +95,6 @@ public class ClientTest extends AbstractCommandTest {
         assertThat(listener.onConnected).isEqualTo(connection);
         assertThat(listener.onDisconnected).isNull();
 
-        connection.set(key, value).get();
         connection.close();
 
         waitOrTimeout(new Condition() {
@@ -104,6 +108,8 @@ public class ClientTest extends AbstractCommandTest {
         assertThat(listener.onConnected).isEqualTo(connection);
         assertThat(listener.onDisconnected).isEqualTo(connection);
 
+        FastShutdown.shutdown(client);
+
     }
 
     @Test
@@ -112,12 +118,12 @@ public class ClientTest extends AbstractCommandTest {
         final TestConnectionListener removedListener = new TestConnectionListener();
         final TestConnectionListener retainedListener = new TestConnectionListener();
 
-        RedisClient client = new RedisClient(host, port);
+        DisqueClient client = DisqueClient.create(clientResources, DisqueURI.create(host, port));
         client.addListener(removedListener);
         client.addListener(retainedListener);
         client.removeListener(removedListener);
 
-        RedisAsyncConnection<String, String> connection = client.connectAsync();
+        DisqueConnection<String, String> connection = client.connect();
         waitOrTimeout(new Condition() {
 
             @Override
@@ -131,7 +137,7 @@ public class ClientTest extends AbstractCommandTest {
         assertThat(removedListener.onConnected).isNull();
         assertThat(removedListener.onDisconnected).isNull();
         assertThat(removedListener.onException).isNull();
-
+        FastShutdown.shutdown(client);
     }
 
     @Test
@@ -157,7 +163,7 @@ public class ClientTest extends AbstractCommandTest {
 
     @Test
     public void connectFailure() throws Exception {
-        DisqueClient client = new DisqueClient("invalid");
+        DisqueClient client = DisqueClient.create(clientResources, "disque://invalid");
         try {
             client.connect();
         } catch (Exception e) {
@@ -169,7 +175,7 @@ public class ClientTest extends AbstractCommandTest {
 
     @Test
     public void connectConnectionRefused() throws Exception {
-        DisqueClient client = new DisqueClient(TestSettings.host(), TestSettings.port(999));
+        DisqueClient client =  DisqueClient.create(clientResources, DisqueURI.create(TestSettings.host(), TestSettings.port(999)));
         try {
             client.connect();
         } catch (Exception e) {
@@ -205,7 +211,7 @@ public class ClientTest extends AbstractCommandTest {
     @Test
     public void emptyClient() throws Exception {
 
-        DisqueClient client = new DisqueClient();
+        DisqueClient client = DisqueClient.create(clientResources);
         try {
             client.connect();
         } catch (IllegalStateException e) {

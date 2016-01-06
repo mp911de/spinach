@@ -1,45 +1,47 @@
 package biz.paluch.spinach;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.*;
+import static org.junit.Assume.assumeTrue;
 
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
-import biz.paluch.spinach.api.sync.DisqueCommands;
-import org.apache.log4j.Logger;
+import biz.paluch.spinach.support.DefaultDisqueClient;
 import org.junit.Test;
 
+import biz.paluch.spinach.api.sync.DisqueCommands;
+import biz.paluch.spinach.commands.AbstractCommandTest;
+import biz.paluch.spinach.support.FastShutdown;
+
+import com.lambdaworks.redis.resource.ClientResources;
 import io.netty.util.internal.SystemPropertyUtil;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
-public class UnixDomainSocketTest {
+public class UnixDomainSocketTest extends AbstractCommandTest {
 
-    protected Logger log = Logger.getLogger(getClass());
-
-    private DisqueCommands<String, String> connection;
+    private static ClientResources clientResources = DefaultDisqueClient.getClientResources();
 
     @Test
     public void linux_x86_64_socket() throws Exception {
 
         linuxOnly();
 
-        DisqueClient disqueClient = new DisqueClient(DisqueURI.Builder.disqueSocket(TestSettings.socket()).build());
+        DisqueClient disqueClient = DisqueClient.create(clientResources, DisqueURI.Builder.disqueSocket(TestSettings.socket())
+                .build());
 
         DisqueCommands<String, String> connection = disqueClient.connect().sync();
 
         connection.debugFlushall();
         connection.ping();
 
-        disqueClient.shutdown(0, 0, TimeUnit.SECONDS);
+        FastShutdown.shutdown(disqueClient);
     }
 
     @Test
     public void differentSocketTypes() throws Exception {
 
-        DisqueClient disqueClient = new DisqueClient(DisqueURI.Builder.disqueSocket(TestSettings.socket())
+        DisqueClient disqueClient = DisqueClient.create(clientResources, DisqueURI.Builder.disqueSocket(TestSettings.socket())
                 .withDisque(TestSettings.host()).build());
 
         try {
@@ -48,7 +50,7 @@ public class UnixDomainSocketTest {
             assertThat(e).hasMessageContaining("You cannot mix unix");
         }
 
-        disqueClient.shutdown(0, 0, TimeUnit.SECONDS);
+        FastShutdown.shutdown(disqueClient);
     }
 
     private void linuxOnly() {

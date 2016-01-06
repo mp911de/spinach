@@ -1,26 +1,32 @@
 package biz.paluch.spinach;
 
-import static biz.paluch.spinach.TestSettings.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
+import static biz.paluch.spinach.TestSettings.host;
+import static biz.paluch.spinach.TestSettings.sslPort;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 
-import biz.paluch.spinach.api.sync.DisqueCommands;
+import biz.paluch.spinach.support.DefaultDisqueClient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
+import biz.paluch.spinach.api.sync.DisqueCommands;
+import biz.paluch.spinach.support.FastShutdown;
+
 import com.lambdaworks.redis.ClientOptions;
 import com.lambdaworks.redis.JavaRuntime;
 import com.lambdaworks.redis.RedisConnectionException;
+import com.lambdaworks.redis.resource.ClientResources;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public class SslTest {
     public static final String KEYSTORE = "work/keystore.jks";
-    public static DisqueClient disqueClient = new DisqueClient();
+    public static ClientResources clientResources =  DefaultDisqueClient.getClientResources();
+    public static DisqueClient disqueClient = DisqueClient.create(clientResources);
 
     @Before
     public void before() throws Exception {
@@ -31,7 +37,7 @@ public class SslTest {
 
     @AfterClass
     public static void afterClass() {
-        disqueClient.shutdown();
+        FastShutdown.shutdown(disqueClient);
     }
 
     @Test

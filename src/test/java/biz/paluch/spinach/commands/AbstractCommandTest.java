@@ -6,16 +6,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import biz.paluch.spinach.DisqueClient;
-import biz.paluch.spinach.TestSettings;
-import biz.paluch.spinach.api.sync.DisqueCommands;
-import com.lambdaworks.redis.KeyValue;
-import com.lambdaworks.redis.ScoredValue;
 import org.apache.log4j.Logger;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+
+import biz.paluch.spinach.DisqueClient;
+import biz.paluch.spinach.DisqueURI;
+import biz.paluch.spinach.TestSettings;
+import biz.paluch.spinach.api.sync.DisqueCommands;
+import biz.paluch.spinach.support.DefaultDisqueClient;
+
+import com.lambdaworks.redis.KeyValue;
+import com.lambdaworks.redis.ScoredValue;
 
 public abstract class AbstractCommandTest {
     public static final String host = TestSettings.host();
@@ -31,16 +34,11 @@ public abstract class AbstractCommandTest {
 
     @BeforeClass
     public static void setupClient() {
-        client = getDisqueClient();
+        client = DefaultDisqueClient.get();
     }
 
     protected static DisqueClient getDisqueClient() {
-        return new DisqueClient(host, port);
-    }
-
-    @AfterClass
-    public static void shutdownClient() {
-        client.shutdown(0, 0, TimeUnit.MILLISECONDS);
+        return DisqueClient.create(DefaultDisqueClient.getClientResources(), DisqueURI.create(host, port));
     }
 
     @Before

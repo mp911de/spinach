@@ -18,11 +18,8 @@ import com.lambdaworks.redis.protocol.ProtocolKeyword;
  */
 class DisqueCommand<K, V, T> extends Command<K, V, T> {
 
-    protected final ProtocolKeyword type;
-
     public DisqueCommand(ProtocolKeyword type, CommandOutput<K, V, T> output, DisqueCommandArgs<K, V> args) {
         super(type, output, args);
-        this.type = type;
     }
 
     public T get() throws ExecutionException {
@@ -60,7 +57,4 @@ class DisqueCommand<K, V, T> extends Command<K, V, T> {
         return (DisqueCommandArgs<K, V>) super.getArgs();
     }
 
-    public ProtocolKeyword getType() {
-        return type;
-    }
 }

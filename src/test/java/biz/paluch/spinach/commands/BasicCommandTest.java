@@ -1,6 +1,7 @@
 package biz.paluch.spinach.commands;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +52,7 @@ public class BasicCommandTest extends AbstractCommandTest {
 
                 DisqueURI disqueURI = DisqueURI.create("disque://" + passwd + "@" + TestSettings.host() + ":"
                         + TestSettings.port());
-                DisqueClient disqueClient = new DisqueClient(disqueURI);
+                DisqueClient disqueClient = DisqueClient.create(disqueURI);
                 DisqueCommands<String, String> authConnection = disqueClient.connect().sync();
                 authConnection.ping();
                 authConnection.close();

@@ -78,7 +78,7 @@ class ReactiveCommandDispatcher<K, V, T> implements Observable.OnSubscribe<T> {
         private boolean completed = false;
 
         public ObservableCommand(Command<K, V, T> command, Subscriber<? super T> subscriber, boolean dissolve) {
-            super(null, null, null);
+            super(command.getType(), null, null);
             this.command = command;
             this.subscriber = subscriber;
             this.dissolve = dissolve;

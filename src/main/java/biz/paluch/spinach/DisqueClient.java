@@ -20,6 +20,7 @@ import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.codec.Utf8StringCodec;
 import com.lambdaworks.redis.protocol.CommandHandler;
 import com.lambdaworks.redis.protocol.RedisCommand;
+import com.lambdaworks.redis.resource.ClientResources;
 
 /**
  * A scalable thread-safe Disque client. Multiple threads may share one connection if they avoid blocking operations.
@@ -31,12 +32,21 @@ import com.lambdaworks.redis.protocol.RedisCommand;
 public class DisqueClient extends AbstractRedisClient {
     private final DisqueURI disqueURI;
 
+    protected DisqueClient(ClientResources clientResources, DisqueURI disqueURI) {
+        super(clientResources);
+        this.disqueURI = disqueURI;
+    }
+
     /**
      * Creates a uri-less {@link DisqueClient}. You can connect to different Disque servers but you must supply a
      * {@link DisqueURI} on connecting. Methods without having a {@link DisqueURI} will fail with a
      * {@link java.lang.IllegalStateException}.
+     * 
+     * @deprecated Use the factory method {@link #create()}
      */
+    @Deprecated
     public DisqueClient() {
+        super(null);
         disqueURI = null;
         setOptions(new ClientOptions.Builder().build());
         setDefaultTimeout(60, TimeUnit.MINUTES);
@@ -46,8 +56,9 @@ public class DisqueClient extends AbstractRedisClient {
      * Create a new client that connects to the supplied host on the default port.
      *
      * @param uri a Disque URI.
-     *
+     * @deprecated Use the factory method {@link #create(String)}
      */
+    @Deprecated
     public DisqueClient(String uri) {
         this(uri != null && uri.startsWith("disque") ? DisqueURI.create(uri) : new DisqueURI.Builder().disque(uri).build());
     }
@@ -58,7 +69,9 @@ public class DisqueClient extends AbstractRedisClient {
      *
      * @param host Server hostname.
      * @param port Server port.
+     * @deprecated Use the factory method {@link #create(DisqueURI)}
      */
+    @Deprecated
     public DisqueClient(String host, int port) {
         this(DisqueURI.Builder.disque(host, port).build());
     }
@@ -68,12 +81,93 @@ public class DisqueClient extends AbstractRedisClient {
      * {@link #setDefaultTimeout timeout} after 60 seconds.
      *
      * @param disqueURI Disque URI.
+     * @deprecated Use the factory method {@link #create(DisqueURI)}
      */
+    @Deprecated
     public DisqueClient(DisqueURI disqueURI) {
-        super();
+        super(null);
         this.disqueURI = disqueURI;
         setDefaultTimeout(disqueURI.getTimeout(), disqueURI.getUnit());
         setOptions(new ClientOptions.Builder().build());
+    }
+
+    /**
+     * Creates a uri-less DisqueClient with default {@link ClientResources}. You can connect to different Redis servers but you
+     * must supply a {@link RedisURI} on connecting. Methods without having a {@link RedisURI} will fail with a
+     * {@link java.lang.IllegalStateException}.
+     * 
+     * @return a new instance of {@link DisqueClient}
+     */
+    public static DisqueClient create() {
+        return new DisqueClient(null, null);
+    }
+
+    /**
+     * Create a new client that connects to the supplied {@link RedisURI uri} with default {@link ClientResources}. You can
+     * connect to different Redis servers but you must supply a {@link RedisURI} on connecting.
+     * 
+     * @param disqueURI the Redis URI, must not be {@literal null}
+     * @return a new instance of {@link DisqueClient}
+     */
+    public static DisqueClient create(DisqueURI disqueURI) {
+        assertNotNull(disqueURI);
+        return new DisqueClient(null, disqueURI);
+    }
+
+    /**
+     * Create a new client that connects to the supplied uri with default {@link ClientResources}. You can connect to different
+     * Redis servers but you must supply a {@link RedisURI} on connecting.
+     *
+     * @param uri the Redis URI, must not be {@literal null}
+     * @return a new instance of {@link DisqueClient}
+     */
+    public static DisqueClient create(String uri) {
+        checkArgument(uri != null, "uri must not be null");
+        return new DisqueClient(null, DisqueURI.create(uri));
+    }
+
+    /**
+     * Creates a uri-less DisqueClient with shared {@link ClientResources}. You need to shut down the {@link ClientResources}
+     * upon shutting down your application. You can connect to different Redis servers but you must supply a {@link RedisURI} on
+     * connecting. Methods without having a {@link RedisURI} will fail with a {@link java.lang.IllegalStateException}.
+     *
+     * @param clientResources the client resources, must not be {@literal null}
+     * @return a new instance of {@link DisqueClient}
+     */
+    public static DisqueClient create(ClientResources clientResources) {
+        assertNotNull(clientResources);
+        return new DisqueClient(clientResources, null);
+    }
+
+    /**
+     * Create a new client that connects to the supplied uri with shared {@link ClientResources}.You need to shut down the
+     * {@link ClientResources} upon shutting down your application. You can connect to different Redis servers but you must
+     * supply a {@link RedisURI} on connecting.
+     *
+     * @param clientResources the client resources, must not be {@literal null}
+     * @param uri the Redis URI, must not be {@literal null}
+     *
+     * @return a new instance of {@link DisqueClient}
+     */
+    public static DisqueClient create(ClientResources clientResources, String uri) {
+        assertNotNull(clientResources);
+        checkArgument(uri != null, "uri must not be null");
+        return create(clientResources, DisqueURI.create(uri));
+    }
+
+    /**
+     * Create a new client that connects to the supplied {@link RedisURI uri} with shared {@link ClientResources}. You need to
+     * shut down the {@link ClientResources} upon shutting down your application.You can connect to different Redis servers but
+     * you must supply a {@link RedisURI} on connecting.
+     * 
+     * @param clientResources the client resources, must not be {@literal null}
+     * @param disqueURI the Redis URI, must not be {@literal null}
+     * @return a new instance of {@link DisqueClient}
+     */
+    public static DisqueClient create(ClientResources clientResources, DisqueURI disqueURI) {
+        assertNotNull(clientResources);
+        assertNotNull(disqueURI);
+        return new DisqueClient(clientResources, disqueURI);
     }
 
     /**
@@ -140,11 +234,10 @@ public class DisqueClient extends AbstractRedisClient {
         checkArgument(!disqueURI.getConnectionPoints().isEmpty(), "No connection points specified");
 
         ClientOptions options = getOptions();
-        final CommandHandler<K, V> commandHandler = new CommandHandler<K, V>(options, queue);
+        final CommandHandler<K, V> commandHandler = new CommandHandler<K, V>(options, clientResources, queue);
         final DisqueConnectionImpl<K, V> connection = newDisquelAsyncConnectionImpl(commandHandler, codec, timeout, unit);
 
         logger.debug("Trying to get a Disque connection for one of: " + disqueURI.getConnectionPoints());
-
 
         final RedisURI redisURI = new RedisURI();
         toRedisURI(disqueURI, null, redisURI);
@@ -221,6 +314,7 @@ public class DisqueClient extends AbstractRedisClient {
         }
 
         connectionBuilder.clientOptions(options);
+        connectionBuilder.clientResources(clientResources);
         connectionBuilder(commandHandler, connection, null, connectionBuilder, redisURI);
         return connectionBuilder;
     }
@@ -240,7 +334,15 @@ public class DisqueClient extends AbstractRedisClient {
         if (unixDomainSocket && inetSocket) {
             throw new RedisConnectionException("You cannot mix unix domain socket and IP socket URI's");
         }
+    }
 
+    /**
+     * Returns the {@link ClientResources} which are used with that client.
+     *
+     * @return the {@link ClientResources} for this client
+     */
+    public ClientResources getResources() {
+        return clientResources;
     }
 
     private void toRedisURI(DisqueURI disqueURI, ConnectionPoint connectionPoint, RedisURI redisURI) {
@@ -255,7 +357,6 @@ public class DisqueClient extends AbstractRedisClient {
             redisURI.setPort(connectionPoint.getPort());
             redisURI.setHost(connectionPoint.getHost());
         }
-
     }
 
     protected <K, V> DisqueConnectionImpl<K, V> newDisquelAsyncConnectionImpl(CommandHandler<K, V> commandHandler,
@@ -272,6 +373,18 @@ public class DisqueClient extends AbstractRedisClient {
         checkState(
                 this.disqueURI != null,
                 "DisqueURI is not available. Use DisqueClient(Host), DisqueClient(Host, Port) or DisqueClient(DisqueURI) to construct your client.");
+    }
+
+    private static <K, V> void assertNotNull(RedisCodec<K, V> codec) {
+        checkArgument(codec != null, "RedisCodec must not be null");
+    }
+
+    private static void assertNotNull(DisqueURI disqueURI) {
+        checkArgument(disqueURI != null, "DisqueURI must not be null");
+    }
+
+    private static void assertNotNull(ClientResources clientResources) {
+        checkArgument(clientResources != null, "ClientResources must not be null");
     }
 
 }

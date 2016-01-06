@@ -13,7 +13,7 @@ import biz.paluch.spinach.api.sync.DisqueCommands;
 public class Standalone {
 
     public static void main(String[] args) {
-        DisqueClient disqueClient = new DisqueClient(DisqueURI.create("disque://password@localhost:7711"));
+        DisqueClient disqueClient = DisqueClient.create(DisqueURI.create("disque://password@localhost:7711"));
         DisqueCommands<String, String> sync = disqueClient.connect().sync();
 
         sync.addjob("queue", "body", 1, TimeUnit.MINUTES);

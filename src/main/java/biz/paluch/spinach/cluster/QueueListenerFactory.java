@@ -72,7 +72,7 @@ public class QueueListenerFactory<K, V> {
             this.disqueClient = disqueClient;
         } else {
             sharedClient = false;
-            this.disqueClient = new DisqueClient();
+            this.disqueClient = DisqueClient.create();
         }
         this.disqueURI = disqueURI;
         this.codec = codec;

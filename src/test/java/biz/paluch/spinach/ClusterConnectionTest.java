@@ -1,14 +1,16 @@
 package biz.paluch.spinach;
 
-import static biz.paluch.spinach.TestSettings.*;
+import static biz.paluch.spinach.TestSettings.host;
+import static biz.paluch.spinach.TestSettings.port;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.concurrent.TimeUnit;
-
-import biz.paluch.spinach.api.DisqueConnection;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import biz.paluch.spinach.api.DisqueConnection;
+import biz.paluch.spinach.support.DefaultDisqueClient;
+import biz.paluch.spinach.support.FastShutdown;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
@@ -21,12 +23,12 @@ public class ClusterConnectionTest {
     public static void beforeClass() {
 
         DisqueURI disqueURI = new DisqueURI.Builder().withDisque(host(), port()).withDisque(host(), port(1)).build();
-        disqueClient = new DisqueClient(disqueURI);
+        disqueClient = DisqueClient.create(DefaultDisqueClient.getClientResources(), disqueURI);
     }
 
     @AfterClass
     public static void afterClass() {
-        disqueClient.shutdown(5, 5, TimeUnit.MILLISECONDS);
+        FastShutdown.shutdown(disqueClient);
     }
 
     @Test
