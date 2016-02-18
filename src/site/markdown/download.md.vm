@@ -4,10 +4,7 @@ Download spinach
  spinach is distributed under the
  [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-  The link in the Mirrors column should display a list of available mirrors with a
-  default selection based on your inferred location. If you do not see that page,
-  try a different browser.  The checksum and signature are links to
-  the originals on the main distribution server.
+ The checksum and signature are links to the originals on the main distribution server.
 
 |                   | Download     | Checksum     | Signature    |
 | ----------------- |:-------------|:-------------|:-------------|
