@@ -43,7 +43,7 @@
         <!-- You need a running redis+sentinel for all tests, therefore disabled by default -->
         <skipTests>true</skipTests>
         <github.site.upload.skip>true</github.site.upload.skip>
-        <spinach-release-version>0.2</spinach-release-version>
+        <spinach-release-version>0.3</spinach-release-version>
         <lettuce-version>3.4.1.Final</lettuce-version>
         <netty-version>4.0.34.Final</netty-version>
         <rxjava-version>1.0.14</rxjava-version>
