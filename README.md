@@ -58,7 +58,7 @@ Basic Usage
 -----------
 
 ```java
-DisqueClient client = new DisqueClient(DisqueURI.create("host", 7711));
+DisqueClient client = DisqueClient.create(DisqueURI.create("host", 7711));
 DisqueConnection<String, String> connection = client.connect().sync();
 DisqueCommands<String, String> sync = connection.sync();
 String jobId = sync.addjob("queue", "body", 1, TimeUnit.MINUTES);
@@ -92,8 +92,8 @@ RedisFuture<String> jobId2 = async.addjob("queue", "body2", 1, SECONDS);
 
 async.awaitAll(jobId1, jobId2) == true
 
-jobId1.get() == "DI...SQ"
-jobId2.get() == "DI...SQ"
+jobId1.get() == "D-..."
+jobId2.get() == "D-..."
  ```
 
 Building
