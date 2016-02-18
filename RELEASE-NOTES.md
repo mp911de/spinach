@@ -146,6 +146,11 @@ Some of the highlights, also available for spinach are:
 Read more: https://github.com/mp911de/lettuce/releases/tag/3.4.Final
 
 
+Updated dependencies
+--------------------
+
+netty 4.0.28.Final -> 4.0.34.Final
+
 Enhancements
 ------------
 * Keep track of nodeId's that were obtained by GETJOB/Implement QueueListener API #8
