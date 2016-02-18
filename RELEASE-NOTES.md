@@ -84,6 +84,9 @@ most of the received jobs. The QueueListenerFactory can initiate locality tracki
 for a particular observable and can enable periodically scheduled checks to
 switch to the node that produced the most received jobs.
 
+
+### Locality tracking
+
 The node switch can also be triggered directly on a QueueListenerFactory for all
 active listeners with enabled locality tracking.
 
@@ -126,17 +129,38 @@ queueListenerFactory.switchNodes(); // 7
 
 The QueueListener API does not emit a terminal event.
 
-Please note this API is experimental.
+Please note this API is experimental and may change.
+
+
+Upgrade to lettuce 3.4
+----------------------
+
+With this upgrade you get all the features provided within lettuce 3.4. 
+
+Some of the highlights, also available for spinach are:
+
+* Reusable ClientResources
+* EventBus and Client Events
+* Command Latency Metrics
+
+Read more: https://github.com/mp911de/lettuce/releases/tag/3.4.Final
 
 
 Enhancements
 ------------
+* Keep track of nodeId's that were obtained by GETJOB/Implement QueueListener API #8
 * Support a pluggable reconnect mechanism #9
-* Keep track of nodeId's that were obtained by GETJOB #8
-* Getjob NOHANG, WITHARGUMENTS #14 #15 (thanks to @macobo) 
-
-Other Changes
--------------
+* Upgrade to lettuce 3.4 #10
+* Getjob NOHANG, WITHARGUMENTS #14 #15 (thanks to @macobo)
+* Switch nodes when received LEAVING in QueueListener API #17
+* Adopt new Disque Job ID format #18
+* Implement PAUSE command #19
+* Implement QSTAT command #20
+ 
+Fixes
+-----
+* Do not cache InetSocketAddress in DisqueURI #16
+* Fix addjob documentation about timeout/TTL #21
 
 spinach requires a minimum of Java 8 to build and Java 6 run. It is tested continuously against Disque unstable.
 
