@@ -1,12 +1,13 @@
 package biz.paluch.spinach.impl;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.After;
 import org.junit.Test;
 
 import biz.paluch.spinach.api.CommandKeyword;
@@ -22,6 +23,12 @@ public class DisqueCommandTest {
 
     private DisqueCommand<String, String, String> sut = new DisqueCommand<String, String, String>(CommandKeyword.GET,
             new StatusOutput<String, String>(null), new DisqueCommandArgs<String, String>(null));
+
+    @After
+    public void tearDown() throws Exception {
+        // clear interrupted flag
+        Thread.interrupted();
+    }
 
     @Test
     public void sucessfulGet() throws Exception {

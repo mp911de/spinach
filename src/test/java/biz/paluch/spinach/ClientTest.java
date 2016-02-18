@@ -180,7 +180,7 @@ public class ClientTest extends AbstractCommandTest {
             client.connect();
         } catch (Exception e) {
             assertThat(e).hasRootCauseExactlyInstanceOf(ConnectException.class);
-            assertThat(e.getCause().getCause()).hasMessageContaining("Connection refused");
+            assertThat(e.getCause().getCause()).hasMessageContaining(TestSettings.host());
         }
         client.shutdown(0, 0, TimeUnit.MILLISECONDS);
     }
