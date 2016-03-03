@@ -73,7 +73,7 @@ public class JobListOutput<K, V> extends CommandOutput<K, V, List<Job<K, V>>> im
     @Override
     public void complete(int depth) {
 
-        if (id != null && body != null) {
+        if (id != null && body != null && depth == 1) {
             Job<K, V> job = new Job<K, V>(queue, id, body, counters);
             if (subscriber != null && !subscriber.isUnsubscribed()) {
                 subscriber.onNext(job);

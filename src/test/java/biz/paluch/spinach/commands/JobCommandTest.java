@@ -76,8 +76,12 @@ public class JobCommandTest extends AbstractCommandTest {
 
         assertThat(qlen).isEqualTo(1);
 
+        disque.getjob(queue);
         disque.nack(id);
+        disque.getjob(queue);
         disque.nack(id);
+        disque.getjob(queue);
+        disque.enqueue(id);
 
         GetJobArgs args = GetJobArgs.builder().withCounters(true).build();
         Job<String, String> job = disque.getjob(args, queue);
@@ -85,6 +89,48 @@ public class JobCommandTest extends AbstractCommandTest {
         assertThat(job.getQueue()).isEqualTo(queue);
         assertThat(job.getBody()).isEqualTo(value);
         assertThat(job.getCounters()).containsKeys("nacks", "additional-deliveries");
+        assertThat(job.getCounters()).containsEntry("nacks", 2L);
+        assertThat(job.getCounters()).containsEntry("additional-deliveries", 1L);
+    }
+
+    @Test
+    public void getJobTwoWithCounters() throws Exception {
+        disque.addjob(queue, value, 5, TimeUnit.SECONDS);
+        disque.addjob(queue, value, 5, TimeUnit.SECONDS);
+
+        assertThat(disque.qlen(queue)).isEqualTo(2);
+        String id1 = disque.getjob(queue).getId();
+        String id2 = disque.getjob(queue).getId();
+        disque.nack(id1);
+        disque.nack(disque.getjob(queue).getId());
+        disque.nack(id2);
+
+        disque.getjob(queue);
+        disque.getjob(queue);
+  
+        disque.enqueue(id1);
+        disque.enqueue(id2);
+
+        GetJobArgs args = GetJobArgs.builder().withCounters(true).build();
+        List<Job<String, String>> getjobs = disque.getjobs(args, 2, queue);
+
+        Job<String, String> job1 = getjobs.get(0);
+
+        assertThat(job1.getId()).isEqualTo(id1); // assume here we got the right job
+        assertThat(job1.getQueue()).isEqualTo(queue);
+        assertThat(job1.getBody()).isEqualTo(value);
+        assertThat(job1.getCounters()).containsKeys("nacks", "additional-deliveries");
+        assertThat(job1.getCounters()).containsEntry("nacks", 2L);
+        assertThat(job1.getCounters()).containsEntry("additional-deliveries", 1L);
+        
+        Job<String, String> job2 = getjobs.get(1);
+
+        assertThat(job2.getId()).isEqualTo(id2); // assume here we got the right job
+        assertThat(job2.getQueue()).isEqualTo(queue);
+        assertThat(job2.getBody()).isEqualTo(value);
+        assertThat(job2.getCounters()).containsKeys("nacks", "additional-deliveries");
+        assertThat(job2.getCounters()).containsEntry("nacks", 1L);
+        assertThat(job2.getCounters()).containsEntry("additional-deliveries", 1L);
     }
 
     @Test
@@ -184,8 +230,8 @@ public class JobCommandTest extends AbstractCommandTest {
 
         addJobs(1, "q", 120, value);
 
-        KeyScanCursor<String> result = disque.jscan(JScanArgs.builder().queue("q13").busyloop()
-                .jobstates(JScanArgs.JobState.QUEUED).build());
+        KeyScanCursor<String> result = disque
+                .jscan(JScanArgs.builder().queue("q13").busyloop().jobstates(JScanArgs.JobState.QUEUED).build());
         assertThat(result.getKeys()).hasSize(1);
         assertThat(result.isFinished()).isTrue();
 
