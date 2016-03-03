@@ -5,85 +5,84 @@ BREW_BIN := $(shell which brew)
 YUM_BIN := $(shell which yum)
 APT_BIN := $(shell which apt-get)
 
-define DISQUE1_CONF
-daemonize yes
-port 7711
-pidfile disque.pid
-logfile disque.log
+#######
+# Disque
+#######
+.PRECIOUS: work/disque-%/disque.conf
 
-appendonly no
-unixsocket $(ROOT_DIR)/work/disque-7711/socket
-unixsocketperm 777
-endef
+work/disque-%/disque.conf:
+	@mkdir -p $(@D)
 
-define DISQUE2_CONF
-daemonize yes
-port 7712
-pidfile disque.pid
-logfile disque.log
-appendonly no
-unixsocket $(ROOT_DIR)/work/disque-7712/socket
-unixsocketperm 777
-endef
+	@echo port $* >> $@
+	@echo daemonize yes >> $@
+	@echo pidfile $(ROOT_DIR)/work/disque-$*/disque.pid >> $@
+	@echo logfile $(ROOT_DIR)/work/disque-$*/disque.log >> $@
+	@echo appendonly no >> $@
+	@echo unixsocket $(ROOT_DIR)/work/disque-$*/socket >> $@
+	@echo unixsocketperm 777 >> $@
 
-define DISQUE3_CONF
-daemonize yes
-port 7713
-pidfile disque.pid
-logfile disque.log
-appendonly no
-unixsocket $(ROOT_DIR)/work/disque-7713/socket
-unixsocketperm 777
-endef
+work/disque-%/disque.pid: work/disque-%/disque.conf work/disque-git/src/disque-server
+	cd work/disque-$* && ../../work/disque-git/src/disque-server disque.conf
 
-define STUNNEL_CONF
-cert=$(ROOT_DIR)/work/cert.pem
-key=$(ROOT_DIR)/work/key.pem
-capath=$(ROOT_DIR)/work/cert.pem
-cafile=$(ROOT_DIR)/work/cert.pem
-delay=yes
-pid=$(ROOT_DIR)/work/stunnel.pid
-foreground = no
+disque-start: work/disque-7711/disque.pid  work/disque-7712/disque.pid  work/disque-7713/disque.pid
 
-[stunnel]
-accept = 127.0.0.1:7443
-connect = 127.0.0.1:7711
-
-endef
-
-export DISQUE1_CONF
-export DISQUE2_CONF
-export DISQUE3_CONF
-
-export STUNNEL_CONF
-
-start: cleanup
-	mkdir -p work/disque-7711
-	mkdir -p work/disque-7712
-	mkdir -p work/disque-7713
-	echo "$$DISQUE1_CONF" > work/disque-7711/disque.conf && cd work/disque-7711 && ../disque-git/src/disque-server disque.conf
-	echo "$$DISQUE2_CONF" > work/disque-7712/disque.conf && cd work/disque-7712 && ../disque-git/src/disque-server disque.conf
-	echo "$$DISQUE3_CONF" > work/disque-7713/disque.conf && cd work/disque-7713 && ../disque-git/src/disque-server disque.conf
-	echo "$$STUNNEL_CONF" > work/stunnel.conf
-	which stunnel4 >/dev/null 2>&1 && stunnel4 work/stunnel.conf || stunnel work/stunnel.conf
+disque-init: disque-start work/disque-git/src/disque-server
 	work/disque-git/src/disque cluster meet 127.0.0.1 7712
 	work/disque-git/src/disque cluster meet 127.0.0.1 7713
 
 
+##########
+# stunnel
+##########
+
+work/stunnel.conf:
+	@mkdir -p $(@D)
+
+	@echo cert=$(ROOT_DIR)/work/cert.pem >> $@
+	@echo key=$(ROOT_DIR)/work/key.pem >> $@
+	@echo capath=$(ROOT_DIR)/work/cert.pem >> $@
+	@echo cafile=$(ROOT_DIR)/work/cert.pem >> $@
+	@echo delay=yes >> $@
+	@echo pid=$(ROOT_DIR)/work/stunnel.pid >> $@
+	@echo foreground = no >> $@
+
+	@echo [stunnel] >> $@
+	@echo accept = 127.0.0.1:7443 >> $@
+	@echo connect = 127.0.0.1:7711 >> $@
+
+work/stunnel.pid: work/stunnel.conf ssl-keys
+	which stunnel4 >/dev/null 2>&1 && stunnel4 $(ROOT_DIR)/work/stunnel.conf || stunnel $(ROOT_DIR)/work/stunnel.conf
+
+stunnel-start: work/stunnel.pid
+
+start: cleanup
+	$(MAKE) disque-init
+	$(MAKE) stunnel-start
+
+
 cleanup: stop
-	- mkdir -p work
+	@mkdir -p $(@D)
 	rm -f work/*.rdb work/*.aof work/*.conf work/*.log 2>/dev/null
 	rm -f *.aof
 	rm -f *.rdb
 
-ssl-keys:
-	- mkdir -p work
-	- rm -f work/keystore.jks
+##########
+# SSL Keys
+#  - remove Java keystore as becomes stale
+##########
+work/key.pem work/cert.pem:
+	@mkdir -p $(@D)
 	openssl genrsa -out work/key.pem 4096
-	openssl req -new -x509 -key work/key.pem -out work/cert.pem -days 365 -subj "/O=disque/ST=Some-State/C=DE/CN=spinach-test"
+	openssl req -new -x509 -key work/key.pem -out work/cert.pem -days 365 -subj "/O=lettuce/ST=Some-State/C=DE/CN=lettuce-test"
 	chmod go-rwx work/key.pem
 	chmod go-rwx work/cert.pem
+	- rm -f work/keystore.jks
+
+work/keystore.jks:
+	@mkdir -p $(@D)
 	$$JAVA_HOME/bin/keytool -importcert -keystore work/keystore.jks -file work/cert.pem -noprompt -storepass changeit
+
+ssl-keys: work/key.pem work/cert.pem work/keystore.jks
 
 stop:
 	pkill stunnel || true
@@ -129,6 +128,7 @@ endif
 endif
 
 endif
+work/disque-git/src/disque work/disque-git/src/disque-server:
 	[ ! -e work/disque-git ] && git clone https://github.com/antirez/disque.git work/disque-git && cd work/disque-git|| true
 	[ -e work/disque-git ] && cd work/disque-git && git reset --hard && git pull || true
 	make -C work/disque-git clean
