@@ -39,11 +39,6 @@ class FutureSyncInvocationHandler<K, V> extends AbstractInvocationHandler {
 
     }
 
-    /**
-     * 
-     * @see com.google.common.reflect.AbstractInvocationHandler#handleInvocation(java.lang.Object, java.lang.reflect.Method,
-     *      java.lang.Object[])
-     */
     @Override
     @SuppressWarnings("unchecked")
     protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {

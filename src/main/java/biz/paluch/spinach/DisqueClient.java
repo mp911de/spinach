@@ -1,8 +1,5 @@
 package biz.paluch.spinach;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -10,11 +7,12 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
-import com.google.common.base.Supplier;
 import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.codec.Utf8StringCodec;
+import com.lambdaworks.redis.internal.LettuceAssert;
 import com.lambdaworks.redis.protocol.CommandHandler;
 import com.lambdaworks.redis.protocol.RedisCommand;
 import com.lambdaworks.redis.resource.ClientResources;
@@ -126,7 +124,7 @@ public class DisqueClient extends AbstractRedisClient {
      * @return a new instance of {@link DisqueClient}
      */
     public static DisqueClient create(String uri) {
-        checkArgument(uri != null, "uri must not be null");
+        LettuceAssert.notNull(uri, "uri must not be null");
         return new DisqueClient(null, DisqueURI.create(uri));
     }
 
@@ -155,7 +153,7 @@ public class DisqueClient extends AbstractRedisClient {
      */
     public static DisqueClient create(ClientResources clientResources, String uri) {
         assertNotNull(clientResources);
-        checkArgument(uri != null, "uri must not be null");
+        LettuceAssert.notNull(uri, "uri must not be null");
         return create(clientResources, DisqueURI.create(uri));
     }
 
@@ -234,13 +232,13 @@ public class DisqueClient extends AbstractRedisClient {
     private <K, V> DisqueConnectionImpl<K, V> connect0(RedisCodec<K, V> codec, final DisqueURI disqueURI,
             SocketAddressSupplierFactory socketAddressSupplierFactory, long timeout, TimeUnit unit) {
 
-        checkArgument(codec != null, "RedisCodec must not be null");
+        LettuceAssert.notNull(codec, "RedisCodec must not be null");
         checkValidDisqueURI(disqueURI);
-        checkArgument(socketAddressSupplierFactory != null, "SocketAddressSupplierFactory must not be null");
+        LettuceAssert.notNull(socketAddressSupplierFactory, "SocketAddressSupplierFactory must not be null");
 
         BlockingQueue<RedisCommand<K, V, ?>> queue = new LinkedBlockingQueue<RedisCommand<K, V, ?>>();
 
-        checkArgument(!disqueURI.getConnectionPoints().isEmpty(), "No connection points specified");
+        LettuceAssert.isTrue(!disqueURI.getConnectionPoints().isEmpty(), "No connection points specified");
 
         ClientOptions options = getOptions();
         final CommandHandler<K, V> commandHandler = new CommandHandler<K, V>(options, clientResources, queue);
@@ -290,7 +288,7 @@ public class DisqueClient extends AbstractRedisClient {
         }
 
         try {
-            if (disqueURI.getPassword() != null) {
+            if (disqueURI.getPassword() != null && disqueURI.getPassword().length != 0) {
                 connection.sync().auth(new String(disqueURI.getPassword()));
             }
         } catch (RedisException e) {
@@ -374,25 +372,21 @@ public class DisqueClient extends AbstractRedisClient {
     }
 
     private void checkValidDisqueURI(DisqueURI disqueURI) {
-        checkArgument(disqueURI != EMPTY_DISQUE_URI && !disqueURI.getConnectionPoints().isEmpty(),
+        LettuceAssert.assertState(disqueURI != EMPTY_DISQUE_URI && !disqueURI.getConnectionPoints().isEmpty(),
                 "A valid DisqueURI with a host is needed");
     }
 
     private void checkForDisqueURI() {
-        checkState(this.disqueURI != EMPTY_DISQUE_URI,
+        LettuceAssert.assertState(this.disqueURI != EMPTY_DISQUE_URI,
                 "DisqueURI is not available. Use DisqueClient(Host), DisqueClient(Host, Port) or DisqueClient(DisqueURI) to construct your client.");
     }
 
-    private static <K, V> void assertNotNull(RedisCodec<K, V> codec) {
-        checkArgument(codec != null, "RedisCodec must not be null");
-    }
-
     private static void assertNotNull(DisqueURI disqueURI) {
-        checkArgument(disqueURI != null, "DisqueURI must not be null");
+        LettuceAssert.notNull(disqueURI, "DisqueURI must not be null");
     }
 
     private static void assertNotNull(ClientResources clientResources) {
-        checkArgument(clientResources != null, "ClientResources must not be null");
+        LettuceAssert.notNull(clientResources, "ClientResources must not be null");
     }
 
     /**

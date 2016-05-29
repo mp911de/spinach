@@ -1,13 +1,9 @@
 package biz.paluch.spinach.cluster;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.io.Serializable;
-import java.util.List;
 import java.util.Set;
 
-import biz.paluch.spinach.DisqueURI;
-import com.lambdaworks.redis.RedisURI;
+import com.lambdaworks.redis.internal.LettuceAssert;
 
 /**
  * Representation of a redis cluster node.
@@ -63,7 +59,7 @@ public class DisqueNode implements Serializable {
     }
 
     public void setNodeId(String nodeId) {
-        checkArgument(nodeId != null, "nodeId must not be null");
+        LettuceAssert.notNull(nodeId, "nodeId must not be null");
         this.nodeId = nodeId;
     }
 

@@ -1,8 +1,7 @@
 package biz.paluch.spinach.impl;
 
-import java.util.List;
+import java.util.Map;
 
-import com.google.common.collect.Lists;
 import com.lambdaworks.redis.codec.RedisCodec;
 import com.lambdaworks.redis.protocol.CommandArgs;
 import com.lambdaworks.redis.protocol.CommandKeyword;
@@ -15,20 +14,13 @@ import com.lambdaworks.redis.protocol.ProtocolKeyword;
  */
 class DisqueCommandArgs<K, V> extends CommandArgs<K, V> {
 
-    private List<String> strings = Lists.newArrayList();
-
     public DisqueCommandArgs(RedisCodec<K, V> codec) {
         super(codec);
     }
 
     @Override
     public DisqueCommandArgs<K, V> add(String s) {
-        strings.add(s);
         return (DisqueCommandArgs<K, V>) super.add(s);
-    }
-
-    public List<String> getStrings() {
-        return strings;
     }
 
     @Override
@@ -69,5 +61,25 @@ class DisqueCommandArgs<K, V> extends CommandArgs<K, V> {
     @Override
     public DisqueCommandArgs<K, V> add(ProtocolKeyword keyword) {
         return (DisqueCommandArgs<K, V>) super.add(keyword);
+    }
+
+    @Override
+    public DisqueCommandArgs<K, V> addKeys(Iterable<K> keys) {
+        return (DisqueCommandArgs<K, V>) super.addKeys(keys);
+    }
+
+    @Override
+    public DisqueCommandArgs<K, V> addValues(V... values) {
+        return (DisqueCommandArgs<K, V>) super.addValues(values);
+    }
+
+    @Override
+    public DisqueCommandArgs<K, V> add(Map<K, V> map) {
+        return (DisqueCommandArgs<K, V>) super.add(map);
+    }
+
+    @Override
+    public DisqueCommandArgs<K, V> add(double n) {
+        return (DisqueCommandArgs<K, V>) super.add(n);
     }
 }

@@ -1,10 +1,10 @@
 package biz.paluch.spinach.api;
 
-import static com.lambdaworks.redis.protocol.CommandKeyword.*;
+import static com.lambdaworks.redis.protocol.CommandKeyword.COUNT;
 
+import java.util.HashSet;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import com.lambdaworks.redis.protocol.CommandArgs;
 
 /**
@@ -19,7 +19,7 @@ public class JScanArgs<K> {
     private Long count;
     private boolean busyloop;
     private K queue;
-    private Set<JobState> jobStates = Sets.newHashSet();
+    private Set<JobState> jobStates = new HashSet<>();
 
     public Long getCount() {
         return count;
@@ -65,12 +65,13 @@ public class JScanArgs<K> {
         private Long count;
         private boolean busyloop;
         private K queue;
-        private Set<JobState> jobStates = Sets.newHashSet();
+        private Set<JobState> jobStates = new HashSet<>();
 
         /**
          * Utility constructor.
          */
-        private Builder() {
+        private Builder()
+        {
 
         }
 

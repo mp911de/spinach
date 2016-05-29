@@ -1,8 +1,7 @@
 package biz.paluch.spinach.impl;
 
 import java.net.SocketAddress;
-
-import com.google.common.base.Supplier;
+import java.util.function.Supplier;
 
 /**
  * Supplier API for {@link SocketAddress}. A {@code SocketAddressSupplier} is typically used to provide a {@link SocketAddress}

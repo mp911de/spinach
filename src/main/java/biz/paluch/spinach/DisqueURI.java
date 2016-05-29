@@ -1,7 +1,5 @@
 package biz.paluch.spinach;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.lambdaworks.redis.LettuceStrings.isEmpty;
 import static com.lambdaworks.redis.LettuceStrings.isNotEmpty;
 
@@ -13,9 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.net.HostAndPort;
 import com.lambdaworks.redis.ConnectionPoint;
-import com.lambdaworks.redis.LettuceStrings;
+import com.lambdaworks.redis.internal.HostAndPort;
+import com.lambdaworks.redis.internal.LettuceAssert;
+
 import io.netty.channel.unix.DomainSocketAddress;
 
 /**
@@ -36,7 +35,7 @@ public class DisqueURI implements Serializable {
      */
     public static final int DEFAULT_DISQUE_PORT = 7711;
 
-    private char[] password;
+    private char[] password = new char[0];
     private boolean ssl = false;
     private boolean verifyPeer = true;
     private boolean startTls = false;
@@ -166,7 +165,7 @@ public class DisqueURI implements Serializable {
                         builder.withSocket(host);
                     }
                 } else {
-                    HostAndPort hostAndPort = HostAndPort.fromString(host);
+                    HostAndPort hostAndPort = HostAndPort.parse(host);
                     if (builder == null) {
                         if (hostAndPort.hasPort()) {
                             builder = DisqueURI.Builder.disque(hostAndPort.getHostText(), hostAndPort.getPort());
@@ -185,7 +184,7 @@ public class DisqueURI implements Serializable {
 
         }
 
-        checkArgument(builder != null, "Invalid URI, cannot get host part");
+        LettuceAssert.notNull(builder, "Invalid URI, cannot get host part");
         return builder;
     }
 
@@ -366,7 +365,7 @@ public class DisqueURI implements Serializable {
          * @return the builder
          */
         public Builder withPassword(String password) {
-            checkNotNull(password, "Password must not be null");
+            LettuceAssert.notNull(password, "Password must not be null");
             disqueURI.setPassword(password);
             return this;
         }
@@ -374,13 +373,15 @@ public class DisqueURI implements Serializable {
         /**
          * Adds timeout.
          * 
-         * @param timeout must be greater or equal 0"
+         * @param timeout must be greater or equal {@literal 0}.
          * @param unit the timeout time unit.
          * @return the builder
          */
         public Builder withTimeout(long timeout, TimeUnit unit) {
-            checkNotNull(unit, "TimeUnit must not be null");
-            checkArgument(timeout >= 0, "Timeout must be greater or equal 0");
+
+            LettuceAssert.notNull(unit, "TimeUnit must not be null");
+            LettuceAssert.isTrue(timeout >= 0, "Timeout must be greater or equal 0");
+
             disqueURI.setTimeout(timeout);
             disqueURI.setUnit(unit);
             return this;
@@ -388,6 +389,7 @@ public class DisqueURI implements Serializable {
 
         /**
          * Build a the {@link DisqueURI}.
+         * 
          * @return the DisqueURI.
          */
         public DisqueURI build() {
@@ -407,7 +409,7 @@ public class DisqueURI implements Serializable {
         }
 
         public DisqueSocket(String socket) {
-            checkArgument(LettuceStrings.isNotEmpty(socket), "Socket must not be empty");
+            LettuceAssert.notEmpty(socket, "Socket must not be empty");
             this.socket = socket;
         }
 
@@ -427,7 +429,7 @@ public class DisqueURI implements Serializable {
         }
 
         public void setSocket(String socket) {
-            checkArgument(LettuceStrings.isNotEmpty(socket), "Socket must not be empty");
+            LettuceAssert.notEmpty(socket, "Socket must not be empty");
             this.socket = socket;
         }
 
@@ -458,8 +460,8 @@ public class DisqueURI implements Serializable {
         }
 
         public DisqueHostAndPort(String host, int port) {
-            checkArgument(LettuceStrings.isNotEmpty(host), "Host must not be empty");
-            checkArgument(isValidPort(port), "Port is out of range");
+            LettuceAssert.notEmpty(host, "Host must not be empty");
+            LettuceAssert.isTrue(isValidPort(port), "Port is out of range");
             this.host = host;
             this.port = port;
         }
@@ -469,7 +471,7 @@ public class DisqueURI implements Serializable {
         }
 
         public void setHost(String host) {
-            checkArgument(LettuceStrings.isNotEmpty(host), "Host must not be empty");
+            LettuceAssert.notEmpty(host, "Host must not be empty");
             this.host = host;
         }
 
@@ -483,7 +485,7 @@ public class DisqueURI implements Serializable {
         }
 
         public void setPort(int port) {
-            checkArgument(isValidPort(port), "Port is out of range");
+            LettuceAssert.isTrue(isValidPort(port), "Port is out of range");
             this.port = port;
         }
 

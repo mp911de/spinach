@@ -1,7 +1,7 @@
 package biz.paluch.spinach.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.copyOf;
+import com.lambdaworks.redis.internal.LettuceAssert;
+import com.lambdaworks.redis.internal.LettuceLists;
 
 import biz.paluch.spinach.DisqueURI;
 
@@ -28,8 +28,8 @@ public interface SocketAddressSupplierFactory {
         ROUND_ROBIN {
             @Override
             public SocketAddressSupplier newSupplier(DisqueURI disqueURI) {
-                checkNotNull(disqueURI != null, "DisqueURI must not be null");
-                return new RoundRobinSocketAddressSupplier(copyOf(disqueURI.getConnectionPoints()));
+                LettuceAssert.notNull(disqueURI, "DisqueURI must not be null");
+                return new RoundRobinSocketAddressSupplier(LettuceLists.unmodifiableList(disqueURI.getConnectionPoints()));
             }
         },
 
@@ -41,7 +41,7 @@ public interface SocketAddressSupplierFactory {
         HELLO_CLUSTER {
             @Override
             public SocketAddressSupplier newSupplier(DisqueURI disqueURI) {
-                checkNotNull(disqueURI != null, "DisqueURI must not be null");
+                LettuceAssert.notNull(disqueURI, "DisqueURI must not be null");
                 return new HelloClusterSocketAddressSupplier(ROUND_ROBIN.newSupplier(disqueURI));
             }
         };

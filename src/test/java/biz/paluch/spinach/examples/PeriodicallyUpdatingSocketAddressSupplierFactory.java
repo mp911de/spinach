@@ -11,8 +11,7 @@ import biz.paluch.spinach.impl.HelloClusterSocketAddressSupplier;
 import biz.paluch.spinach.impl.RoundRobinSocketAddressSupplier;
 import biz.paluch.spinach.impl.SocketAddressSupplier;
 import biz.paluch.spinach.impl.SocketAddressSupplierFactory;
-
-import com.google.common.collect.Sets;
+import io.netty.util.internal.ConcurrentSet;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
@@ -20,7 +19,7 @@ import com.google.common.collect.Sets;
 public class PeriodicallyUpdatingSocketAddressSupplierFactory implements SocketAddressSupplierFactory {
 
     private final ScheduledExecutorService scheduledExecutorService;
-    private final Set<ScheduledFuture<?>> futures = Sets.newConcurrentHashSet();
+    private final Set<ScheduledFuture<?>> futures = new ConcurrentSet<>();
 
     public PeriodicallyUpdatingSocketAddressSupplierFactory(ScheduledExecutorService scheduledExecutorService) {
         this.scheduledExecutorService = scheduledExecutorService;
@@ -46,8 +45,8 @@ public class PeriodicallyUpdatingSocketAddressSupplierFactory implements SocketA
                     }
                 };
 
-                ScheduledFuture<?> scheduledFuture = scheduledExecutorService
-                        .scheduleAtFixedRate(command, 1, 1, TimeUnit.HOURS);
+                ScheduledFuture<?> scheduledFuture = scheduledExecutorService.scheduleAtFixedRate(command, 1, 1,
+                        TimeUnit.HOURS);
 
                 futures.add(scheduledFuture);
                 super.setConnection(disqueConnection);

@@ -4,16 +4,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import rx.Observable;
+import com.lambdaworks.redis.internal.AbstractInvocationHandler;
+import com.lambdaworks.redis.internal.LettuceLists;
+
 import biz.paluch.spinach.api.DisqueConnection;
 import biz.paluch.spinach.api.sync.DisqueCommands;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.reflect.AbstractInvocationHandler;
+import rx.Observable;
 
 public class RxSyncInvocationHandler<K, V> extends AbstractInvocationHandler {
 
@@ -47,11 +47,11 @@ public class RxSyncInvocationHandler<K, V> extends AbstractInvocationHandler {
             Iterable<?> objects = observable.toBlocking().toIterable();
 
             if (method.getReturnType().equals(List.class)) {
-                return Lists.newArrayList(objects);
+                return LettuceLists.newList(objects);
             }
 
             if (method.getReturnType().equals(Set.class)) {
-                return Sets.newHashSet(objects);
+                return new LinkedHashSet<>(LettuceLists.newList(objects));
             }
 
             Iterator<?> iterator = objects.iterator();

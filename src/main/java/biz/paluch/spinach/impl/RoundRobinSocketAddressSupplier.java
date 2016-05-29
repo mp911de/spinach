@@ -1,13 +1,12 @@
 package biz.paluch.spinach.impl;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.net.SocketAddress;
 import java.util.Collection;
 
-import biz.paluch.spinach.DisqueURI;
-
 import com.lambdaworks.redis.ConnectionPoint;
+import com.lambdaworks.redis.internal.LettuceAssert;
+
+import biz.paluch.spinach.DisqueURI;
 
 /**
  * Round-Robin socket address supplier. Connection points are iterated circular/infinitely.
@@ -34,7 +33,7 @@ public class RoundRobinSocketAddressSupplier implements SocketAddressSupplier {
      *        {@literal null}.
      */
     public RoundRobinSocketAddressSupplier(Collection<? extends ConnectionPoint> connectionPoints, ConnectionPoint offset) {
-        checkArgument(connectionPoints != null, "ConnectionPoints must not be null");
+        LettuceAssert.notNull(connectionPoints, "ConnectionPoints must not be null");
         this.connectionPoint = connectionPoints;
         this.roundRobin = new RoundRobin<ConnectionPoint>(connectionPoints, offset);
     }

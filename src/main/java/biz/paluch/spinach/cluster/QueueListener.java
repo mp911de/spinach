@@ -1,24 +1,20 @@
 package biz.paluch.spinach.cluster;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
+import biz.paluch.spinach.api.DisqueConnection;
+import biz.paluch.spinach.api.Job;
+import io.netty.util.internal.ConcurrentSet;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action0;
-import biz.paluch.spinach.api.DisqueConnection;
-import biz.paluch.spinach.api.Job;
-
-import com.google.common.base.Supplier;
-import com.google.common.collect.Sets;
-
-import io.netty.util.internal.logging.InternalLogger;
-import io.netty.util.internal.logging.InternalLoggerFactory;
 
 /**
  * Queue listener create an {@link Observable}. This class creates a connection upon subscription and receives jobs from Disque.
@@ -43,7 +39,7 @@ class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
 
     private final Scheduler scheduler;
     private final Supplier<LocalityAwareConnection<K, V>> disqueConnectionSupplier;
-    private final Set<GetJobsAction<K, V>> actions = Sets.newConcurrentHashSet();
+    private final Set<GetJobsAction<K, V>> actions = new ConcurrentSet<>();
     private final GetJobsArgs<K> getJobsArgs;
 
     private long improveLocalityInterval = 0;
@@ -52,7 +48,8 @@ class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
 
     private volatile Subscription reconnectTrigger;
 
-    QueueListener(Scheduler scheduler, Supplier<LocalityAwareConnection<K, V>> disqueConnectionSupplier, GetJobsArgs<K> getJobsArgs) {
+    QueueListener(Scheduler scheduler, Supplier<LocalityAwareConnection<K, V>> disqueConnectionSupplier,
+            GetJobsArgs<K> getJobsArgs) {
 
         this.scheduler = scheduler;
         this.disqueConnectionSupplier = disqueConnectionSupplier;
@@ -152,7 +149,8 @@ class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
         private final NodeIdAwareSocketAddressSupplier socketAddressSupplier;
         private final DisqueConnection<K, V> connection;
 
-        public LocalityAwareConnection(NodeIdAwareSocketAddressSupplier socketAddressSupplier, DisqueConnection<K, V> connection) {
+        public LocalityAwareConnection(NodeIdAwareSocketAddressSupplier socketAddressSupplier,
+                DisqueConnection<K, V> connection) {
             this.socketAddressSupplier = socketAddressSupplier;
             this.connection = connection;
         }

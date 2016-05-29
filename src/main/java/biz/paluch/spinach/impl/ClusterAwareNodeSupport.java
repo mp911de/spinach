@@ -1,15 +1,12 @@
 package biz.paluch.spinach.impl;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-
 import java.io.Serializable;
 import java.util.*;
 
+import com.lambdaworks.redis.internal.LettuceAssert;
+
 import biz.paluch.spinach.api.DisqueConnection;
 import biz.paluch.spinach.cluster.DisqueNode;
-
-import com.google.common.collect.Lists;
 
 /**
  * Convenient base class for classes that rely on the cluster topology of Disque. Typically subclassed by
@@ -22,7 +19,7 @@ public abstract class ClusterAwareNodeSupport {
     public final static int MAX_ALLOWED_PRIORITY = 99;
 
     private DisqueConnection<Object, Object> disqueConnection;
-    private final List<DisqueNode> nodes = Lists.newArrayList();
+    private final List<DisqueNode> nodes = new ArrayList<>();
 
     /**
      * Load/reload cluster nodes and order the nodes by its priority.
@@ -87,7 +84,7 @@ public abstract class ClusterAwareNodeSupport {
     static class Hello {
         long version;
         String nodeId;
-        List<PrioritizedDisqueNode> nodes = Lists.newArrayList();
+        List<PrioritizedDisqueNode> nodes = new ArrayList<>();
 
     }
 
@@ -95,18 +92,19 @@ public abstract class ClusterAwareNodeSupport {
 
         public static Hello parse(List<Object> hello) {
 
-            checkArgument(hello.size() > 2, "HELLO output must contain more than two elements");
-            checkArgument(Long.valueOf(1).equals(hello.get(0)), "Only HELLO version 1 supported. Received HELLO version is "
-                    + hello.get(0));
+            LettuceAssert.isTrue(hello.size() > 2, "HELLO output must contain more than two elements");
+            LettuceAssert.isTrue(Long.valueOf(1).equals(hello.get(0)),
+                    "Only HELLO version 1 supported. Received HELLO version is " + hello.get(0));
 
             Hello result = new Hello();
             result.version = (Long) hello.get(0);
             result.nodeId = (String) hello.get(1);
 
             for (int i = 2; i < hello.size(); i++) {
-                checkState(hello.get(i) instanceof Collection, "HELLO output at index " + i + " is not a collection");
+                LettuceAssert.assertState(hello.get(i) instanceof Collection,
+                        "HELLO output at index " + i + " is not a collection");
                 Collection<Object> nodeDetails = (Collection<Object>) hello.get(i);
-                checkState(nodeDetails.size() > 3, "HELLO output at index " + i + " has less than 4 elements");
+                LettuceAssert.assertState(nodeDetails.size() > 3, "HELLO output at index " + i + " has less than 4 elements");
 
                 Iterator<Object> iterator = nodeDetails.iterator();
 

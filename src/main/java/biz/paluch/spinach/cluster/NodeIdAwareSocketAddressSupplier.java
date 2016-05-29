@@ -1,9 +1,9 @@
 package biz.paluch.spinach.cluster;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+
+import com.lambdaworks.redis.internal.LettuceAssert;
 
 import biz.paluch.spinach.impl.HelloClusterSocketAddressSupplier;
 import biz.paluch.spinach.impl.RoundRobin;
@@ -70,7 +70,7 @@ public class NodeIdAwareSocketAddressSupplier extends HelloClusterSocketAddressS
      * @param preferredNodeIdPrefix the id prefix of the preferred node
      */
     public void setPreferredNodeIdPrefix(String preferredNodeIdPrefix) {
-        checkArgument(preferredNodeIdPrefix != null, "preferredNodeIdPrefix must not be null");
+        LettuceAssert.notNull(preferredNodeIdPrefix, "preferredNodeIdPrefix must not be null");
         boolean resetRoundRobin = false;
 
         if (this.preferredNodeIdPrefix == null || !preferredNodeIdPrefix.equals(this.preferredNodeIdPrefix)) {

@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import rx.Subscriber;
 import rx.Subscription;
@@ -14,7 +15,6 @@ import biz.paluch.spinach.api.DisqueConnection;
 import biz.paluch.spinach.api.Job;
 import biz.paluch.spinach.api.sync.DisqueCommands;
 
-import com.google.common.base.Supplier;
 import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
@@ -58,7 +58,7 @@ class GetJobsAction<K, V> implements Action0 {
     private volatile Subscription schedulerSubscription;
 
     public GetJobsAction(Supplier<QueueListener.LocalityAwareConnection<K, V>> disqueConnectionSupplier, String subscriptionId,
-            Subscriber<? super Job<K, V>> subscriber, boolean jobLocalityTracking, GetJobsArgs<K> getJobsArgs) {
+                         Subscriber<? super Job<K, V>> subscriber, boolean jobLocalityTracking, GetJobsArgs<K> getJobsArgs) {
 
         QueueListener.LocalityAwareConnection<K, V> localityAwareConnection = disqueConnectionSupplier.get();
 

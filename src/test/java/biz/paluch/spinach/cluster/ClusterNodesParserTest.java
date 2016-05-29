@@ -3,12 +3,11 @@ package biz.paluch.spinach.cluster;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 
 /**
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
@@ -33,7 +32,7 @@ public class ClusterNodesParserTest {
         assertThat(p1.getNodeId()).isEqualTo("c37ab8396be428403d4e55c0d317348be27ed973");
         assertThat(p1.getAddr()).isEqualTo("127.0.0.1");
         assertThat(p1.getPort()).isEqualTo(7381);
-        assertThat(p1.getFlags()).isEqualTo(ImmutableSet.of(DisqueNode.NodeFlag.NOFLAGS));
+        assertThat(p1.getFlags()).isEqualTo(Collections.singleton(DisqueNode.NodeFlag.NOFLAGS));
         assertThat(p1.getPingSentTimestamp()).isEqualTo(-111);
         assertThat(p1.getPongReceivedTimestamp()).isEqualTo(1401258245007L);
         assertThat(p1.isConnected()).isTrue();
@@ -62,7 +61,7 @@ public class ClusterNodesParserTest {
     public void testModel() throws Exception {
         DisqueNode node = new DisqueNode();
         node.setConnected(true);
-        node.setFlags(Sets.<DisqueNode.NodeFlag> newHashSet());
+        node.setFlags(new HashSet<>());
         node.setNodeId("abcd");
         node.setPingSentTimestamp(2);
         node.setPongReceivedTimestamp(3);
