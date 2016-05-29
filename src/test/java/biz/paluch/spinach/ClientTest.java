@@ -72,6 +72,18 @@ public class ClientTest extends AbstractCommandTest {
     }
 
     @Test
+    public void commandTimeoutIsSetOnConnection() throws Exception {
+
+        DisqueURI disqueURI = DisqueURI.Builder.disque(host, port).withTimeout(10, TimeUnit.MINUTES).build();
+
+        DisqueConnection<String, String> connection = getDisqueClient().connect(disqueURI);
+        connection.close();
+
+        assertThat(connection.getTimeout()).isEqualTo(10);
+        assertThat(connection.getTimeoutUnit()).isEqualTo(TimeUnit.MINUTES);
+    }
+
+    @Test
     public void listenerTest() throws Exception {
 
         final TestConnectionListener listener = new TestConnectionListener();

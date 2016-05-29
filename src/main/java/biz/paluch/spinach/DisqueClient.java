@@ -11,9 +11,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import biz.paluch.spinach.api.DisqueConnection;
-import biz.paluch.spinach.impl.*;
-
 import com.google.common.base.Supplier;
 import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.codec.RedisCodec;
@@ -21,6 +18,9 @@ import com.lambdaworks.redis.codec.Utf8StringCodec;
 import com.lambdaworks.redis.protocol.CommandHandler;
 import com.lambdaworks.redis.protocol.RedisCommand;
 import com.lambdaworks.redis.resource.ClientResources;
+
+import biz.paluch.spinach.api.DisqueConnection;
+import biz.paluch.spinach.impl.*;
 
 /**
  * A scalable thread-safe Disque client. Multiple threads may share one connection if they avoid blocking operations.
@@ -30,11 +30,21 @@ import com.lambdaworks.redis.resource.ClientResources;
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  */
 public class DisqueClient extends AbstractRedisClient {
+
+    private final static DisqueURI EMPTY_DISQUE_URI = new DisqueURI();
     private final DisqueURI disqueURI;
 
     protected DisqueClient(ClientResources clientResources, DisqueURI disqueURI) {
+
         super(clientResources);
+
+        assertNotNull(disqueURI);
+
         this.disqueURI = disqueURI;
+
+        setOptions(new ClientOptions.Builder().build());
+        setDefaultTimeout(60, TimeUnit.MINUTES);
+        setDefaultTimeout(disqueURI.getTimeout(), disqueURI.getUnit());
     }
 
     /**
@@ -46,10 +56,7 @@ public class DisqueClient extends AbstractRedisClient {
      */
     @Deprecated
     public DisqueClient() {
-        super(null);
-        disqueURI = null;
-        setOptions(new ClientOptions.Builder().build());
-        setDefaultTimeout(60, TimeUnit.MINUTES);
+        this(null, EMPTY_DISQUE_URI);
     }
 
     /**
@@ -85,10 +92,7 @@ public class DisqueClient extends AbstractRedisClient {
      */
     @Deprecated
     public DisqueClient(DisqueURI disqueURI) {
-        super(null);
-        this.disqueURI = disqueURI;
-        setDefaultTimeout(disqueURI.getTimeout(), disqueURI.getUnit());
-        setOptions(new ClientOptions.Builder().build());
+        this(null, disqueURI);
     }
 
     /**
@@ -99,7 +103,7 @@ public class DisqueClient extends AbstractRedisClient {
      * @return a new instance of {@link DisqueClient}
      */
     public static DisqueClient create() {
-        return new DisqueClient(null, null);
+        return new DisqueClient(null, EMPTY_DISQUE_URI);
     }
 
     /**
@@ -136,7 +140,7 @@ public class DisqueClient extends AbstractRedisClient {
      */
     public static DisqueClient create(ClientResources clientResources) {
         assertNotNull(clientResources);
-        return new DisqueClient(clientResources, null);
+        return new DisqueClient(clientResources, EMPTY_DISQUE_URI);
     }
 
     /**
@@ -172,7 +176,8 @@ public class DisqueClient extends AbstractRedisClient {
 
     /**
      * Open a new connection to a Disque server that treats keys and values as UTF-8 strings. This method requires to have the
-     * {@link DisqueURI} specified when constructing the client.
+     * {@link DisqueURI} specified when constructing the client. Command timeouts are applied from the default
+     * {@link #setDefaultTimeout(long, TimeUnit)} settings.
      *
      * @return A new connection.
      */
@@ -182,6 +187,7 @@ public class DisqueClient extends AbstractRedisClient {
 
     /**
      * Open a new connection to a Disque server. Use the supplied {@link RedisCodec codec} to encode/decode keys and values.
+     * Command timeouts are applied from the default {@link #setDefaultTimeout(long, TimeUnit)} settings.
      *
      * @param codec use this codec to encode/decode keys and values, must note be {@literal null}
      * @param <K> Key type.
@@ -190,12 +196,12 @@ public class DisqueClient extends AbstractRedisClient {
      */
     public <K, V> DisqueConnection<K, V> connect(RedisCodec<K, V> codec) {
         checkForDisqueURI();
-        return connect(codec, this.disqueURI, SocketAddressSupplierFactory.Factories.ROUND_ROBIN);
+        return connect0(codec, this.disqueURI, SocketAddressSupplierFactory.Factories.ROUND_ROBIN, timeout, unit);
     }
 
     /**
      * Open a new connection to a Disque server with the supplied {@link DisqueURI} that treats keys and values as UTF-8
-     * strings.
+     * strings. Command timeouts are applied from the given {@link DisqueURI#getTimeout()} settings.
      *
      * @param disqueURI the disque server to connect to, must not be {@literal null}
      * @return A new connection.
@@ -206,7 +212,7 @@ public class DisqueClient extends AbstractRedisClient {
 
     /**
      * Open a new connection to a Disque server using the supplied {@link DisqueURI} and the supplied {@link RedisCodec codec}
-     * to encode/decode keys.
+     * to encode/decode keys. Command timeouts are applied from the given {@link DisqueURI#getTimeout()} settings.
      *
      * @param codec use this codec to encode/decode keys and values, must not be {@literal null}
      * @param disqueURI the Disque server to connect to, must not be {@literal null}
@@ -219,11 +225,14 @@ public class DisqueClient extends AbstractRedisClient {
      */
     public <K, V> DisqueConnection<K, V> connect(RedisCodec<K, V> codec, DisqueURI disqueURI,
             SocketAddressSupplierFactory socketAddressSupplierFactory) {
-        return connect0(codec, disqueURI, socketAddressSupplierFactory);
+
+        assertNotNull(disqueURI);
+        checkValidDisqueURI(disqueURI);
+        return connect0(codec, disqueURI, socketAddressSupplierFactory, disqueURI.getTimeout(), disqueURI.getUnit());
     }
 
     private <K, V> DisqueConnectionImpl<K, V> connect0(RedisCodec<K, V> codec, final DisqueURI disqueURI,
-            SocketAddressSupplierFactory socketAddressSupplierFactory) {
+            SocketAddressSupplierFactory socketAddressSupplierFactory, long timeout, TimeUnit unit) {
 
         checkArgument(codec != null, "RedisCodec must not be null");
         checkValidDisqueURI(disqueURI);
@@ -365,13 +374,12 @@ public class DisqueClient extends AbstractRedisClient {
     }
 
     private void checkValidDisqueURI(DisqueURI disqueURI) {
-        checkArgument(disqueURI != null && !disqueURI.getConnectionPoints().isEmpty(),
+        checkArgument(disqueURI != EMPTY_DISQUE_URI && !disqueURI.getConnectionPoints().isEmpty(),
                 "A valid DisqueURI with a host is needed");
     }
 
     private void checkForDisqueURI() {
-        checkState(
-                this.disqueURI != null,
+        checkState(this.disqueURI != EMPTY_DISQUE_URI,
                 "DisqueURI is not available. Use DisqueClient(Host), DisqueClient(Host, Port) or DisqueClient(DisqueURI) to construct your client.");
     }
 
