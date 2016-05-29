@@ -433,7 +433,7 @@ public class DisqueURI implements Serializable {
             this.socket = socket;
         }
 
-        public SocketAddress getResolvedAddress() {
+        public SocketAddress getSocketAddress() {
             if (resolvedAddress == null) {
                 resolvedAddress = new DomainSocketAddress(getSocket());
             }
@@ -487,10 +487,6 @@ public class DisqueURI implements Serializable {
         public void setPort(int port) {
             LettuceAssert.isTrue(isValidPort(port), "Port is out of range");
             this.port = port;
-        }
-
-        public SocketAddress getResolvedAddress() {
-            return new InetSocketAddress(host, port);
         }
 
         @Override

@@ -91,6 +91,9 @@ class QueueListener<K, V> implements Observable.OnSubscribe<Job<K, V>> {
                 }, improveLocalityInterval, improveLocalityInterval, improveLocalityTimeUnit);
             }
         } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("QueueListener.call caught an exception: {}", e.getMessage(), e);
+            }
             subscriber.onError(e);
         }
     }

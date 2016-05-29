@@ -38,7 +38,7 @@ public class HelloClusterSocketAddressSupplier extends ClusterAwareNodeSupport i
         }
 
         DisqueNode disqueNode = roundRobin.next();
-        return new InetSocketAddress(disqueNode.getAddr(), disqueNode.getPort());
+        return InetSocketAddress.createUnresolved(disqueNode.getAddr(), disqueNode.getPort());
     }
 
     @Override

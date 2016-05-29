@@ -48,10 +48,19 @@ public class NodeIdAwareSocketAddressSupplier extends HelloClusterSocketAddressS
         }
 
         for (DisqueNode disqueNode : getNodes()) {
-            if (currentSocketAddress.getAddress().getHostAddress().equals(disqueNode.getAddr())
-                    && disqueNode.getPort() == currentSocketAddress.getPort()) {
-                currentNodeId = disqueNode.getNodeId();
-                break;
+
+            if (currentSocketAddress.isUnresolved()) {
+                if (currentSocketAddress.getHostString().equals(disqueNode.getAddr())
+                        && disqueNode.getPort() == currentSocketAddress.getPort()) {
+                    currentNodeId = disqueNode.getNodeId();
+                    break;
+                }
+            } else {
+                if (currentSocketAddress.getAddress().getHostAddress().equals(disqueNode.getAddr())
+                        && disqueNode.getPort() == currentSocketAddress.getPort()) {
+                    currentNodeId = disqueNode.getNodeId();
+                    break;
+                }
             }
         }
     }

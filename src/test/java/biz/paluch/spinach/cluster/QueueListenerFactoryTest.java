@@ -8,6 +8,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import rx.Observable;
@@ -57,6 +58,7 @@ public class QueueListenerFactoryTest extends AbstractCommandTest {
     @Test
     public void simpleQueueListener() throws Exception {
         queueListenerFactory.getjobs().subscribe(subscriber);
+        subscriber.assertNoErrors();
 
         createJobs(connection0);
         waitForSomeReceivedJobs();

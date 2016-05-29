@@ -267,8 +267,14 @@ public class DisqueClient extends AbstractRedisClient {
                 if (socketAddress instanceof InetSocketAddress) {
                     InetSocketAddress isa = (InetSocketAddress) socketAddress;
                     redisURI.setPort(isa.getPort());
-                    redisURI.setHost(isa.getHostName());
+                    redisURI.setHost(isa.getHostString());
+
+                    SocketAddress resolved = SocketAddressResolver.resolve(isa, clientResources.dnsResolver());
+
+                    logger.debug("Resolved {} to address: {}", isa.getHostString(), resolved);
+                    return resolved;
                 }
+
                 return socketAddress;
             }
         });

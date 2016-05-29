@@ -2,10 +2,10 @@ package biz.paluch.spinach;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import biz.paluch.spinach.impl.RoundRobinSocketAddressSupplier;
@@ -21,22 +21,15 @@ public class RoundRobinSocketAddressSupplierTest {
 
     private Collection<DisqueURI.DisqueHostAndPort> points = Arrays.asList(hap1, hap2, hap3);
 
-    @BeforeClass
-    public static void beforeClass() throws Exception {
-        hap1.getResolvedAddress();
-        hap2.getResolvedAddress();
-        hap3.getResolvedAddress();
-    }
-
     @Test
     public void noOffset() throws Exception {
 
         RoundRobinSocketAddressSupplier sut = new RoundRobinSocketAddressSupplier(points, null);
 
-        assertThat(sut.get()).isEqualTo(hap1.getResolvedAddress());
-        assertThat(sut.get()).isEqualTo(hap2.getResolvedAddress());
-        assertThat(sut.get()).isEqualTo(hap3.getResolvedAddress());
-        assertThat(sut.get()).isEqualTo(hap1.getResolvedAddress());
+        assertThat(sut.get()).isEqualTo(getSocketAddress(hap1));
+        assertThat(sut.get()).isEqualTo(getSocketAddress(hap2));
+        assertThat(sut.get()).isEqualTo(getSocketAddress(hap3));
+        assertThat(sut.get()).isEqualTo(getSocketAddress(hap1));
     }
 
     @Test
@@ -44,9 +37,14 @@ public class RoundRobinSocketAddressSupplierTest {
 
         RoundRobinSocketAddressSupplier sut = new RoundRobinSocketAddressSupplier(points, hap2);
 
-        assertThat(sut.get()).isEqualTo(hap3.getResolvedAddress());
-        assertThat(sut.get()).isEqualTo(hap1.getResolvedAddress());
-        assertThat(sut.get()).isEqualTo(hap2.getResolvedAddress());
-        assertThat(sut.get()).isEqualTo(hap3.getResolvedAddress());
+        assertThat(sut.get()).isEqualTo(getSocketAddress(hap3));
+        assertThat(sut.get()).isEqualTo(getSocketAddress(hap1));
+        assertThat(sut.get()).isEqualTo(getSocketAddress(hap2));
+        assertThat(sut.get()).isEqualTo(getSocketAddress(hap3));
+    }
+
+    private InetSocketAddress getSocketAddress(DisqueURI.DisqueHostAndPort hostAndPort) {
+        return InetSocketAddress.createUnresolved(hostAndPort.getHost(), hostAndPort
+                .getPort());
     }
 }

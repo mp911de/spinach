@@ -1,5 +1,6 @@
 package biz.paluch.spinach.impl;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
 
@@ -45,9 +46,10 @@ public class RoundRobinSocketAddressSupplier implements SocketAddressSupplier {
     }
 
     protected static SocketAddress getSocketAddress(ConnectionPoint connectionPoint) {
+
         if (connectionPoint instanceof DisqueURI.DisqueSocket) {
-            return ((DisqueURI.DisqueSocket) connectionPoint).getResolvedAddress();
+            return ((DisqueURI.DisqueSocket) connectionPoint).getSocketAddress();
         }
-        return ((DisqueURI.DisqueHostAndPort) connectionPoint).getResolvedAddress();
+        return InetSocketAddress.createUnresolved(connectionPoint.getHost(), connectionPoint.getPort());
     }
 }
