@@ -1,19 +1,16 @@
 spinach - A scalable Java Disque client
 ======================================
 
-
 [![Build Status](https://travis-ci.org/mp911de/spinach.svg)](https://travis-ci.org/mp911de/spinach) [![Coverage Status](https://coveralls.io/repos/mp911de/spinach/badge.svg?branch=master)](https://coveralls.io/r/mp911de/spinach?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/biz.paluch.redis/spinach/badge.svg)](https://maven-badges.herokuapp.com/maven-central/biz.paluch.redis/spinach)
 
-spinach - A scalable Java Disque client
-=============
 
 Spinach is a scalable thread-safe Disque client providing both synchronous and
 asynchronous APIs. Multiple threads may share one connection if they do not use blocking commands. Spinach is based on
-[lettuce](https://github.com/mp911de/lettuce).
+[lettuce](https://github.com/mp911de/lettuce) 4.
 Multiple connections are efficiently managed by the excellent netty NIO
 framework.
 
-* Works with Java 6, 7 and 8
+* Requires Java 8
 * [synchronous](https://github.com/mp911de/spinach/wiki/Basic-usage), [asynchronous](https://github.com/mp911de/spinach/wiki/Asynchronous-API) and [reactive](https://github.com/mp911de/spinach/wiki/Reactive-API) APIs
 * [SSL](https://github.com/mp911de/spinach/wiki/SSL-Connections) and [Unix Domain Socket](https://github.com/mp911de/spinach/wiki/Unix-Domain-Sockets) connections
 * [Codecs](https://github.com/mp911de/lettuce/wiki/Codecs) (for UTF8/bit/JSON etc. representation of your data)
@@ -24,7 +21,6 @@ Communication
 ---------------
 
 * [Github Issues](https://github.com/mp911de/spinach/issues)
-
 
 Documentation
 ---------------
@@ -92,8 +88,8 @@ RedisFuture<String> jobId2 = async.addjob("queue", "body2", 1, SECONDS);
 
 async.awaitAll(jobId1, jobId2) == true
 
-jobId1.get() == "D-..."
-jobId2.get() == "D-..."
+jobId1.get() == "D-...a1"
+jobId2.get() == "D-...a1"
  ```
 
 Building
@@ -102,7 +98,6 @@ Building
 Spinach is built with Apache Maven. The tests require multiple running Disque instances for different test cases which
 are configured using a ```Makefile```.
 
-* Initial environment setup (clone and build `disque`, setup SSL keys for SSL tests): ```make prepare ssl-keys```
 * Run the build: ```make test```
 * Start Disque (manually): ```make start```
 * Stop Disque (manually): ```make stop```
