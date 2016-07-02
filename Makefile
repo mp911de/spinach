@@ -145,4 +145,3 @@ release:
 	ls target/checkout/target/*-bin.zip | xargs gpg -b -a
 	ls target/checkout/target/*-bin.tar.gz | xargs gpg -b -a
 	cd target/checkout && mvn site:site && mvn -o scm-publish:publish-scm -Dgithub.site.upload.skip=false
-
