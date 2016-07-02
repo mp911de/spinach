@@ -45,9 +45,9 @@
         <skipTests>true</skipTests>
         <github.site.upload.skip>true</github.site.upload.skip>
         <spinach-release-version>0.2</spinach-release-version>
-        <lettuce-version>4.2.0-SNAPSHOT</lettuce-version>
-        <netty-version>4.0.36.Final</netty-version>
-        <rxjava-version>1.1.5</rxjava-version>
+        <lettuce-version>4.2.1.Final</lettuce-version>
+        <netty-version>4.1.1.Final</netty-version>
+        <rxjava-version>1.1.6</rxjava-version>
     </properties>
 
     <scm>

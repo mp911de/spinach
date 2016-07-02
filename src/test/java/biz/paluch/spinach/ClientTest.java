@@ -4,8 +4,10 @@ import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -179,7 +181,7 @@ public class ClientTest extends AbstractCommandTest {
         try {
             client.connect();
         } catch (Exception e) {
-            assertThat(e).hasRootCauseExactlyInstanceOf(UnresolvedAddressException.class);
+            assertThat(e).hasRootCauseInstanceOf(IOException.class);
         }
 
         client.shutdown(0, 0, TimeUnit.MILLISECONDS);
